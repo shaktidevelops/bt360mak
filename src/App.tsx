@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Header } from './components/Header';
+import { Header, AppTheme } from './components/Header';
 import { Sidebar, TabType } from './components/Sidebar';
 import { DashboardView } from './components/DashboardView';
 import { SquadView } from './components/SquadView';
@@ -23,6 +23,10 @@ import { Club, Player, TrainingLog, NetAllocation, MatchRecord, StadiumTier, Fin
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<TabType>('dashboard');
+  const [theme, setTheme] = useState<AppTheme>(() => {
+    return (localStorage.getItem('bt360mak_theme') as AppTheme) || 'emerald';
+  });
+
   const [club, setClub] = useState<Club>(fallbackClub);
   const [squad, setSquad] = useState<Player[]>(fallbackSquad);
   const [trainingLogs, setTrainingLogs] = useState<TrainingLog[]>(fallbackTrainingLogs);
@@ -30,6 +34,12 @@ export function App() {
   const [matches, setMatches] = useState<MatchRecord[]>(fallbackMatches);
   const [stadiumTiers, setStadiumTiers] = useState<StadiumTier[]>(fallbackStadiumTiers);
   const [finances, setFinances] = useState<FinancialRecord[]>(fallbackFinances);
+
+  // Sync theme to body class
+  useEffect(() => {
+    document.body.className = `theme-${theme}`;
+    localStorage.setItem('bt360mak_theme', theme);
+  }, [theme]);
 
   // Fetch from Supabase if credentials are provided and tables exist
   useEffect(() => {
@@ -66,9 +76,15 @@ export function App() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0b181a] text-slate-100">
-      {/* Elevated Luxury Header with Custom SVG Crest */}
-      <Header club={club} />
+    <div className={`min-h-screen flex flex-col transition-colors ${
+      theme === 'light' ? 'bg-[#f1f5f9] text-slate-800' : theme === 'midnight' ? 'bg-[#0a1128] text-slate-100' : 'bg-[#0d1e20] text-slate-100'
+    }`}>
+      {/* Elevated Luxury Header with Theme Switcher */}
+      <Header 
+        club={club} 
+        theme={theme}
+        onThemeChange={setTheme}
+      />
 
       {/* Main Workspace: Navigation Sidebar + Console Stage */}
       <div className="flex flex-1">
@@ -77,6 +93,7 @@ export function App() {
           onSelectTab={setCurrentTab}
           squadCount={squad.length}
           popsCount={trainingLogs.length}
+          theme={theme}
         />
 
         <main className="flex-1 p-6 max-w-7xl overflow-y-auto">

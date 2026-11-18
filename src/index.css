@@ -5,12 +5,24 @@
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
+}
 
-  body {
-    font-family: var(--font-sans);
-    background-color: #0b181a;
-    color: #f1f5f9;
-  }
+/* Theme: Sovereign Emerald (Vibrant, high-contrast sporting slate) */
+body.theme-emerald {
+  background-color: #0d1e20;
+  color: #f8fafc;
+}
+
+/* Theme: Daylight Pavilion (Crisp, radiant light mode - completely fixes darkness) */
+body.theme-light {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Theme: Midnight Sapphire (Deep luxury navy & cyan) */
+body.theme-midnight {
+  background-color: #0a1128;
+  color: #f8fafc;
 }
 
 /* Custom scrollbars */
@@ -19,12 +31,12 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #081315;
+  background: rgba(0, 0, 0, 0.1);
 }
 ::-webkit-scrollbar-thumb {
-  background: #194646;
+  background: rgba(16, 185, 129, 0.3);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #256663;
+  background: rgba(16, 185, 129, 0.6);
 }

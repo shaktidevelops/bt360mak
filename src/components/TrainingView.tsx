@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Player, TrainingLog, NetAllocation } from '../types/database';
-import { Target, Zap, Clock, Sparkles, UserCheck, Flame } from 'lucide-react';
+import { Target, Zap, Clock, Sparkles, UserCheck, Flame, Dices } from 'lucide-react';
 
 interface TrainingViewProps {
   logs: TrainingLog[];
-  nets: NetAllocation[];
+  nets?: NetAllocation[];
   squad: Player[];
   onUpdateNet?: (netNumber: number, playerId: string, trainingType: string) => void;
 }
@@ -43,6 +43,10 @@ export const TrainingView: React.FC<TrainingViewProps> = ({
     });
   });
 
+  // Youth Academy (ITS) investment state
+  const [itsInvestment, setItsInvestment] = useState<number>(36000);
+  const [simulatedPull, setSimulatedPull] = useState<string | null>(null);
+
   const handlePlayerChange = (netNum: number, newPlayerId: string) => {
     setActiveNets(prev => prev.map(n => {
       if (n.net_number !== netNum) return n;
@@ -62,6 +66,15 @@ export const TrainingView: React.FC<TrainingViewProps> = ({
     setActiveNets(prev => prev.map(n => n.net_number === netNum ? { ...n, training_type: newType } : n));
   };
 
+  const handleSimulateYouthPull = () => {
+    const roles = ['RHB Opener', 'LHB Top-Order Anchor', 'R H Finger Spinner', 'L Fast-Medium Seamer', 'Specialist Wicketkeeper'];
+    const skills = ['Competent', 'Respectable', 'Proficient', 'Strong'];
+    const randomRole = roles[Math.floor(Math.random() * roles.length)];
+    const randomSkill = skills[Math.floor(Math.random() * skills.length)];
+    const randomSub = (Math.random() * 0.8 + 6.0).toFixed(2);
+    setSimulatedPull(`17yo Wonderkid (${randomRole}) with ${randomSkill} primary skill (Subskill: ${randomSub}) and Sensational potential!`);
+  };
+
   const totalAssignedNets = activeNets.filter(n => n.player_id).length;
 
   return (
@@ -77,8 +90,8 @@ export const TrainingView: React.FC<TrainingViewProps> = ({
             <h2 className="text-2xl font-black text-white mt-1">
               10-Net Training Facility & Pop Progression Engine
             </h2>
-            <p className="text-xs text-slate-300 mt-1 max-w-2xl">
-              100% capacity utilized across all 10 nets. Competent Head Coach multiplier (1.00x) applied. Friday training updates calculate subskill increments.
+            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+              100% net utilization across all 10 nets. Competent Head Coach multiplier (1.00x) applied. Friday training updates evaluate subskill growth towards next skill level.
             </p>
           </div>
 
@@ -111,13 +124,13 @@ export const TrainingView: React.FC<TrainingViewProps> = ({
                 Finger Spin Progression: Competent &rarr; Proficient
               </div>
               <div className="text-xs text-slate-300 mt-0.5">
-                Subskill: <span className="font-mono font-bold text-amber-300">6.70 / 7.00</span> (70% populated)
+                Subskill: <span className="font-mono font-bold text-amber-300">6.70 / 7.00</span> (70% to pop)
               </div>
             </div>
             <div className="text-right">
               <span className="text-[10px] uppercase text-slate-400 font-bold">Pop In</span>
               <div className="text-2xl font-black font-mono text-amber-300">~3 wks</div>
-              <span className="text-[10px] text-emerald-400 font-semibold">High Velocity</span>
+              <span className="text-[10px] text-emerald-400 font-semibold">Fast Track</span>
             </div>
           </div>
 
@@ -131,49 +144,15 @@ export const TrainingView: React.FC<TrainingViewProps> = ({
                 Batting Technique: Competent &rarr; Proficient
               </div>
               <div className="text-xs text-slate-300 mt-0.5">
-                Subskill: <span className="font-mono font-bold text-emerald-300">6.70 / 7.00</span> (70% populated)
+                Subskill: <span className="font-mono font-bold text-emerald-300">6.70 / 7.00</span> (70% to pop)
               </div>
             </div>
             <div className="text-right">
               <span className="text-[10px] uppercase text-slate-400 font-bold">Pop In</span>
               <div className="text-2xl font-black font-mono text-emerald-300">~4 wks</div>
-              <span className="text-[10px] text-emerald-400 font-semibold">High Velocity</span>
+              <span className="text-[10px] text-emerald-400 font-semibold">Fast Track</span>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Friday Training Pop Celebrations */}
-      <div className="bg-[#10272a] rounded-2xl border border-[#204b4c] p-5 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-amber-400" />
-            <h3 className="text-base font-extrabold text-white">
-              Confirmed Friday Skill Pops (Season Archive)
-            </h3>
-          </div>
-          <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-600/50 font-bold font-mono">
-            {logs.length} Confirmed Pops
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {logs.map((log) => (
-            <div key={log.id} className="p-4 rounded-xl bg-[#0a181a] border border-[#204b4c] flex items-center justify-between hover:border-emerald-600/50 transition-all">
-              <div>
-                <span className="text-[10px] font-mono text-slate-400">{log.log_date}</span>
-                <h4 className="text-sm font-bold text-white mt-0.5">{log.player_name}</h4>
-                <div className="text-xs text-amber-300 font-bold mt-1">
-                  {log.skill_trained}: {log.previous_level} &rarr; <span className="underline decoration-amber-400">{log.new_level} (POP!)</span>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-[10px] text-slate-400">Subskill Level</span>
-                <div className="text-base font-bold font-mono text-emerald-300">{log.subskill}</div>
-                <span className="text-[10px] text-slate-400">{log.weeks_taken} Weeks taken</span>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
 
@@ -187,7 +166,7 @@ export const TrainingView: React.FC<TrainingViewProps> = ({
             </h3>
           </div>
           <span className="text-xs text-slate-400">
-            Click dropdowns to reassign players or change training specializations.
+            Reassign trainees or specialization drills with 1 click.
           </span>
         </div>
 
@@ -198,7 +177,7 @@ export const TrainingView: React.FC<TrainingViewProps> = ({
                 <th className="py-3 px-3 text-center">Net</th>
                 <th className="py-3 px-4">Assigned Player</th>
                 <th className="py-3 px-4">Training Specialization</th>
-                <th className="py-3 px-3 text-center">Coach</th>
+                <th className="py-3 px-3 text-center">Coach Multiplier</th>
                 <th className="py-3 px-3 text-center">Estimated Pop</th>
                 <th className="py-3 px-4">Development Objective</th>
               </tr>
@@ -286,6 +265,94 @@ export const TrainingView: React.FC<TrainingViewProps> = ({
               })}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* BATTRICK YOUTH ACADEMY (ITS) SIMULATOR & PULL GENERATOR */}
+      <div className="bg-[#10272a] rounded-2xl border border-[#204b4c] p-6 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400">
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>Youth Academy & Individual Training Scheme (ITS)</span>
+            </div>
+            <h3 className="text-lg font-black text-white mt-0.5">
+              Weekly Youth Intake & Trainee Generation Hub
+            </h3>
+          </div>
+          <div className="bg-[#091719] px-4 py-2 rounded-xl border border-amber-600/40 font-mono font-bold text-amber-300 text-sm">
+            ITS Investment: £{itsInvestment.toLocaleString()} / wk
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl bg-[#0a181a] border border-[#204b4c]">
+            <div className="flex justify-between text-xs text-slate-300 font-semibold mb-2">
+              <span>Investment Level</span>
+              <span className="font-mono text-amber-300 font-bold">Level 20 (Maximum Intake Potential)</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="36000"
+              step="4000"
+              value={itsInvestment}
+              onChange={(e) => setItsInvestment(Number(e.target.value))}
+              className="w-full accent-amber-500 cursor-pointer h-2 bg-[#163638] rounded-lg"
+            />
+            <p className="text-[11px] text-slate-300 mt-3 leading-relaxed">
+              ⭐ <strong>Maximum £36,000/week (Level 20)</strong>: Maximizes the likelihood of pulling high-BTI 17-year-olds with Respectable or Proficient primary skills and high potential.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-xl bg-[#0a181a] border border-emerald-600/40 flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold text-emerald-400">Youth Intake Draft Room</span>
+              <p className="text-xs text-slate-300 mt-1">
+                {simulatedPull || 'Simulate your club\'s Friday youth draft pull to review new academy wonderkids.'}
+              </p>
+            </div>
+            <button
+              onClick={handleSimulateYouthPull}
+              className="mt-3 flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-extrabold text-xs shadow-lg transition-all cursor-pointer"
+            >
+              <Dices className="w-4 h-4" /> Simulate Weekly Youth Pull
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Friday Training Pop Celebrations */}
+      <div className="bg-[#10272a] rounded-2xl border border-[#204b4c] p-5 shadow-xl">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-amber-400" />
+            <h3 className="text-base font-extrabold text-white">
+              Confirmed Friday Skill Pops (Season Archive)
+            </h3>
+          </div>
+          <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-600/50 font-bold font-mono">
+            {logs.length} Confirmed Pops
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {logs.map((log) => (
+            <div key={log.id} className="p-4 rounded-xl bg-[#0a181a] border border-[#204b4c] flex items-center justify-between hover:border-emerald-600/50 transition-all">
+              <div>
+                <span className="text-[10px] font-mono text-slate-400">{log.log_date}</span>
+                <h4 className="text-sm font-bold text-white mt-0.5">{log.player_name}</h4>
+                <div className="text-xs text-amber-300 font-bold mt-1">
+                  {log.skill_trained}: {log.previous_level} &rarr; <span className="underline decoration-amber-400">{log.new_level} (POP!)</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-slate-400">Subskill Level</span>
+                <div className="text-base font-bold font-mono text-emerald-300">{log.subskill}</div>
+                <span className="text-[10px] text-slate-400">{log.weeks_taken} Weeks taken</span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
