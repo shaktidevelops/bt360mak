@@ -6,6 +6,7 @@ import { SquadView } from './components/SquadView';
 import { TacticsView } from './components/TacticsView';
 import { TrainingView } from './components/TrainingView';
 import { FinancesView } from './components/FinancesView';
+import { StadiumView } from './components/StadiumView';
 import { MatchesView } from './components/MatchesView';
 import { SettingsView } from './components/SettingsView';
 import { 
@@ -30,7 +31,7 @@ export function App() {
   const [stadiumTiers, setStadiumTiers] = useState<StadiumTier[]>(fallbackStadiumTiers);
   const [finances, setFinances] = useState<FinancialRecord[]>(fallbackFinances);
 
-  // Fetch from Supabase if credentials are provided
+  // Fetch from Supabase if credentials are provided and tables exist
   useEffect(() => {
     if (!isSupabaseConfigured) return;
 
@@ -57,7 +58,7 @@ export function App() {
         const { data: finData } = await supabase.from('financial_ledger').select('*').eq('club_id', '13108');
         if (finData && finData.length > 0) setFinances(finData);
       } catch (err) {
-        console.warn('Supabase query returned error, retaining local verified data:', err);
+        console.warn('Supabase query fallback to verified local records:', err);
       }
     };
 
@@ -65,11 +66,11 @@ export function App() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#041512]">
-      {/* Sticky Luxury Header */}
+    <div className="min-h-screen flex flex-col bg-[#0b181a] text-slate-100">
+      {/* Elevated Luxury Header with Custom SVG Crest */}
       <Header club={club} />
 
-      {/* Main Workspace: Sidebar + Dynamic Stage */}
+      {/* Main Workspace: Navigation Sidebar + Console Stage */}
       <div className="flex flex-1">
         <Sidebar 
           currentTab={currentTab} 
@@ -83,13 +84,14 @@ export function App() {
             <DashboardView 
               club={club} 
               squad={squad} 
-              onNavigateToSquad={() => setCurrentTab('squad')} 
+              onNavigate={(tab) => setCurrentTab(tab)} 
             />
           )}
           {currentTab === 'squad' && <SquadView squad={squad} />}
           {currentTab === 'tactics' && <TacticsView squad={squad} />}
-          {currentTab === 'training' && <TrainingView logs={trainingLogs} nets={nets} />}
-          {currentTab === 'finances' && <FinancesView finances={finances} stadiumTiers={stadiumTiers} />}
+          {currentTab === 'training' && <TrainingView logs={trainingLogs} nets={nets} squad={squad} />}
+          {currentTab === 'finances' && <FinancesView finances={finances} />}
+          {currentTab === 'stadium' && <StadiumView tiers={stadiumTiers} />}
           {currentTab === 'matches' && <MatchesView matches={matches} />}
           {currentTab === 'settings' && <SettingsView />}
         </main>
