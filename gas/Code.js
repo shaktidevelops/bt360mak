@@ -78,7 +78,7 @@ function doGet(e) {
   }
 
   // Serve Frontend HTML
-  const template = HtmlService.createTemplateFromFile('frontend/index');
+  const template = HtmlService.createTemplateFromFile('index');
   return template.evaluate()
     .setTitle(CONFIG.APP_NAME)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')

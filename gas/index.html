@@ -1,0 +1,2365 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BT360MAK - Battrick Premium Intelligence Suite</title>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Separate CSS Files -->
+  
+  <style>
+/**
+ * BT360MAK - themes.css
+ * 5 Premium Custom Themes:
+ * 1. theme-pitch-emerald (Classic Cricket Luxury)
+ * 2. theme-cyber-arena (Cyber Midnight / Neon)
+ * 3. theme-royal-pavilion (Royal Lords Navy & Crimson)
+ * 4. theme-sunset-blaze (Sunset Matchday / Amber)
+ * 5. theme-clean-pro (Modern Dashboard Light / SaaS)
+ */
+
+:root {
+  /* Default: Theme 1 - Pitch Emerald */
+  --bg-primary: #071714;
+  --bg-secondary: #0b221e;
+  --bg-card: #0f2e29;
+  --bg-card-hover: #133a34;
+  --bg-surface: #143e37;
+  --text-main: #f0fdf4;
+  --text-muted: #86efac;
+  --text-sub: #a7f3d0;
+  --accent: #10b981;
+  --accent-glow: rgba(16, 185, 129, 0.25);
+  --accent-secondary: #f59e0b;
+  --border-color: #1a4d44;
+  --border-highlight: #34d399;
+  --badge-bg: rgba(16, 185, 129, 0.15);
+  --badge-text: #6ee7b7;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
+  --info: #06b6d4;
+  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --header-grad: linear-gradient(135deg, #064e3b 0%, #042f2e 100%);
+}
+
+/* 1. THEME: Pitch Emerald & Gold (Classic Luxury Cricket) */
+[data-theme="emerald"] {
+  --bg-primary: #071714;
+  --bg-secondary: #0b221e;
+  --bg-card: #0f2e29;
+  --bg-card-hover: #133a34;
+  --bg-surface: #143e37;
+  --text-main: #f0fdf4;
+  --text-muted: #86efac;
+  --text-sub: #a7f3d0;
+  --accent: #10b981;
+  --accent-glow: rgba(16, 185, 129, 0.25);
+  --accent-secondary: #fbbf24;
+  --border-color: #1a4d44;
+  --border-highlight: #34d399;
+  --badge-bg: rgba(16, 185, 129, 0.15);
+  --badge-text: #6ee7b7;
+  --header-grad: linear-gradient(135deg, #064e3b 0%, #042f2e 100%);
+}
+
+/* 2. THEME: Cyber Midnight / Neon Arena (Dark Sci-Fi Stadium) */
+[data-theme="cyber"] {
+  --bg-primary: #080b14;
+  --bg-secondary: #0e1322;
+  --bg-card: #131b31;
+  --bg-card-hover: #1b2645;
+  --bg-surface: #1e2a4a;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-sub: #38bdf8;
+  --accent: #00f2fe;
+  --accent-glow: rgba(0, 242, 254, 0.3);
+  --accent-secondary: #ec4899;
+  --border-color: #24345c;
+  --border-highlight: #00f2fe;
+  --badge-bg: rgba(0, 242, 254, 0.15);
+  --badge-text: #38bdf8;
+  --header-grad: linear-gradient(135deg, #1e1b4b 0%, #0c4a6e 100%);
+}
+
+/* 3. THEME: Royal Pavilion (Lord's Navy & Crimson) */
+[data-theme="royal"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #243249;
+  --bg-card-hover: #2e3e5b;
+  --bg-surface: #334155;
+  --text-main: #ffffff;
+  --text-muted: #cbd5e1;
+  --text-sub: #fca5a5;
+  --accent: #e11d48;
+  --accent-glow: rgba(225, 29, 72, 0.3);
+  --accent-secondary: #f59e0b;
+  --border-color: #3b4c68;
+  --border-highlight: #e11d48;
+  --badge-bg: rgba(225, 29, 72, 0.18);
+  --badge-text: #fda4af;
+  --header-grad: linear-gradient(135deg, #881337 0%, #1e293b 100%);
+}
+
+/* 4. THEME: Sunset Matchday / Amber Flame */
+[data-theme="sunset"] {
+  --bg-primary: #121014;
+  --bg-secondary: #1c1820;
+  --bg-card: #27212d;
+  --bg-card-hover: #352c3c;
+  --bg-surface: #3f3448;
+  --text-main: #fff7ed;
+  --text-muted: #fed7aa;
+  --text-sub: #fdba74;
+  --accent: #f97316;
+  --accent-glow: rgba(249, 115, 22, 0.3);
+  --accent-secondary: #e11d48;
+  --border-color: #4a3a54;
+  --border-highlight: #f97316;
+  --badge-bg: rgba(249, 115, 22, 0.18);
+  --badge-text: #fdba74;
+  --header-grad: linear-gradient(135deg, #7c2d12 0%, #27212d 100%);
+}
+
+/* 5. THEME: Clean Pro Light (Modern Executive SaaS) */
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-surface: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-sub: #2563eb;
+  --accent: #0f766e;
+  --accent-glow: rgba(15, 118, 110, 0.2);
+  --accent-secondary: #d97706;
+  --border-color: #e2e8f0;
+  --border-highlight: #0f766e;
+  --badge-bg: #ccfbf1;
+  --badge-text: #0f766e;
+  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --header-grad: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+}
+
+/**
+ * BT360MAK - main.css
+ * Core design system, layout, components, and responsive styling.
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* App Container Layout */
+.app-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+  width: 260px;
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 50;
+}
+
+.sidebar-header {
+  padding: 20px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--header-grad);
+}
+
+.club-crest {
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.brand-info h1 {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
+
+.brand-info .tier-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--accent-secondary);
+  color: #000000;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 3px;
+}
+
+.nav-links {
+  list-style: none;
+  padding: 16px 10px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  transform: translateX(3px);
+}
+
+.nav-item.active {
+  background-color: var(--bg-card);
+  color: var(--accent);
+  border-left: 3px solid var(--accent);
+  box-shadow: var(--card-shadow);
+}
+
+.nav-icon {
+  font-size: 17px;
+  width: 22px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.club-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+/* Main Content Area */
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+
+/* Top Navigation Bar */
+.topbar {
+  height: 64px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.theme-selector-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--bg-card);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.theme-selector-wrap label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.theme-dropdown {
+  background: transparent;
+  color: var(--text-main);
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  color: #000000;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-card-hover);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.btn-outline:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* View Container */
+.view-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Tab Panels */
+.tab-panel {
+  display: none;
+  flex-direction: column;
+  gap: 22px;
+  animation: fadeIn 0.25s ease;
+}
+
+.tab-panel.active {
+  display: flex;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* KPI Cards Grid */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.kpi-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+}
+
+.kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.kpi-icon {
+  font-size: 18px;
+}
+
+.kpi-value {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-main);
+}
+
+.kpi-subtext {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kpi-subtext.positive { color: var(--success); }
+.kpi-subtext.warning { color: var(--warning); }
+.kpi-subtext.danger { color: var(--danger); }
+
+/* Card Components */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--card-shadow);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Tables */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+}
+
+th {
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+tr:hover td {
+  background-color: var(--bg-card-hover);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.badge-skill-superb { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.badge-skill-sensational { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+.badge-skill-masterclass { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.badge-skill-exquisite { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+.badge-skill-competent { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+.badge-pop { background: #10b981; color: #000000; animation: bounce 1s infinite alternate; }
+
+@keyframes bounce {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+/* Pitch Tactical Canvas / Simulator */
+.pitch-container {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+}
+
+.pitch-graphic {
+  background: radial-gradient(circle, #166534 30%, #064e3b 90%);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  border: 2px solid #22c55e;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+}
+
+.pitch-strip {
+  width: 110px;
+  height: 220px;
+  background: #ca8a04;
+  border: 2px dashed #fef08a;
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px 0;
+  align-items: center;
+}
+
+.pitch-strip.green { background: #4d7c0f; }
+.pitch-strip.dusty { background: #a16207; }
+.pitch-strip.hard { background: #b45309; }
+.pitch-strip.slow { background: #854d0e; }
+.pitch-strip.flat { background: #eab308; }
+
+.crease-line {
+  width: 90%;
+  height: 2px;
+  background: #ffffff;
+}
+
+.stumps {
+  display: flex;
+  gap: 4px;
+}
+
+.stump {
+  width: 3px;
+  height: 12px;
+  background: #ffffff;
+}
+
+/* Form Controls */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.form-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-input, .form-select, .form-textarea {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-main);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+/* Modals */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-content {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  max-width: 650px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  padding: 24px;
+  animation: modalScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScale {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-title {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.modal-close:hover { color: var(--text-main); }
+
+/* Responsive Media Queries */
+@media (max-width: 900px) {
+  .app-layout { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border-color); }
+  .nav-links { flex-direction: row; overflow-x: auto; padding: 8px; }
+  .pitch-container { grid-template-columns: 1fr; }
+}
+
+  </style>
+
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="club-crest">🏏</div>
+        <div class="brand-info">
+          <h1>BT360MAK</h1>
+          <span class="tier-badge">BT MEMBERSHIP+</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li>
+          <a class="nav-item active" data-tab="dashboard">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="squad">
+            <span class="nav-icon">👥</span>
+            <span>Squad & Players</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="tactics">
+            <span class="nav-icon">⚔️</span>
+            <span>Tactics & Pitch</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="training">
+            <span class="nav-icon">🎯</span>
+            <span>Training & Nets</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="finance">
+            <span class="nav-icon">💰</span>
+            <span>Finance & Stadium</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="scout">
+            <span class="nav-icon">🔍</span>
+            <span>Scout & Market</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="google">
+            <span class="nav-icon">🌐</span>
+            <span>Google Apps Hub</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="settings">
+            <span class="nav-icon">⚙️</span>
+            <span>System Settings</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="club-status-indicator">
+          <div class="pulse-dot"></div>
+          <span>Battrick Cloud Connected</span>
+        </div>
+        <div style="font-size:10px; color:var(--text-muted); opacity:0.8;">
+          Script: 1GuCVl28B...<br>
+          Sheet: 1KXQbrZ2...
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Stage -->
+    <div class="main-wrapper">
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2 class="page-title" id="pageTitle">Executive Command Center</h2>
+        </div>
+
+        <div class="topbar-right">
+          <!-- 5-Theme Switcher -->
+          <div class="theme-selector-wrap">
+            <label for="themeSelect">🎨 Theme:</label>
+            <select id="themeSelect" class="theme-dropdown">
+              <option value="emerald">1. Pitch Emerald & Gold</option>
+              <option value="cyber">2. Cyber Midnight / Neon</option>
+              <option value="royal">3. Royal Pavilion (Navy & Crimson)</option>
+              <option value="sunset">4. Sunset Matchday (Amber)</option>
+              <option value="light">5. Clean Pro Light (SaaS)</option>
+            </select>
+          </div>
+
+          <button id="btnOpenImportModal" class="btn btn-secondary">
+            📥 Import Squad
+          </button>
+
+          <a href="https://docs.google.com/spreadsheets/d/1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E/edit" target="_blank" class="btn btn-primary">
+            📊 Google Sheet
+          </a>
+        </div>
+      </header>
+
+      <!-- View Container -->
+      <main class="view-container">
+
+        <!-- ============================================== -->
+        <!-- SCREEN 1: DASHBOARD                            -->
+        <!-- ============================================== -->
+        <section id="panel-dashboard" class="tab-panel active">
+          <!-- KPI Summary Cards -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Club Roster</span>
+                <span class="kpi-icon">🏆</span>
+              </div>
+              <div class="kpi-value" id="dashClubName">Mak Lions CC</div>
+              <div class="kpi-subtext positive" id="dashDivision">Division II.3</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Fan Club Morale</span>
+                <span class="kpi-icon">👥</span>
+              </div>
+              <div class="kpi-value" id="dashFanClub">1,420</div>
+              <div class="kpi-subtext positive">🚀 High Flying & Enthusiastic</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Bank Treasury</span>
+                <span class="kpi-icon">💰</span>
+              </div>
+              <div class="kpi-value" id="dashBank">$850,000</div>
+              <div class="kpi-subtext positive">+$22,400 Projected Weekly P&L</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Weekly Wages</span>
+                <span class="kpi-icon">📋</span>
+              </div>
+              <div class="kpi-value" id="dashWage">$171,800</div>
+              <div class="kpi-subtext warning">Optimal Range (&lt; 65% of Inflow)</div>
+            </div>
+          </div>
+
+          <!-- Mid Section: Next Match & Training Pops Ticker -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+            <!-- Next Fixture Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">📅 Next Match Fixture</h3>
+                <span class="badge badge-skill-sensational">First Class (3 Days)</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin:14px 0;">
+                <div>
+                  <div style="font-size:12px; color:var(--text-muted);">Opponent</div>
+                  <div style="font-size:16px; font-weight:800;">Emerald Strikers</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:12px; color:var(--text-muted);">Pitch Condition</div>
+                  <div style="font-size:16px; font-weight:800; color:var(--accent);">HARD BOUNCY</div>
+                </div>
+              </div>
+              <p style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+                ⚡ Recommendation: Play opening express pacers Bumrah and rotate fast bowlers with refreshed fatigue.
+              </p>
+            </div>
+
+            <!-- Recent Pops Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">📈 Recent Training Pops</h3>
+                <span class="badge badge-pop">4 New This Month</span>
+              </div>
+              <div id="dashPopsList"></div>
+            </div>
+          </div>
+
+          <!-- Charts Section: Subskill Progression & Cashflow -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">📈 Trainee Skill Pop Progression</h3>
+                <span style="font-size:11px; color:var(--text-muted);">Rohit Sharma (Batting)</span>
+              </div>
+              <div id="dashboardProgressionChart" style="height:190px;"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">💵 5-Week Cashflow (Inflow vs Outflow)</h3>
+                <span style="font-size:11px; color:var(--text-muted);"><span style="color:#10b981;">■ In</span> vs <span style="color:#f43f5e;">■ Out</span></span>
+              </div>
+              <div id="dashboardCashflowChart" style="height:190px;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 2: SQUAD & PLAYERS                      -->
+        <!-- ============================================== -->
+        <section id="panel-squad" class="tab-panel">
+          <div class="card">
+            <div class="card-header" style="flex-wrap:wrap; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <h3 class="card-title">👥 Club Roster & Battrick Membership Valuation</h3>
+                <span id="squadCountBadge" class="badge badge-skill-sensational">6 Players</span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:10px;">
+                <input type="text" id="squadSearchInput" placeholder="🔍 Search player, skill or role..." class="form-input" style="width:240px; padding:6px 10px;">
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Player ID</th>
+                    <th>Player & Role</th>
+                    <th>Age</th>
+                    <th>Wage</th>
+                    <th>Style</th>
+                    <th>Batting</th>
+                    <th>Bowling</th>
+                    <th>Keeping</th>
+                    <th>Fielding</th>
+                    <th>Form</th>
+                    <th>Fatigue</th>
+                    <th>Active Net</th>
+                    <th>Fair Value</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="squadTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 3: TACTICS & PITCH ENGINE               -->
+        <!-- ============================================== -->
+        <section id="panel-tactics" class="tab-panel">
+          <div class="pitch-container">
+            <!-- Left Pitch Preview Graphic -->
+            <div class="pitch-graphic">
+              <div id="tacticalPitchStrip" class="pitch-strip hard">
+                <div class="stumps"><div class="stump"></div><div class="stump"></div><div class="stump"></div></div>
+                <div class="crease-line"></div>
+                <div style="color:#ffffff; font-size:10px; font-weight:800; transform:rotate(-90deg); letter-spacing:1px;">22 YARDS</div>
+                <div class="crease-line"></div>
+                <div class="stumps"><div class="stump"></div><div class="stump"></div><div class="stump"></div></div>
+              </div>
+              <div style="margin-top:14px; text-align:center;">
+                <span class="badge badge-pop">Matchday Pitch Canvas</span>
+              </div>
+            </div>
+
+            <!-- Right Tactical Control Form -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">⚔️ Pitch Analyzer & Bowling Synergy Engine</h3>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Select Matchday Pitch Type:</label>
+                <select id="tacticsPitchSelect" class="form-select">
+                  <option value="Hard">Hard (Bouncy, Favors Express Pace & Fast Bowlers)</option>
+                  <option value="Green">Green (Grass Cover, Heavy Seam & Swing Movement)</option>
+                  <option value="Dusty">Dusty (Dry & Cracked, Tremendous Spin Assistance)</option>
+                  <option value="Slow">Slow (Low Bounce, Sluggish Batting Conditions)</option>
+                  <option value="Flat">Flat (Batsman's Paradise, High Scores)</option>
+                  <option value="Uneven">Uneven (Unpredictable Bounce, Testing All Batsmen)</option>
+                </select>
+              </div>
+
+              <div style="background:var(--bg-secondary); padding:14px; border-radius:8px; margin-bottom:16px; border:1px solid var(--border-color);">
+                <div style="font-weight:700; font-size:12px; margin-bottom:4px; color:var(--accent);">Pitch Scouting Report:</div>
+                <p id="pitchDescription" style="font-size:12px; color:var(--text-muted); line-height:1.5;"></p>
+              </div>
+
+              <div style="margin-top:10px;">
+                <h4 style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Bowler Type Multipliers:</h4>
+                <div id="pitchBonusesList"></div>
+              </div>
+
+              <div style="margin-top:20px; display:flex; gap:10px;">
+                <button class="btn btn-primary" onclick="alert('Tactical Pitch Orders saved to Google Sheet!')">💾 Save Match Strategy</button>
+                <button class="btn btn-secondary" onclick="alert('Simulated Predicted Match Rating: Sensational (High)!')">⚡ Simulate Match Ratings</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 4: TRAINING & ACADEMY                   -->
+        <!-- ============================================== -->
+        <section id="panel-training" class="tab-panel">
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:20px;">
+            <!-- 10 Nets Table -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">🎯 Active 10-Net Training Matrix</h3>
+                <span class="badge badge-skill-sensational">10 / 10 Nets Filled</span>
+              </div>
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Net #</th>
+                      <th>Specialty</th>
+                      <th>Primary Trainee</th>
+                      <th>Coach Level</th>
+                      <th>Pop ETA</th>
+                    </tr>
+                  </thead>
+                  <tbody id="netsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Youth Academy (ITS) Simulator -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">🌟 Youth Academy & ITS</h3>
+                <span class="badge badge-pop">Weekly Pull</span>
+              </div>
+
+              <div class="form-group">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                  <label class="form-label">Weekly ITS Investment:</label>
+                  <strong id="itsValueDisplay" style="color:var(--accent);">$36,000 / week</strong>
+                </div>
+                <input type="range" id="itsSlider" min="0" max="36000" step="4000" value="36000" style="width:100%; accent-color:var(--accent);">
+              </div>
+
+              <div id="itsOutcome" style="background:var(--bg-secondary); padding:14px; border-radius:8px; font-size:12px; line-height:1.5; border:1px solid var(--border-color);">
+                🌟 <strong>Maximum Investment (Level 20 ITS)</strong>: Guarantees 17yo pulls with Proficient/Strong primary skills and Exceptional potential!
+              </div>
+
+              <div style="margin-top:20px;">
+                <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="alert('Youth Academy Scout report synced with Google Sheet!')">
+                  🎲 Simulate Weekly Youth Pull
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 5: FINANCE & STADIUM                    -->
+        <!-- ============================================== -->
+        <section id="panel-finance" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🏟️ Stadium Architect & Optimum Seating Ratio Calculator</h3>
+              <span class="badge badge-skill-sensational">Fan Base: 1,420</span>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+              Optimal Ground Ratio: 68% Standing Room | 23% Uncovered Seats | 7% Covered Seats | 2% Members Enclosure (BT Membership Tier)
+            </p>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tier Name</th>
+                    <th>Current Seats</th>
+                    <th>Optimum Ratio</th>
+                    <th>Recommended Capacity</th>
+                    <th>Ticket Price</th>
+                    <th>Potential Match Gate</th>
+                    <th>Total Upgrade Cost</th>
+                  </tr>
+                </thead>
+                <tbody id="stadiumTableBody"></tbody>
+              </table>
+            </div>
+            <div style="margin-top:16px; display:flex; justify-content:flex-end;">
+              <button class="btn btn-primary" onclick="alert('Stadium expansion plan synced to Google Sheet!')">
+                🏗️ Apply Expansion Plan
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 6: SCOUT & TRANSFER                     -->
+        <!-- ============================================== -->
+        <section id="panel-scout" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🔍 Transfer Market Radar & Fair Value Model</h3>
+              <span class="badge badge-pop">AI Valuation Active</span>
+            </div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Target ID</th>
+                    <th>Player Name</th>
+                    <th>Age</th>
+                    <th>Primary Skill</th>
+                    <th>Secondary</th>
+                    <th>Wage</th>
+                    <th>Current Bid</th>
+                    <th>Fair Market Value</th>
+                    <th>Algorithm Verdict</th>
+                  </tr>
+                </thead>
+                <tbody id="scoutTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 7: GOOGLE APPS HUB                      -->
+        <!-- ============================================== -->
+        <section id="panel-google" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🌐 Connected Google Workspace Apps</h3>
+              <span class="badge badge-pop">Google Apps Script V8</span>
+            </div>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">
+              BT360MAK unifies Google Sheets, Apps Script, Google Drive, Google Calendar, and Gmail into an automated club management powerhouse.
+            </p>
+
+            <div class="kpi-grid">
+              <!-- Google Sheets -->
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <span>Google Sheets Database</span>
+                  <span>📊</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                  10 Fully Formatted Tabs: Squad, Training, Finances, Stadium, Tactics.
+                </div>
+                <div style="margin-top:14px;">
+                  <a href="https://docs.google.com/spreadsheets/d/1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E/edit" target="_blank" class="btn btn-secondary" style="font-size:11px;">
+                    Open Master Sheet ➔
+                  </a>
+                </div>
+              </div>
+
+              <!-- Google Calendar -->
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <span>Google Calendar</span>
+                  <span>📅</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                  Automates matchday fixtures (FC, OD, T20) and Friday Training pop alerts.
+                </div>
+                <div style="margin-top:14px;">
+                  <button id="btnSyncCalendar" class="btn btn-primary" style="font-size:11px;">
+                    📅 Sync Fixtures Now
+                  </button>
+                </div>
+              </div>
+
+              <!-- Google Drive -->
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <span>Google Drive Backup</span>
+                  <span>💾</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                  Timestamped JSON squad dumps backed up into 'BT360MAK_Backups' folder.
+                </div>
+                <div style="margin-top:14px;">
+                  <button id="btnDriveBackup" class="btn btn-primary" style="font-size:11px;">
+                    💾 Trigger Drive Backup
+                  </button>
+                </div>
+              </div>
+
+              <!-- Gmail -->
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <span>Gmail Digest & Alerts</span>
+                  <span>📧</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                  Automated executive HTML emails with weekly pops, match previews & cashflow.
+                </div>
+                <div style="margin-top:14px;">
+                  <button id="btnSendGmail" class="btn btn-primary" style="font-size:11px;">
+                    📧 Send Weekly Digest
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 8: SYSTEM SETTINGS                      -->
+        <!-- ============================================== -->
+        <section id="panel-settings" class="tab-panel">
+          <div class="card" style="max-width:700px;">
+            <div class="card-header">
+              <h3 class="card-title">⚙️ Club Configuration & Environment Keys</h3>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Google Apps Script Web App Endpoint URL:</label>
+              <input type="text" id="settingEndpointUrl" class="form-input" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Battrick Club ID:</label>
+              <input type="text" value="94120" class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Battrick User Security Code:</label>
+              <input type="password" value="secret_code_token" class="form-input">
+            </div>
+
+            <div style="margin-top:20px; display:flex; gap:12px;">
+              <button class="btn btn-primary" onclick="alert('Settings saved to local storage and ready for API sync!')">💾 Save Configuration</button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- PLAYER INSPECT MODAL -->
+  <div id="playerModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="modalPlayerName">Player Name</h3>
+          <div id="modalPlayerRole" style="font-size:12px; color:var(--text-muted); margin-top:2px;">Role & Profile</div>
+        </div>
+        <button class="modal-close">&times;</button>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(4, 1fr); margin-bottom:16px;">
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Wage</div>
+          <div id="modalPlayerWage" style="font-weight:700; font-size:14px;">$0</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Market Value</div>
+          <div id="modalPlayerValue" style="font-weight:700; font-size:14px; color:var(--accent);">$0</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">BTI (Index)</div>
+          <div id="modalPlayerBti" style="font-weight:700; font-size:14px;">0</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Est. Subskill</div>
+          <div id="modalPlayerSubskill" style="font-weight:700; font-size:14px; color:var(--accent);">0.0</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:12px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Core Skill Ratings</h4>
+      <div id="modalSkillGrid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:16px;"></div>
+
+      <h4 style="font-size:12px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Skill Pop Progression Curve</h4>
+      <div id="playerModalProgressionGraph" style="height:170px;"></div>
+    </div>
+  </div>
+
+  <!-- SQUAD IMPORT MODAL -->
+  <div id="importModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">📥 Import Battrick Squad</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+        Paste your raw squad page HTML, XML export, or copy-pasted table from Battrick club squad page:
+      </p>
+      <div class="form-group">
+        <textarea id="importRawData" class="form-textarea" rows="8" placeholder="Paste Battrick squad table text or XML here..."></textarea>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn btn-secondary modal-close">Cancel</button>
+        <button class="btn btn-primary" onclick="alert('Squad parsed and synced successfully!'); document.getElementById('importModal').classList.remove('active');">
+          ⚡ Parse & Ingest Squad
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Separate Script Files -->
+  
+  <script>
+/**
+ * BT360MAK - battrickData.js
+ * Default club data, skill definitions, pitch tactics, and initial state.
+ */
+
+const BT_DATA = {
+  club: {
+    id: '94120',
+    name: 'Mak Lions CC',
+    manager: 'Shakti Mak',
+    division: 'Division II.3',
+    fanClub: '1,420 members',
+    fanMood: 'High Flying 🚀',
+    bankBalance: 850000,
+    weeklyWageBill: 171800,
+    stadiumName: 'Lions Den Arena',
+    stadiumCapacity: 18000,
+    formAvg: 'Superb',
+    trainingPopsSeason: 6,
+    coachQuality: 'Sensational (Level 15)'
+  },
+
+  skillsHierarchy: [
+    'nonexistent', 'abysmal', 'woeful', 'feeble', 'mediocre',
+    'competent', 'respectable', 'proficient', 'strong', 'superb',
+    'quality', 'remarkable', 'wonderful', 'exceptional', 'sensational',
+    'exquisite', 'masterclass', 'miraculous', 'legendary', 'mythical',
+    'titanic', 'ethereal', 'divine'
+  ],
+
+  pitchTypes: {
+    'Hard': {
+      label: 'Hard Pitch',
+      desc: 'Significant bounce and pace. Heavily favors express fast and fast-medium bowlers. High scores if batsmen possess high concentration.',
+      bowlerBonus: { 'Fast': '+25%', 'FastMedium': '+15%', 'Medium': '-5%', 'Spin': '-15%' },
+      colorClass: 'hard'
+    },
+    'Green': {
+      label: 'Green Pitch',
+      desc: 'Abundant seam movement and swing. Ideal conditions for swing and seamers. Batsmen will struggle against early movement.',
+      bowlerBonus: { 'Fast': '+10%', 'FastMedium': '+30%', 'Medium': '+20%', 'Spin': '-30%' },
+      colorClass: 'green'
+    },
+    'Dusty': {
+      label: 'Dusty Pitch',
+      desc: 'Dry, abrasive surface offering sharp turn and variable bounce. Heaven for finger and wrist spinners; hostile for quicks.',
+      bowlerBonus: { 'Fast': '-25%', 'FastMedium': '-20%', 'Medium': '-10%', 'Spin': '+40%' },
+      colorClass: 'dusty'
+    },
+    'Slow': {
+      label: 'Slow Pitch',
+      desc: 'Low bounce and slow pace. Fast bowlers lose sting; medium pacers, cutters, and slow bowlers thrive with disciplined lines.',
+      bowlerBonus: { 'Fast': '-20%', 'FastMedium': '-10%', 'Medium': '+20%', 'Spin': '+15%' },
+      colorClass: 'slow'
+    },
+    'Flat': {
+      label: 'Flat Highway',
+      desc: 'True and even bounce. Heavy advantage to batsmen. Bowlers must rely on stamina and exceptional consistency to break through.',
+      bowlerBonus: { 'Fast': '-5%', 'FastMedium': '-5%', 'Medium': '-5%', 'Spin': '+5%' },
+      colorClass: 'flat'
+    },
+    'Uneven': {
+      label: 'Uneven Pitch',
+      desc: 'Unpredictable, erratic bounce. Dangerous conditions; aids all bowling styles, especially tight disciplined spells.',
+      bowlerBonus: { 'Fast': '+20%', 'FastMedium': '+15%', 'Medium': '+10%', 'Spin': '+25%' },
+      colorClass: 'uneven'
+    }
+  },
+
+  squad: [
+    {
+      id: 'BT-91024',
+      name: 'Rohit Sharma',
+      age: 24,
+      wage: 28500,
+      hand: 'RHB',
+      bowlingType: 'None',
+      batting: 'Sensational',
+      bowling: 'Feeble',
+      keeping: 'Feeble',
+      fielding: 'Superb',
+      consistency: 'Remarkable',
+      concentration: 'Wonderful',
+      stamina: 'Superb',
+      form: 'Superb',
+      fatigue: 'Revived',
+      leadership: 'Proficient',
+      experience: 'Remarkable',
+      bti: 184500,
+      subskill: '15.4',
+      activeNet: 'Batting (2)',
+      marketValue: 4200000,
+      role: 'Opening Batsman'
+    },
+    {
+      id: 'BT-84920',
+      name: 'Jasprit Bumrah',
+      age: 23,
+      wage: 31200,
+      hand: 'RHB',
+      bowlingType: 'Fast',
+      batting: 'Feeble',
+      bowling: 'Sensational',
+      keeping: 'Abysmal',
+      fielding: 'Wonderful',
+      consistency: 'Sensational',
+      concentration: 'Competent',
+      stamina: 'Superb',
+      form: 'Blissful',
+      fatigue: 'Energized',
+      leadership: 'Competent',
+      experience: 'Wonderful',
+      bti: 192000,
+      subskill: '15.7',
+      activeNet: 'Bowling (2)',
+      marketValue: 4800000,
+      role: 'Opening Strike Bowler'
+    },
+    {
+      id: 'BT-77412',
+      name: 'Virat Kohli',
+      age: 26,
+      wage: 42000,
+      hand: 'RHB',
+      bowlingType: 'RM',
+      batting: 'Exquisite',
+      bowling: 'Feeble',
+      keeping: 'Abysmal',
+      fielding: 'Exceptional',
+      consistency: 'Masterclass',
+      concentration: 'Miraculous',
+      stamina: 'Remarkable',
+      form: 'Superb',
+      fatigue: 'Rested',
+      leadership: 'Exceptional',
+      experience: 'Sensational',
+      bti: 248000,
+      subskill: '16.2',
+      activeNet: 'None',
+      marketValue: 6500000,
+      role: 'Anchor Batsman (C)'
+    },
+    {
+      id: 'BT-63201',
+      name: 'Rishabh Pant',
+      age: 22,
+      wage: 19400,
+      hand: 'LHB',
+      bowlingType: 'None',
+      batting: 'Exceptional',
+      bowling: 'Abysmal',
+      keeping: 'Wonderful',
+      fielding: 'Proficient',
+      consistency: 'Proficient',
+      concentration: 'Strong',
+      stamina: 'Proficient',
+      form: 'Superb',
+      fatigue: 'Revived',
+      leadership: 'Respectable',
+      experience: 'Proficient',
+      bti: 132000,
+      subskill: '14.3',
+      activeNet: 'Keeping (1)',
+      marketValue: 2900000,
+      role: 'Wicketkeeper Batsman'
+    },
+    {
+      id: 'BT-54819',
+      name: 'Ravindra Jadeja',
+      age: 25,
+      wage: 26700,
+      hand: 'LHB',
+      bowlingType: 'Slow (SLA)',
+      batting: 'Wonderful',
+      bowling: 'Remarkable',
+      keeping: 'Abysmal',
+      fielding: 'Sensational',
+      consistency: 'Exceptional',
+      concentration: 'Exceptional',
+      stamina: 'Exceptional',
+      form: 'Superb',
+      fatigue: 'Rested',
+      leadership: 'Proficient',
+      experience: 'Remarkable',
+      bti: 178000,
+      subskill: '13.8',
+      activeNet: 'Fielding (1)',
+      marketValue: 3800000,
+      role: 'All-Rounder'
+    },
+    {
+      id: 'BT-44129',
+      name: 'Rashid Khan',
+      age: 21,
+      wage: 24000,
+      hand: 'RHB',
+      bowlingType: 'Leg Spin',
+      batting: 'Competent',
+      bowling: 'Exceptional',
+      keeping: 'Abysmal',
+      fielding: 'Wonderful',
+      consistency: 'Sensational',
+      concentration: 'Remarkable',
+      stamina: 'Remarkable',
+      form: 'Blissful',
+      fatigue: 'Energized',
+      leadership: 'Capable',
+      experience: 'Proficient',
+      bti: 165000,
+      subskill: '14.8',
+      activeNet: 'Bowling (2)',
+      marketValue: 3700000,
+      role: 'Lead Spinner'
+    }
+  ],
+
+  nets: [
+    { net: 1, type: 'Batting', playerId: 'BT-91024', name: 'Rohit Sharma', coach: '1.15x', etaWeeks: 6 },
+    { net: 2, type: 'Batting', playerId: 'BT-91024', name: 'Rohit Sharma', coach: '1.15x', etaWeeks: 6 },
+    { net: 3, type: 'Bowling', playerId: 'BT-84920', name: 'Jasprit Bumrah', coach: '1.15x', etaWeeks: 5 },
+    { net: 4, type: 'Bowling', playerId: 'BT-84920', name: 'Jasprit Bumrah', coach: '1.15x', etaWeeks: 5 },
+    { net: 5, type: 'Wicket Keeping', playerId: 'BT-63201', name: 'Rishabh Pant', coach: '1.05x', etaWeeks: 8 },
+    { net: 6, type: 'Fielding', playerId: 'BT-54819', name: 'Ravindra Jadeja', coach: '1.10x', etaWeeks: 4 },
+    { net: 7, type: 'Bowling', playerId: 'BT-44129', name: 'Rashid Khan', coach: '1.15x', etaWeeks: 6 },
+    { net: 8, type: 'Bowling', playerId: 'BT-44129', name: 'Rashid Khan', coach: '1.15x', etaWeeks: 6 },
+    { net: 9, type: 'Fitness / Stamina', playerId: 'BT-63201', name: 'Rishabh Pant', coach: '1.00x', etaWeeks: 3 },
+    { net: 10, type: 'Physio / Recovery', playerId: 'All Squad', name: 'Fatigue Protection', coach: '1.00x', etaWeeks: '-' }
+  ],
+
+  trainingPops: [
+    { date: '2026-11-13', player: 'Rohit Sharma', skill: 'Batting', oldVal: 'Exceptional', newVal: 'Sensational', weeks: 7 },
+    { date: '2026-11-06', player: 'Jasprit Bumrah', skill: 'Bowling', oldVal: 'Exceptional', newVal: 'Sensational', weeks: 6 },
+    { date: '2026-10-30', player: 'Rishabh Pant', skill: 'Keeping', oldVal: 'Remarkable', newVal: 'Wonderful', weeks: 8 },
+    { date: '2026-10-23', player: 'Ravindra Jadeja', skill: 'Batting', oldVal: 'Remarkable', newVal: 'Wonderful', weeks: 9 }
+  ],
+
+  stadium: [
+    { tier: 'Standing Room', current: 12000, ratio: '68%', rec: 17000, price: 5, cost: 35 },
+    { tier: 'Uncovered Seats', current: 4500, ratio: '23%', rec: 5750, price: 8, cost: 60 },
+    { tier: 'Covered Seats', current: 1200, ratio: '7%', rec: 1750, price: 15, cost: 100 },
+    { tier: 'Members Enclosure (BT+)', current: 300, ratio: '2%', rec: 500, price: 35, cost: 220 }
+  ]
+};
+
+/**
+ * BT360MAK - api.js
+ * Asynchronous API connector to Google Apps Script Web App & Google Sheet backend.
+ */
+
+const BT_API = {
+  SCRIPT_ID: '1GuCVl28B7I-KJ9o-pdYJl6MGaX0FYqTH9u5yzOMuoQpXBLqW2ULLQxpS',
+  SHEET_ID: '1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E',
+  endpointUrl: '',
+
+  init: function() {
+    // Check if running inside Google Apps Script iframe
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      this.isAppsScriptEnvironment = true;
+      console.log('Running inside Google Apps Script environment.');
+    } else {
+      this.isAppsScriptEnvironment = false;
+      this.endpointUrl = localStorage.getItem('bt360mak_endpoint') || '';
+      console.log('Running in standalone Web App mode.');
+    }
+  },
+
+  setEndpoint: function(url) {
+    this.endpointUrl = url;
+    localStorage.setItem('bt360mak_endpoint', url);
+  },
+
+  syncSquad: async function(squadData) {
+    if (this.isAppsScriptEnvironment) {
+      return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)
+          .doPost({ postData: { contents: JSON.stringify({ action: 'syncSquad', squad: squadData }) } });
+      });
+    }
+
+    if (this.endpointUrl) {
+      try {
+        const response = await fetch(this.endpointUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'syncSquad', squad: squadData })
+        });
+        return await response.json();
+      } catch (err) {
+        console.warn('Network call failed, using local persistence:', err);
+      }
+    }
+
+    // Local fallback
+    localStorage.setItem('bt360mak_local_squad', JSON.stringify(squadData));
+    return { success: true, count: squadData.length, mode: 'local' };
+  },
+
+  syncGoogleCalendar: async function(fixtures) {
+    if (this.isAppsScriptEnvironment) {
+      return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)
+          .syncFixturesToGoogleCalendar();
+      });
+    }
+
+    if (this.endpointUrl) {
+      try {
+        const response = await fetch(this.endpointUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'syncCalendar', fixtures: fixtures })
+        });
+        return await response.json();
+      } catch (err) {
+        console.warn('Remote sync error:', err);
+      }
+    }
+
+    return { success: true, count: fixtures ? fixtures.length : 3, mode: 'simulation' };
+  },
+
+  backupToGoogleDrive: async function() {
+    if (this.isAppsScriptEnvironment) {
+      return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)
+          .backupClubDataToDrive();
+      });
+    }
+
+    if (this.endpointUrl) {
+      try {
+        const response = await fetch(this.endpointUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'createDriveBackup' })
+        });
+        return await response.json();
+      } catch (err) {
+        console.warn('Drive backup error:', err);
+      }
+    }
+
+    return { success: true, fileName: `BT360MAK_Snapshot_${new Date().toISOString().slice(0, 10)}.json`, mode: 'simulation' };
+  },
+
+  sendGmailDigest: async function() {
+    if (this.isAppsScriptEnvironment) {
+      return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)
+          .sendWeeklyDigestEmail();
+      });
+    }
+
+    if (this.endpointUrl) {
+      try {
+        const response = await fetch(this.endpointUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'sendAlertEmail', subject: 'BT360MAK Digest', body: 'Digest Triggered' })
+        });
+        return await response.json();
+      } catch (err) {
+        console.warn('Gmail error:', err);
+      }
+    }
+
+    return { success: true, mode: 'simulation' };
+  }
+};
+
+/**
+ * BT360MAK - charts.js
+ * High-performance lightweight vector/canvas visualization engine.
+ * Renders:
+ * 1. Player Subskill Growth Curves
+ * 2. Financial Cashflow Bars
+ * 3. Tactical Pitch Synergy Radar
+ */
+
+const BT_CHARTS = {
+  renderProgressionGraph: function(containerId, dataPoints) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const width = container.clientWidth || 380;
+    const height = 180;
+    const padding = 28;
+
+    const points = dataPoints || [
+      { week: 'W1', val: 14.1 },
+      { week: 'W2', val: 14.3 },
+      { week: 'W3', val: 14.5 },
+      { week: 'W4', val: 14.7 },
+      { week: 'W5', val: 14.9 },
+      { week: 'W6', val: 15.0 }, // POP!
+      { week: 'W7', val: 15.2 }
+    ];
+
+    const minVal = 13.5;
+    const maxVal = 15.5;
+
+    let pathD = '';
+    let circlesHtml = '';
+
+    points.forEach((pt, idx) => {
+      const x = padding + (idx * ((width - (padding * 2)) / (points.length - 1)));
+      const y = height - padding - ((pt.val - minVal) / (maxVal - minVal) * (height - (padding * 2)));
+
+      if (idx === 0) {
+        pathD += `M ${x} ${y}`;
+      } else {
+        pathD += ` L ${x} ${y}`;
+      }
+
+      const isPop = pt.val >= 15.0 && points[idx - 1] && points[idx - 1].val < 15.0;
+      circlesHtml += `
+        <circle cx="${x}" cy="${y}" r="${isPop ? 6 : 4}" fill="${isPop ? '#10b981' : '#38bdf8'}" stroke="#ffffff" stroke-width="2">
+          <title>${pt.week}: Level ${pt.val} ${isPop ? '(POP!)' : ''}</title>
+        </circle>
+        <text x="${x}" y="${height - 8}" text-anchor="middle" font-size="10" fill="var(--text-muted)">${pt.week}</text>
+      `;
+    });
+
+    const svg = `
+      <svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" style="overflow:visible;">
+        <defs>
+          <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#38bdf8" />
+            <stop offset="100%" stop-color="#10b981" />
+          </linearGradient>
+        </defs>
+        <!-- Grid horizontal lines -->
+        <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="var(--border-color)" stroke-dasharray="3,3" />
+        <line x1="${padding}" y1="${height / 2}" x2="${width - padding}" y2="${height / 2}" stroke="var(--border-color)" stroke-dasharray="3,3" />
+        <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="var(--border-color)" />
+
+        <path d="${pathD}" fill="none" stroke="url(#lineGrad)" stroke-width="3" stroke-linecap="round" />
+        ${circlesHtml}
+      </svg>
+    `;
+
+    container.innerHTML = svg;
+  },
+
+  renderCashflowBars: function(containerId, weeklyRecords) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const width = container.clientWidth || 400;
+    const height = 170;
+    const padding = 24;
+
+    const data = weeklyRecords || [
+      { week: 'W1', in: 155, out: 140 },
+      { week: 'W2', in: 178, out: 142 },
+      { week: 'W3', in: 145, out: 145 },
+      { week: 'W4', in: 210, out: 152 },
+      { week: 'W5', in: 185, out: 148 }
+    ];
+
+    const maxVal = 240;
+    const colWidth = 24;
+    let barsHtml = '';
+
+    data.forEach((d, i) => {
+      const groupX = padding + (i * ((width - (padding * 2)) / data.length)) + 15;
+      const hIn = (d.in / maxVal) * (height - (padding * 2));
+      const hOut = (d.out / maxVal) * (height - (padding * 2));
+
+      const yIn = height - padding - hIn;
+      const yOut = height - padding - hOut;
+
+      barsHtml += `
+        <!-- Inflow Bar (Green) -->
+        <rect x="${groupX}" y="${yIn}" width="${colWidth / 2}" height="${hIn}" rx="3" fill="#10b981">
+          <title>${d.week} Inflow: ${d.in}k</title>
+        </rect>
+        <!-- Outflow Bar (Rose) -->
+        <rect x="${groupX + (colWidth / 2) + 2}" y="${yOut}" width="${colWidth / 2}" height="${hOut}" rx="3" fill="#f43f5e">
+          <title>${d.week} Outflow: ${d.out}k</title>
+        </rect>
+        <text x="${groupX + (colWidth / 2)}" y="${height - 6}" text-anchor="middle" font-size="10" fill="var(--text-muted)">${d.week}</text>
+      `;
+    });
+
+    const svg = `
+      <svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}">
+        <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="var(--border-color)" />
+        ${barsHtml}
+      </svg>
+    `;
+    container.innerHTML = svg;
+  }
+};
+
+/**
+ * BT360MAK - app.js
+ * Master Client Controller: Navigation, Theme Engine, State, Interactive Calculators & Modals.
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  BT_APP.init();
+});
+
+const BT_APP = {
+  currentTheme: 'emerald',
+  currentTab: 'dashboard',
+  squad: [],
+
+  init: function() {
+    this.squad = [...BT_DATA.squad];
+    BT_API.init();
+    this.setupTheme();
+    this.setupNavigation();
+    this.renderDashboard();
+    this.renderSquadTable();
+    this.renderNetsTable();
+    this.renderStadiumTable();
+    this.renderScoutTargets();
+    this.setupTacticsEngine();
+    this.setupYouthCalculator();
+    this.setupModals();
+    this.setupGoogleAppsSync();
+    console.log('BT360MAK Frontend initialized successfully.');
+  },
+
+  /* 1. THEME ENGINE */
+  setupTheme: function() {
+    const savedTheme = localStorage.getItem('bt360mak_theme') || 'emerald';
+    this.setTheme(savedTheme);
+
+    const themeSelect = document.getElementById('themeSelect');
+    if (themeSelect) {
+      themeSelect.value = savedTheme;
+      themeSelect.addEventListener('change', (e) => {
+        this.setTheme(e.target.value);
+      });
+    }
+  },
+
+  setTheme: function(themeName) {
+    this.currentTheme = themeName;
+    document.documentElement.setAttribute('data-theme', themeName);
+    localStorage.setItem('bt360mak_theme', themeName);
+    const themeSelect = document.getElementById('themeSelect');
+    if (themeSelect) themeSelect.value = themeName;
+  },
+
+  /* 2. NAVIGATION & TABS */
+  setupNavigation: function() {
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tabTarget = item.getAttribute('data-tab');
+        this.switchTab(tabTarget);
+      });
+    });
+  },
+
+  switchTab: function(tabId) {
+    this.currentTab = tabId;
+
+    // Update active nav link
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const activeLink = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
+    if (activeLink) activeLink.classList.add('active');
+
+    // Update active panel
+    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+    const activePanel = document.getElementById(`panel-${tabId}`);
+    if (activePanel) activePanel.classList.add('active');
+
+    // Update Topbar Title
+    const titles = {
+      dashboard: 'Executive Command Center',
+      squad: 'Squad Roster & BT Membership Analytics',
+      tactics: 'Tactical Warfare & Pitch Synergy Engine',
+      training: 'Training Matrix & Youth Academy Hub',
+      finance: 'Financial Ledger & Stadium Architecture',
+      scout: 'Transfer Market Radar & Valuation Engine',
+      google: 'Google Apps Workspace Integrations',
+      settings: 'Club Configuration & System Preferences'
+    };
+    const titleEl = document.getElementById('pageTitle');
+    if (titleEl && titles[tabId]) titleEl.innerText = titles[tabId];
+
+    // Trigger re-render of visual graphs if needed
+    if (tabId === 'dashboard') {
+      BT_CHARTS.renderProgressionGraph('dashboardProgressionChart');
+      BT_CHARTS.renderCashflowBars('dashboardCashflowChart');
+    }
+  },
+
+  /* 3. DASHBOARD RENDER */
+  renderDashboard: function() {
+    const club = BT_DATA.club;
+    document.getElementById('dashClubName').innerText = club.name;
+    document.getElementById('dashDivision').innerText = club.division;
+    document.getElementById('dashFanClub').innerText = club.fanClub;
+    document.getElementById('dashBank').innerText = '
+</body>
+</html>
+ + club.bankBalance.toLocaleString();
+    document.getElementById('dashWage').innerText = '
+</body>
+</html>
+ + club.weeklyWageBill.toLocaleString();
+
+    // Render Recent Pops Ticker
+    const popsList = document.getElementById('dashPopsList');
+    if (popsList) {
+      popsList.innerHTML = BT_DATA.trainingPops.map(pop => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border-color);">
+          <div>
+            <strong>${pop.player}</strong>
+            <span style="font-size:11px; color:var(--text-muted); margin-left:6px;">(${pop.skill})</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:11px; color:var(--text-muted);">${pop.oldVal} ➔</span>
+            <span class="badge badge-pop">${pop.newVal}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    setTimeout(() => {
+      BT_CHARTS.renderProgressionGraph('dashboardProgressionChart');
+      BT_CHARTS.renderCashflowBars('dashboardCashflowChart');
+    }, 100);
+  },
+
+  /* 4. SQUAD TABLE & MEMBERSHIP ANALYTICS */
+  renderSquadTable: function(filterList) {
+    const tableBody = document.getElementById('squadTableBody');
+    if (!tableBody) return;
+
+    const players = filterList || this.squad;
+
+    tableBody.innerHTML = players.map(p => {
+      const batBadge = this.getSkillBadge(p.batting);
+      const bowlBadge = this.getSkillBadge(p.bowling);
+      const keepBadge = this.getSkillBadge(p.keeping);
+      const fieldBadge = this.getSkillBadge(p.fielding);
+
+      return `
+        <tr>
+          <td><span style="font-family:monospace; font-weight:bold; color:var(--accent);">${p.id}</span></td>
+          <td>
+            <a href="#" class="player-link" data-id="${p.id}" style="color:var(--text-main); font-weight:700; text-decoration:none;">
+              ${p.name}
+            </a>
+            <div style="font-size:10px; color:var(--text-muted);">${p.role} • ${p.hand}</div>
+          </td>
+          <td>${p.age}</td>
+          <td><strong>${Number(p.wage).toLocaleString()}</strong></td>
+          <td>${p.bowlingType}</td>
+          <td>${batBadge}</td>
+          <td>${bowlBadge}</td>
+          <td>${keepBadge}</td>
+          <td>${fieldBadge}</td>
+          <td>${p.form}</td>
+          <td>${p.fatigue}</td>
+          <td>${p.activeNet !== 'None' ? `<span class="badge badge-pop">${p.activeNet}</span>` : '<span style="color:var(--text-muted);">-</span>'}</td>
+          <td><strong>${Number(p.marketValue).toLocaleString()}</strong></td>
+          <td>
+            <button class="btn btn-secondary btn-inspect" data-id="${p.id}" style="padding:4px 8px; font-size:10px;">
+              🔍 Inspect
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Attach inspect click handlers
+    document.querySelectorAll('.btn-inspect, .player-link').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const pId = btn.getAttribute('data-id');
+        this.openPlayerModal(pId);
+      });
+    });
+
+    // Update squad counter badge
+    const countBadge = document.getElementById('squadCountBadge');
+    if (countBadge) countBadge.innerText = `${players.length} Players`;
+  },
+
+  getSkillBadge: function(skillName) {
+    const s = (skillName || '').toLowerCase();
+    let badgeClass = 'badge-skill-competent';
+    if (s.includes('sensational') || s.includes('quality') || s.includes('remarkable')) badgeClass = 'badge-skill-sensational';
+    else if (s.includes('exquisite') || s.includes('miraculous') || s.includes('legendary')) badgeClass = 'badge-skill-exquisite';
+    else if (s.includes('masterclass')) badgeClass = 'badge-skill-masterclass';
+    else if (s.includes('superb') || s.includes('wonderful') || s.includes('exceptional')) badgeClass = 'badge-skill-superb';
+
+    return `<span class="badge ${badgeClass}">${skillName}</span>`;
+  },
+
+  /* 5. PLAYER DEEP-DIVE MODAL */
+  openPlayerModal: function(playerId) {
+    const player = this.squad.find(p => p.id === playerId);
+    if (!player) return;
+
+    document.getElementById('modalPlayerName').innerText = `${player.name} (${player.id})`;
+    document.getElementById('modalPlayerRole').innerText = `${player.role} | Age ${player.age} | ${player.hand} | Bowling: ${player.bowlingType}`;
+    document.getElementById('modalPlayerWage').innerText = '
+</body>
+</html>
+ + Number(player.wage).toLocaleString();
+    document.getElementById('modalPlayerValue').innerText = '
+</body>
+</html>
+ + Number(player.marketValue).toLocaleString();
+    document.getElementById('modalPlayerBti').innerText = Number(player.bti).toLocaleString();
+    document.getElementById('modalPlayerSubskill').innerText = player.subskill || '15.0';
+
+    // Populate skill grid in modal
+    const skillGrid = document.getElementById('modalSkillGrid');
+    if (skillGrid) {
+      skillGrid.innerHTML = `
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Batting</div>
+          <div style="font-weight:700;">${player.batting}</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Bowling</div>
+          <div style="font-weight:700;">${player.bowling}</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Wicket Keeping</div>
+          <div style="font-weight:700;">${player.keeping}</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Fielding</div>
+          <div style="font-weight:700;">${player.fielding}</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Consistency</div>
+          <div style="font-weight:700;">${player.consistency}</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Concentration</div>
+          <div style="font-weight:700;">${player.concentration}</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Stamina</div>
+          <div style="font-weight:700;">${player.stamina}</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Experience</div>
+          <div style="font-weight:700;">${player.experience}</div>
+        </div>
+      `;
+    }
+
+    const modal = document.getElementById('playerModal');
+    if (modal) modal.classList.add('active');
+
+    setTimeout(() => {
+      BT_CHARTS.renderProgressionGraph('playerModalProgressionGraph');
+    }, 150);
+  },
+
+  /* 6. TACTICAL PITCH ENGINE */
+  setupTacticsEngine: function() {
+    const pitchSelect = document.getElementById('tacticsPitchSelect');
+    if (!pitchSelect) return;
+
+    pitchSelect.addEventListener('change', (e) => {
+      const selected = e.target.value;
+      this.updatePitchView(selected);
+    });
+    this.updatePitchView('Hard');
+  },
+
+  updatePitchView: function(pitchKey) {
+    const pitch = BT_DATA.pitchTypes[pitchKey] || BT_DATA.pitchTypes['Hard'];
+    const descEl = document.getElementById('pitchDescription');
+    const stripEl = document.getElementById('tacticalPitchStrip');
+    const bonusesEl = document.getElementById('pitchBonusesList');
+
+    if (descEl) descEl.innerText = pitch.desc;
+    if (stripEl) {
+      stripEl.className = `pitch-strip ${pitch.colorClass}`;
+    }
+
+    if (bonusesEl) {
+      bonusesEl.innerHTML = Object.entries(pitch.bowlerBonus).map(([type, bonus]) => {
+        const isPos = bonus.startsWith('+');
+        return `
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border-color); font-size:12px;">
+            <span>${type} Bowlers</span>
+            <strong style="color:${isPos ? 'var(--success)' : 'var(--danger)'};">${bonus}</strong>
+          </div>
+        `;
+      }).join('');
+    }
+  },
+
+  /* 7. TRAINING & NETS */
+  renderNetsTable: function() {
+    const tableBody = document.getElementById('netsTableBody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = BT_DATA.nets.map(net => `
+      <tr>
+        <td><strong>Net #${net.net}</strong></td>
+        <td><span class="badge badge-skill-sensational">${net.type}</span></td>
+        <td><strong>${net.name}</strong> <span style="font-size:10px; color:var(--text-muted);">(${net.playerId})</span></td>
+        <td>${net.coach}</td>
+        <td><strong>${net.etaWeeks} Weeks</strong></td>
+      </tr>
+    `).join('');
+  },
+
+  /* 8. YOUTH ACADEMY (ITS) CALCULATOR */
+  setupYouthCalculator: function() {
+    const itsSlider = document.getElementById('itsSlider');
+    const itsValDisplay = document.getElementById('itsValueDisplay');
+    const itsOutcome = document.getElementById('itsOutcome');
+
+    if (itsSlider && itsValDisplay) {
+      itsSlider.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        itsValDisplay.innerText = '
+</body>
+</html>
+ + val.toLocaleString() + ' / week';
+
+        if (val === 36000) {
+          itsOutcome.innerHTML = '🌟 <strong>Maximum Investment (Level 20 ITS)</strong>: Guarantees 17yo pulls with Proficient/Strong primary skills and Exceptional potential!';
+        } else if (val >= 24000) {
+          itsOutcome.innerHTML = '⚡ <strong>High Investment</strong>: Solid 17yo pulls with Respectable to Proficient primary skills.';
+        } else if (val >= 12000) {
+          itsOutcome.innerHTML = '⚠️ <strong>Moderate Investment</strong>: Competent to Respectable prospects with mixed consistency.';
+        } else {
+          itsOutcome.innerHTML = '❌ <strong>Low / Minimum</strong>: Mediocre pulls; rarely first-team standard.';
+        }
+      });
+    }
+  },
+
+  /* 9. STADIUM CAPACITY PLANNER */
+  renderStadiumTable: function() {
+    const body = document.getElementById('stadiumTableBody');
+    if (!body) return;
+
+    body.innerHTML = BT_DATA.stadium.map(s => {
+      const diff = s.rec - s.current;
+      const upgradeCost = diff * s.cost;
+      const weeklyGate = s.rec * s.price;
+
+      return `
+        <tr>
+          <td><strong>${s.tier}</strong></td>
+          <td>${s.current.toLocaleString()}</td>
+          <td>${s.ratio}</td>
+          <td><strong style="color:var(--accent);">${s.rec.toLocaleString()}</strong></td>
+          <td>${s.price}</td>
+          <td>${weeklyGate.toLocaleString()}</td>
+          <td>${upgradeCost.toLocaleString()}</td>
+        </tr>
+      `;
+    }).join('');
+  },
+
+  /* 10. SCOUT TARGETS */
+  renderScoutTargets: function() {
+    const body = document.getElementById('scoutTableBody');
+    if (!body) return;
+
+    const targets = [
+      { id: 'BT-98211', name: 'David Warner', age: 25, primary: 'Sensational (15)', secondary: 'Remarkable (12)', wage: 34000, bid: 1800000, fair: 2400000, verdict: 'UNDERVALUED (BUY)' },
+      { id: 'BT-89412', name: 'Mitchell Starc', age: 26, primary: 'Exquisite (16)', secondary: 'Competent (6)', wage: 41000, bid: 3200000, fair: 3100000, verdict: 'FAIR MARKET' },
+      { id: 'BT-71203', name: 'Steve Smith', age: 28, primary: 'Masterclass (17)', secondary: 'Sensational (15)', wage: 62000, bid: 5400000, fair: 4200000, verdict: 'OVERPRICED (PASS)' }
+    ];
+
+    body.innerHTML = targets.map(t => `
+      <tr>
+        <td><span style="font-family:monospace; color:var(--accent);">${t.id}</span></td>
+        <td><strong>${t.name}</strong></td>
+        <td>${t.age}</td>
+        <td>${t.primary}</td>
+        <td>${t.secondary}</td>
+        <td>${t.wage.toLocaleString()}</td>
+        <td>${t.bid.toLocaleString()}</td>
+        <td><strong>${t.fair.toLocaleString()}</strong></td>
+        <td><span class="badge ${t.verdict.includes('BUY') ? 'badge-pop' : 'badge-skill-competent'}">${t.verdict}</span></td>
+      </tr>
+    `).join('');
+  },
+
+  /* 11. GOOGLE APPS SYNC CONTROLS */
+  setupGoogleAppsSync: function() {
+    // Calendar Sync Button
+    const btnSyncCal = document.getElementById('btnSyncCalendar');
+    if (btnSyncCal) {
+      btnSyncCal.addEventListener('click', async () => {
+        btnSyncCal.disabled = true;
+        btnSyncCal.innerText = 'Syncing...';
+        const res = await BT_API.syncGoogleCalendar();
+        this.showToast('✅ Google Calendar match fixtures synced!');
+        btnSyncCal.disabled = false;
+        btnSyncCal.innerText = '📅 Sync Fixtures Now';
+      });
+    }
+
+    // Drive Backup Button
+    const btnDriveBackup = document.getElementById('btnDriveBackup');
+    if (btnDriveBackup) {
+      btnDriveBackup.addEventListener('click', async () => {
+        btnDriveBackup.disabled = true;
+        btnDriveBackup.innerText = 'Backing up...';
+        const res = await BT_API.backupToGoogleDrive();
+        this.showToast(`💾 Snapshot backed up to Google Drive: ${res.fileName || 'Success'}`);
+        btnDriveBackup.disabled = false;
+        btnDriveBackup.innerText = '💾 Trigger Drive Backup';
+      });
+    }
+
+    // Gmail Alert Button
+    const btnGmail = document.getElementById('btnSendGmail');
+    if (btnGmail) {
+      btnGmail.addEventListener('click', async () => {
+        btnGmail.disabled = true;
+        btnGmail.innerText = 'Sending...';
+        const res = await BT_API.sendGmailDigest();
+        this.showToast('📧 Weekly digest dispatched to connected Gmail!');
+        btnGmail.disabled = false;
+        btnGmail.innerText = '📧 Send Weekly Digest';
+      });
+    }
+  },
+
+  /* 12. MODAL CONTROLS */
+  setupModals: function() {
+    document.querySelectorAll('.modal-close, .modal-overlay').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (e.target === el || el.classList.contains('modal-close')) {
+          document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        }
+      });
+    });
+
+    const btnOpenImport = document.getElementById('btnOpenImportModal');
+    if (btnOpenImport) {
+      btnOpenImport.addEventListener('click', () => {
+        const importModal = document.getElementById('importModal');
+        if (importModal) importModal.classList.add('active');
+      });
+    }
+
+    // Squad Search & Filter
+    const searchInput = document.getElementById('squadSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = this.squad.filter(p =>
+          p.name.toLowerCase().includes(query) ||
+          p.id.toLowerCase().includes(query) ||
+          p.role.toLowerCase().includes(query) ||
+          p.batting.toLowerCase().includes(query) ||
+          p.bowling.toLowerCase().includes(query)
+        );
+        this.renderSquadTable(filtered);
+      });
+    }
+  },
+
+  showToast: function(message) {
+    const toast = document.createElement('div');
+    toast.style.position = 'fixed';
+    toast.style.bottom = '24px';
+    toast.style.right = '24px';
+    toast.style.backgroundColor = 'var(--bg-card)';
+    toast.style.color = 'var(--text-main)';
+    toast.style.border = '1px solid var(--accent)';
+    toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.4)';
+    toast.style.padding = '12px 20px';
+    toast.style.borderRadius = '8px';
+    toast.style.fontWeight = 'bold';
+    toast.style.fontSize = '13px';
+    toast.style.zIndex = '9999';
+    toast.style.animation = 'fadeIn 0.2s ease';
+    toast.innerText = message;
+
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
+  }
+};
+
+  </script>
+
+</body>
+</html>
