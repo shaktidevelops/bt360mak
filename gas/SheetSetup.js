@@ -1,46 +1,48 @@
 /**
  * BT360MAK - SheetSetup.js
- * Formats, designs, and initializes all 10 Google Sheet tabs with professional styling,
- * formulas, data validation, and conditional formatting.
+ * Formats, designs, and initializes all 10 Google Sheet tabs with:
+ * - Font: "Plus Jakarta Sans" across all sheets, headers, and cells
+ * - Strips all unused/additional columns beyond each tab's schema
+ * - Strips all unused rows to make sheets super clean and fast
+ * - Professional executive color palette (Emerald, Teal, Slate & Gold)
+ * - Number formatting, zebra striping, and cell formulas
  */
 
 const SheetSetup = {
-  // Color Palette for Sheets (Pitch Green & Executive Dark)
+  // Executive Color Palette
   PALETTE: {
     HEADER_BG: '#064e3b',       // Deep Forest Emerald
     HEADER_TEXT: '#ffffff',     // Crisp White
     SUBHEADER_BG: '#0f766e',    // Teal Dark
+    SUBHEADER_TEXT: '#ffffff',
     ZEBRA_LIGHT: '#f8fafc',     // Very Light Slate
-    ACCENT_BORDER: '#cbd5e1',   // Slate Border
+    BORDER_COLOR: '#e2e8f0',    // Soft Slate Border
     HIGHLIGHT_GOLD: '#fef08a',  // Subtle Gold
-    POSITIVE_BG: '#dcfce7',     // Soft Green
-    POSITIVE_TEXT: '#166534',
-    WARNING_BG: '#fef3c7',      // Soft Yellow
-    WARNING_TEXT: '#92400e',
-    NEGATIVE_BG: '#fee2e2',     // Soft Red
-    NEGATIVE_TEXT: '#991b1b'
+    TEXT_MAIN: '#0f172a',       // Deep Slate
+    TEXT_MUTED: '#64748b'
   },
 
   setupAllSheets: function() {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) throw new Error('Spreadsheet could not be accessed with ID: ' + CONFIG.SHEET_ID);
 
-    this.createOrClearTab(ss, CONFIG.TABS.DASHBOARD, this.buildDashboardTab);
-    this.createOrClearTab(ss, CONFIG.TABS.SQUAD, this.buildSquadTab);
-    this.createOrClearTab(ss, CONFIG.TABS.TRAINING, this.buildTrainingTab);
-    this.createOrClearTab(ss, CONFIG.TABS.NETS, this.buildNetsTab);
-    this.createOrClearTab(ss, CONFIG.TABS.MATCHES, this.buildMatchesTab);
-    this.createOrClearTab(ss, CONFIG.TABS.TACTICS, this.buildTacticsTab);
-    this.createOrClearTab(ss, CONFIG.TABS.FINANCES, this.buildFinancesTab);
-    this.createOrClearTab(ss, CONFIG.TABS.STADIUM, this.buildStadiumTab);
-    this.createOrClearTab(ss, CONFIG.TABS.SCOUTS, this.buildScoutsTab);
-    this.createOrClearTab(ss, CONFIG.TABS.SETTINGS, this.buildSettingsTab);
+    this.createOrFormatTab(ss, CONFIG.TABS.DASHBOARD, 8, 30, this.buildDashboardTab);
+    this.createOrFormatTab(ss, CONFIG.TABS.SQUAD, 22, 50, this.buildSquadTab);
+    this.createOrFormatTab(ss, CONFIG.TABS.TRAINING, 10, 50, this.buildTrainingTab);
+    this.createOrFormatTab(ss, CONFIG.TABS.NETS, 7, 20, this.buildNetsTab);
+    this.createOrFormatTab(ss, CONFIG.TABS.MATCHES, 14, 50, this.buildMatchesTab);
+    this.createOrFormatTab(ss, CONFIG.TABS.TACTICS, 8, 30, this.buildTacticsTab);
+    this.createOrFormatTab(ss, CONFIG.TABS.FINANCES, 14, 60, this.buildFinancesTab);
+    this.createOrFormatTab(ss, CONFIG.TABS.STADIUM, 8, 20, this.buildStadiumTab);
+    this.createOrFormatTab(ss, CONFIG.TABS.SCOUTS, 10, 35, this.buildScoutsTab);
+    this.createOrFormatTab(ss, CONFIG.TABS.SETTINGS, 4, 20, this.buildSettingsTab);
 
     // Set Dashboard as active
     const dash = ss.getSheetByName(CONFIG.TABS.DASHBOARD);
     if (dash) ss.setActiveSheet(dash);
   },
 
-  createOrClearTab: function(ss, tabName, builderFunction) {
+  createOrFormatTab: function(ss, tabName, maxCols, maxRows, builderFunction) {
     let sheet = ss.getSheetByName(tabName);
     if (!sheet) {
       sheet = ss.insertSheet(tabName);
@@ -48,12 +50,35 @@ const SheetSetup = {
       sheet.clear();
       sheet.clearFormats();
     }
-    // Remove default grid lines style if desired, or keep clean grid
+
     sheet.setShowGridLines(true);
     builderFunction.call(this, sheet);
+
+    // Apply "Plus Jakarta Sans" font across all cells in the sheet
+    const dataRange = sheet.getDataRange();
+    dataRange.setFontFamily(CONFIG.FONT_FAMILY);
+
+    // Remove additional/unused columns beyond maxCols
+    this.trimGridDimensions(sheet, maxCols, maxRows);
   },
 
-  // 1. DASHBOARD TAB
+  /**
+   * Trims additional columns and excess rows so the sheet is ultra clean
+   */
+  trimGridDimensions: function(sheet, maxCols, minRows) {
+    const totalCols = sheet.getMaxColumns();
+    if (totalCols > maxCols) {
+      sheet.deleteColumns(maxCols + 1, totalCols - maxCols);
+    }
+
+    const lastDataRow = Math.max(sheet.getLastRow(), minRows);
+    const totalRows = sheet.getMaxRows();
+    if (totalRows > lastDataRow + 5) {
+      sheet.deleteRows(lastDataRow + 6, totalRows - (lastDataRow + 5));
+    }
+  },
+
+  // 1. DASHBOARD TAB (8 Columns)
   buildDashboardTab: function(sheet) {
     // Title Banner
     sheet.getRange('A1:H1').merge()
@@ -62,54 +87,62 @@ const SheetSetup = {
       .setFontColor(this.PALETTE.HEADER_TEXT)
       .setFontSize(14)
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center')
       .setVerticalAlignment('middle');
-    sheet.setRowHeight(1, 45);
+    sheet.setRowHeight(1, 48);
 
     // KPI Cards
     const kpis = [
-      ['🏆 Club Name', 'Mak Lions CC', '👥 Fan Club', '1,420 (High Flying)', '💰 Bank Balance', '=07_Financial_Ledger!R4'],
-      ['🏟️ Stadium Capacity', '=08_Stadium_Planner!B10', '🔥 Form Avg', 'Superb', '📈 Training Pops (S)', '=COUNTA(03_Training_Tracker!A4:A50)']
+      ['🏆 Club Name', 'Mak Lions CC', '👥 Fan Club', '1,420 (High Flying)', '💰 Bank Balance', '=07_Financial_Ledger!N4'],
+      ['🏟️ Stadium Capacity', '=08_Stadium_Planner!B8', '🔥 Form Avg', 'Superb', '📈 Training Pops (S)', '=COUNTA(03_Training_Tracker!A4:A50)']
     ];
 
     for (let r = 0; r < kpis.length; r++) {
       const rowIdx = 3 + (r * 2);
       for (let c = 0; c < 3; c++) {
         const colStart = 1 + (c * 3);
-        const titleCell = sheet.getRange(rowIdx, colStart, 1, 2).merge();
+        if (colStart > 8) continue;
+        const width = (c === 2) ? 2 : 3;
+
+        const titleCell = sheet.getRange(rowIdx, colStart, 1, Math.min(width, 9 - colStart)).merge();
         titleCell.setValue(kpis[r][c * 2])
           .setBackground(this.PALETTE.SUBHEADER_BG)
-          .setFontColor('#ffffff')
+          .setFontColor(this.PALETTE.SUBHEADER_TEXT)
           .setFontWeight('bold')
           .setFontSize(10)
+          .setFontFamily(CONFIG.FONT_FAMILY)
           .setHorizontalAlignment('center');
 
-        const valCell = sheet.getRange(rowIdx + 1, colStart, 1, 2).merge();
+        const valCell = sheet.getRange(rowIdx + 1, colStart, 1, Math.min(width, 9 - colStart)).merge();
         valCell.setValue(kpis[r][(c * 2) + 1])
           .setBackground(this.PALETTE.ZEBRA_LIGHT)
           .setFontWeight('bold')
-          .setFontSize(12)
+          .setFontSize(13)
+          .setFontFamily(CONFIG.FONT_FAMILY)
           .setHorizontalAlignment('center')
-          .setBorder(true, true, true, true, false, false, this.PALETTE.ACCENT_BORDER, SpreadsheetApp.BorderStyle.SOLID);
+          .setBorder(true, true, true, true, false, false, this.PALETTE.BORDER_COLOR, SpreadsheetApp.BorderStyle.SOLID);
       }
     }
 
     // Quick Squad Spotlight Header
     sheet.getRange('A8:H8').merge()
-      .setValue('🌟 Squad Spotlight & Top Performers')
+      .setValue('🌟 Squad Spotlight & Core Assets')
       .setBackground(this.PALETTE.SUBHEADER_BG)
       .setFontColor('#ffffff')
-      .setFontWeight('bold');
+      .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY);
 
     const headers = ['Player ID', 'Name', 'Age', 'Wage ($)', 'Primary Skill', 'Form', 'Fatigue', 'Market Value ($)'];
     sheet.getRange(9, 1, 1, 8).setValues([headers])
       .setBackground('#1e293b')
       .setFontColor('#ffffff')
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
-    // Sample data rows pointing to squad sheet
-    for (let i = 1; i <= 5; i++) {
+    // Formulas referencing 02_Squad_Master
+    for (let i = 1; i <= 6; i++) {
       const row = 9 + i;
       sheet.getRange(row, 1).setFormula(`=IF(02_Squad_Master!A${i+3}="","",02_Squad_Master!A${i+3})`);
       sheet.getRange(row, 2).setFormula(`=IF(02_Squad_Master!B${i+3}="","",02_Squad_Master!B${i+3})`);
@@ -122,18 +155,21 @@ const SheetSetup = {
       sheet.getRange(row, 1, 1, 8).setBackground(i % 2 === 0 ? this.PALETTE.ZEBRA_LIGHT : '#ffffff');
     }
 
-    // Set Column Widths
+    sheet.getRange(10, 4, 6, 1).setNumberFormat('$#,##0');
+    sheet.getRange(10, 8, 6, 1).setNumberFormat('$#,##0');
+
+    // Column widths
     sheet.setColumnWidth(1, 110);
     sheet.setColumnWidth(2, 170);
-    sheet.setColumnWidth(3, 80);
-    sheet.setColumnWidth(4, 110);
+    sheet.setColumnWidth(3, 75);
+    sheet.setColumnWidth(4, 115);
     sheet.setColumnWidth(5, 140);
     sheet.setColumnWidth(6, 110);
     sheet.setColumnWidth(7, 110);
-    sheet.setColumnWidth(8, 140);
+    sheet.setColumnWidth(8, 145);
   },
 
-  // 2. SQUAD MASTER TAB
+  // 2. SQUAD MASTER TAB (22 Columns)
   buildSquadTab: function(sheet) {
     sheet.getRange('A1:V1').merge()
       .setValue('🏏 02_SQUAD_MASTER - COMPLETE ROSTER & BT MEMBERSHIP ANALYTICS')
@@ -141,8 +177,9 @@ const SheetSetup = {
       .setFontColor(this.PALETTE.HEADER_TEXT)
       .setFontSize(13)
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
-    sheet.setRowHeight(1, 38);
+    sheet.setRowHeight(1, 40);
 
     const headers = [
       'Player ID', 'Player Name', 'Age', 'Wage ($)', 'Hand', 'Bowling Type',
@@ -155,17 +192,17 @@ const SheetSetup = {
       .setBackground(this.PALETTE.SUBHEADER_BG)
       .setFontColor('#ffffff')
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center')
       .setWrap(true);
-    sheet.setRowHeight(3, 32);
+    sheet.setRowHeight(3, 34);
     sheet.setFrozenRows(3);
     sheet.setFrozenColumns(2);
 
-    // Initial Sample Squad Data representing realistic Battrick players
     const sampleSquad = [
       ['BT-91024', 'Rohit Sharma', 24, 28500, 'RHB', 'None', 'Sensational', 'Feeble', 'Feeble', 'Superb', 'Remarkable', 'Wonderful', 'Superb', 'Superb', 'Revived', 'Proficient', 'Remarkable', 184500, '15.4', 'Batting (2)', 4200000, 'Opening Batsman'],
       ['BT-84920', 'Jasprit Bumrah', 23, 31200, 'RHB', 'Fast', 'Feeble', 'Sensational', 'Abysmal', 'Wonderful', 'Sensational', 'Competent', 'Superb', 'Blissful', 'Energized', 'Competent', 'Wonderful', 192000, '15.7', 'Bowling (2)', 4800000, 'Opening Strike Bowler'],
-      ['BT-77412', 'Virat Kohli', 26, 42000, 'RHB', 'RM', 'Exquisite', 'Feeble', 'Abysmal', 'Exceptional', 'Masterclass', 'Miraculous', 'Remarkable', 'Superb', 'Rested', 'Exceptional', 'Sensational', 248000, '16.2', 'None', 6500000, 'Top Order Anchor (C)'],
+      ['BT-77412', 'Virat Kohli', 26, 42000, 'RHB', 'RM', 'Exquisite', 'Feeble', 'Abysmal', 'Exceptional', 'Masterclass', 'Miraculous', 'Remarkable', 'Superb', 'Rested', 'Exceptional', 'Sensational', 248000, '16.2', 'None', 6500000, 'Anchor Batsman (C)'],
       ['BT-63201', 'Rishabh Pant', 22, 19400, 'LHB', 'None', 'Exceptional', 'Abysmal', 'Wonderful', 'Proficient', 'Proficient', 'Strong', 'Proficient', 'Superb', 'Revived', 'Respectable', 'Proficient', 132000, '14.3', 'Keeping (1)', 2900000, 'Wicketkeeper Batsman'],
       ['BT-54819', 'Ravindra Jadeja', 25, 26700, 'LHB', 'Slow (SLA)', 'Wonderful', 'Remarkable', 'Abysmal', 'Sensational', 'Exceptional', 'Exceptional', 'Exceptional', 'Superb', 'Rested', 'Proficient', 'Remarkable', 178000, '13.8', 'Fielding (1)', 3800000, 'All-Rounder'],
       ['BT-44129', 'Rashid Khan', 21, 24000, 'RHB', 'Leg Spin', 'Competent', 'Exceptional', 'Abysmal', 'Wonderful', 'Sensational', 'Remarkable', 'Remarkable', 'Blissful', 'Energized', 'Capable', 'Proficient', 165000, '14.8', 'Bowling (2)', 3700000, 'Lead Spinner']
@@ -173,25 +210,22 @@ const SheetSetup = {
 
     sheet.getRange(4, 1, sampleSquad.length, headers.length).setValues(sampleSquad);
 
-    // Apply Zebra striping and formatting
     for (let r = 4; r < 4 + sampleSquad.length; r++) {
       const bg = (r % 2 === 0) ? this.PALETTE.ZEBRA_LIGHT : '#ffffff';
       sheet.getRange(r, 1, 1, headers.length).setBackground(bg);
     }
 
-    // Number formats for currency and numbers
     sheet.getRange(4, 4, 30, 1).setNumberFormat('$#,##0');
     sheet.getRange(4, 18, 30, 1).setNumberFormat('#,##0');
     sheet.getRange(4, 21, 30, 1).setNumberFormat('$#,##0');
 
-    // Auto fit widths with sensible minimums
     for (let c = 1; c <= headers.length; c++) {
-      sheet.setColumnWidth(c, Math.max(95, sheet.getColumnWidth(c)));
+      sheet.setColumnWidth(c, Math.max(100, sheet.getColumnWidth(c)));
     }
-    sheet.setColumnWidth(2, 160);
+    sheet.setColumnWidth(2, 170);
   },
 
-  // 3. TRAINING TRACKER TAB
+  // 3. TRAINING TRACKER TAB (10 Columns)
   buildTrainingTab: function(sheet) {
     sheet.getRange('A1:J1').merge()
       .setValue('📈 03_TRAINING_TRACKER - WEEKLY SKILL POPS & SUBSKILL PREDICTIONS')
@@ -199,6 +233,7 @@ const SheetSetup = {
       .setFontColor(this.PALETTE.HEADER_TEXT)
       .setFontSize(13)
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const headers = [
@@ -210,10 +245,10 @@ const SheetSetup = {
       .setBackground(this.PALETTE.SUBHEADER_BG)
       .setFontColor('#ffffff')
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
     sheet.setFrozenRows(3);
 
-    // Sample Training Pops
     const samplePops = [
       ['2026-11-13', 'BT-91024', 'Rohit Sharma', 'Batting', 'Exceptional', 'Sensational', '15.0', 7, 'Sensational', 'YES'],
       ['2026-11-06', 'BT-84920', 'Jasprit Bumrah', 'Bowling', 'Exceptional', 'Sensational', '15.0', 6, 'Sensational', 'YES'],
@@ -223,11 +258,11 @@ const SheetSetup = {
     sheet.getRange(4, 1, samplePops.length, headers.length).setValues(samplePops);
 
     for (let c = 1; c <= headers.length; c++) {
-      sheet.setColumnWidth(c, 130);
+      sheet.setColumnWidth(c, 135);
     }
   },
 
-  // 4. NETS MATRIX TAB
+  // 4. NETS MATRIX TAB (7 Columns)
   buildNetsTab: function(sheet) {
     sheet.getRange('A1:G1').merge()
       .setValue('🎯 04_NETS_MATRIX - WEEKLY NET ALLOCATION (10 NETS TOTAL)')
@@ -235,6 +270,7 @@ const SheetSetup = {
       .setFontColor(this.PALETTE.HEADER_TEXT)
       .setFontSize(13)
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const headers = ['Net #', 'Training Type', 'Primary Trainee ID', 'Player Name', 'Coach Multiplier', 'Pops Estimated In (Wks)', 'Notes'];
@@ -242,6 +278,7 @@ const SheetSetup = {
       .setBackground(this.PALETTE.SUBHEADER_BG)
       .setFontColor('#ffffff')
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const nets = [
@@ -259,11 +296,11 @@ const SheetSetup = {
     sheet.getRange(4, 1, nets.length, headers.length).setValues(nets);
 
     for (let c = 1; c <= headers.length; c++) {
-      sheet.setColumnWidth(c, 150);
+      sheet.setColumnWidth(c, 155);
     }
   },
 
-  // 5. MATCH ARCHIVES TAB
+  // 5. MATCH ARCHIVES TAB (14 Columns)
   buildMatchesTab: function(sheet) {
     sheet.getRange('A1:N1').merge()
       .setValue('📅 05_MATCH_ARCHIVES - FIXTURES, RESULTS & MATCH RATINGS')
@@ -271,6 +308,7 @@ const SheetSetup = {
       .setFontColor(this.PALETTE.HEADER_TEXT)
       .setFontSize(13)
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const headers = [
@@ -282,6 +320,7 @@ const SheetSetup = {
       .setBackground(this.PALETTE.SUBHEADER_BG)
       .setFontColor('#ffffff')
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const sampleMatches = [
@@ -293,7 +332,7 @@ const SheetSetup = {
     for (let c = 1; c <= headers.length; c++) sheet.setColumnWidth(c, 130);
   },
 
-  // 6. LINEUP & TACTICS TAB
+  // 6. LINEUP & TACTICS TAB (8 Columns)
   buildTacticsTab: function(sheet) {
     sheet.getRange('A1:H1').merge()
       .setValue('⚔️ 06_LINEUP_TACTICS - MATCH ORDERS & PITCH SYNERGY ENGINE')
@@ -301,20 +340,22 @@ const SheetSetup = {
       .setFontColor(this.PALETTE.HEADER_TEXT)
       .setFontSize(13)
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
-    // Tactical pitch guide
     sheet.getRange('A3:H3').merge()
       .setValue('Current Selected Pitch: HARD | Predicted Bounce: High | Seam Advantage: +22% | Spin Assistance: Low')
       .setBackground('#f1f5f9')
       .setFontColor('#0f172a')
-      .setFontWeight('bold');
+      .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY);
 
     const headers = ['Batting #', 'Player ID', 'Player Name', 'Role', 'Aggression Level', 'Bowling Order', 'Max Overs', 'Field Setting'];
     sheet.getRange(5, 1, 1, headers.length).setValues([headers])
       .setBackground(this.PALETTE.SUBHEADER_BG)
       .setFontColor('#ffffff')
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const lineup = [
@@ -325,18 +366,19 @@ const SheetSetup = {
       [5, 'BT-44129', 'Rashid Khan', 'Spin Specialist', 'Moderate', '2nd Change', 10, 'Mid-Wicket'],
       [6, 'BT-84920', 'Jasprit Bumrah', 'Opening Strike Bowler', 'Defensive', '1st Bowler', 10, 'Fine Leg']
     ];
-    sheet.getRange(6, 1, 1 + lineup.length - 1, headers.length).setValues(lineup);
+    sheet.getRange(6, 1, lineup.length, headers.length).setValues(lineup);
     for (let c = 1; c <= headers.length; c++) sheet.setColumnWidth(c, 140);
   },
 
-  // 7. FINANCIAL LEDGER TAB
+  // 7. FINANCIAL LEDGER TAB (14 Columns)
   buildFinancesTab: function(sheet) {
-    sheet.getRange('A1:R1').merge()
+    sheet.getRange('A1:N1').merge()
       .setValue('💰 07_FINANCIAL_LEDGER - 52-WEEK CASHFLOW, WAGES & REVENUE PROJECTIONS')
       .setBackground(this.PALETTE.HEADER_BG)
       .setFontColor(this.PALETTE.HEADER_TEXT)
       .setFontSize(13)
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const headers = [
@@ -350,6 +392,7 @@ const SheetSetup = {
       .setBackground(this.PALETTE.SUBHEADER_BG)
       .setFontColor('#ffffff')
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
     sheet.setFrozenRows(3);
 
@@ -358,12 +401,11 @@ const SheetSetup = {
     ];
     sheet.getRange(4, 1, 1, headers.length).setValues([initialFinanceRow]);
 
-    // Apply currency formatting
     sheet.getRange(4, 3, 50, headers.length - 2).setNumberFormat('$#,##0');
     for (let c = 1; c <= headers.length; c++) sheet.setColumnWidth(c, 130);
   },
 
-  // 8. STADIUM PLANNER TAB
+  // 8. STADIUM PLANNER TAB (8 Columns)
   buildStadiumTab: function(sheet) {
     sheet.getRange('A1:H1').merge()
       .setValue('🏟️ 08_STADIUM_PLANNER - OPTIMAL GROUND CAPACITY & TICKET PRICING ENGINE')
@@ -371,6 +413,7 @@ const SheetSetup = {
       .setFontColor(this.PALETTE.HEADER_TEXT)
       .setFontSize(13)
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const headers = [
@@ -381,6 +424,7 @@ const SheetSetup = {
       .setBackground(this.PALETTE.SUBHEADER_BG)
       .setFontColor('#ffffff')
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const tiers = [
@@ -397,7 +441,7 @@ const SheetSetup = {
     for (let c = 1; c <= headers.length; c++) sheet.setColumnWidth(c, 150);
   },
 
-  // 9. SCOUT & TRANSFER TAB
+  // 9. SCOUT & TRANSFER TAB (10 Columns)
   buildScoutsTab: function(sheet) {
     sheet.getRange('A1:J1').merge()
       .setValue('🔍 09_SCOUT_TRANSFER - TRANSFER MARKET RADAR & PLAYER VALUATION ENGINE')
@@ -405,6 +449,7 @@ const SheetSetup = {
       .setFontColor(this.PALETTE.HEADER_TEXT)
       .setFontSize(13)
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const headers = [
@@ -415,6 +460,7 @@ const SheetSetup = {
       .setBackground(this.PALETTE.SUBHEADER_BG)
       .setFontColor('#ffffff')
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const sampleTargets = [
@@ -426,7 +472,7 @@ const SheetSetup = {
     for (let c = 1; c <= headers.length; c++) sheet.setColumnWidth(c, 140);
   },
 
-  // 10. GOOGLE SYNC & SYSTEM CONFIG TAB
+  // 10. GOOGLE SYNC & SYSTEM CONFIG TAB (4 Columns)
   buildSettingsTab: function(sheet) {
     sheet.getRange('A1:D1').merge()
       .setValue('⚙️ 10_GOOGLE_SYNC_CONFIG - SYSTEM PREFERENCES & GOOGLE APPS INTEGRATION')
@@ -434,6 +480,7 @@ const SheetSetup = {
       .setFontColor(this.PALETTE.HEADER_TEXT)
       .setFontSize(13)
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const headers = ['Configuration Key', 'Value', 'Status / Description', 'Last Updated'];
@@ -441,6 +488,7 @@ const SheetSetup = {
       .setBackground(this.PALETTE.SUBHEADER_BG)
       .setFontColor('#ffffff')
       .setFontWeight('bold')
+      .setFontFamily(CONFIG.FONT_FAMILY)
       .setHorizontalAlignment('center');
 
     const settings = [
@@ -451,8 +499,8 @@ const SheetSetup = {
       ['GOOGLE_DRIVE_FOLDER_NAME', 'BT360MAK_Backups', 'Target Drive folder for automated JSON/CSV dumps', 'Ready'],
       ['TRAINING_POP_DAY', 'Friday', 'Weekly training calculation cycle', 'Weekly 08:00 AM IST'],
       ['FINANCIAL_UPDATE_DAY', 'Sunday', 'Weekly sponsor & wage deduction cycle', 'Weekly 06:00 AM IST'],
-      ['ACTIVE_THEME', 'Emerald & Gold', 'UI Theme default (Switchable in Web App)', 'Active'],
-      ['WEB_APP_URL', ScriptApp.getService().getUrl() || 'Deploy as Web App to generate URL', 'REST & HTML Service endpoint', 'Ready']
+      ['FONT_FAMILY', 'Plus Jakarta Sans', 'System-wide typography', 'Enforced'],
+      ['ACTIVE_THEME', 'Emerald & Gold', 'UI Theme default (Switchable in Web App)', 'Active']
     ];
     sheet.getRange(4, 1, settings.length, headers.length).setValues(settings);
 

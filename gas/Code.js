@@ -9,6 +9,7 @@ const CONFIG = {
   SHEET_ID: '1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E',
   SCRIPT_ID: '1GuCVl28B7I-KJ9o-pdYJl6MGaX0FYqTH9u5yzOMuoQpXBLqW2ULLQxpS',
   APP_NAME: 'BT360MAK - Battrick Premium Hub',
+  FONT_FAMILY: 'Plus Jakarta Sans',
   VERSION: '1.0.0',
   TABS: {
     DASHBOARD: '01_Dashboard',
@@ -25,27 +26,45 @@ const CONFIG = {
 };
 
 /**
+ * Universal Spreadsheet Resolver (Supports both Container-Bound & Standalone Scripts)
+ */
+function getMasterSpreadsheet() {
+  try {
+    if (CONFIG.SHEET_ID) {
+      return SpreadsheetApp.openById(CONFIG.SHEET_ID);
+    }
+  } catch (err) {
+    Logger.log('Could not open spreadsheet by ID, falling back to active: ' + err.toString());
+  }
+  return SpreadsheetApp.getActiveSpreadsheet();
+}
+
+/**
  * Custom UI Menu when opening the Google Sheet
  */
 function onOpen() {
-  const ui = SpreadsheetApp.getUi();
-  ui.createMenu('🏏 BT360MAK Manager')
-    .addItem('⚡ Format & Initialize All Sheets', 'initializeSheetStructure')
-    .addSeparator()
-    .addItem('🔄 Sync / Import Battrick Club Data', 'triggerBattrickSync')
-    .addItem('📈 Calculate Training Pops & Subskills', 'detectTrainingPops')
-    .addItem('🏟️ Recalculate Optimal Stadium Capacity', 'recalculateStadiumOptimization')
-    .addSeparator()
-    .addSubMenu(ui.createMenu('🌐 Google Apps Integrations')
-      .addItem('📅 Sync Fixtures to Google Calendar', 'syncFixturesToGoogleCalendar')
-      .addItem('💾 Backup Snapshot to Google Drive', 'backupClubDataToDrive')
-      .addItem('📧 Send Match & Pop Digest via Gmail', 'sendWeeklyDigestEmail')
-      .addItem('📄 Export Executive Report to Google Docs', 'exportSeasonReportToDocs')
-    )
-    .addSeparator()
-    .addItem('⚙️ Install Automatic Background Triggers', 'installAutomatedTriggers')
-    .addItem('🚀 Open Web App Dashboard', 'openWebAppModal')
-    .addToUi();
+  try {
+    const ui = SpreadsheetApp.getUi();
+    ui.createMenu('🏏 BT360MAK Manager')
+      .addItem('⚡ Format & Initialize All Sheets (Plus Jakarta Sans)', 'initializeSheetStructure')
+      .addSeparator()
+      .addItem('🔄 Sync / Import Battrick Club Data', 'triggerBattrickSync')
+      .addItem('📈 Calculate Training Pops & Subskills', 'detectTrainingPops')
+      .addItem('🏟️ Recalculate Optimal Stadium Capacity', 'recalculateStadiumOptimization')
+      .addSeparator()
+      .addSubMenu(ui.createMenu('🌐 Google Apps Integrations')
+        .addItem('📅 Sync Fixtures to Google Calendar', 'syncFixturesToGoogleCalendar')
+        .addItem('💾 Backup Snapshot to Google Drive', 'backupClubDataToDrive')
+        .addItem('📧 Send Match & Pop Digest via Gmail', 'sendWeeklyDigestEmail')
+        .addItem('📄 Export Executive Report to Google Docs', 'exportSeasonReportToDocs')
+      )
+      .addSeparator()
+      .addItem('⚙️ Install Automatic Background Triggers', 'installAutomatedTriggers')
+      .addItem('🚀 Open Web App Dashboard', 'openWebAppModal')
+      .addToUi();
+  } catch (e) {
+    Logger.log('Standalone script execution without active UI: ' + e.toString());
+  }
 }
 
 /**
@@ -143,11 +162,14 @@ function handleApiGet(e) {
 }
 
 /**
- * Initialize Google Sheet tabs and formatting
+ * Initialize Google Sheet tabs, typography, and formatting
  */
 function initializeSheetStructure() {
   SheetSetup.setupAllSheets();
-  SpreadsheetApp.getActiveSpreadsheet().toast('✅ BT360MAK Sheets successfully formatted!', 'Ready', 5);
+  const ss = getMasterSpreadsheet();
+  if (ss) {
+    ss.toast('✅ BT360MAK Sheets successfully formatted with Plus Jakarta Sans & columns trimmed!', 'Ready', 6);
+  }
 }
 
 /**
@@ -195,17 +217,20 @@ function exportSeasonReportToDocs() {
  */
 function openWebAppModal() {
   const html = `
-    <div style="font-family:sans-serif; padding:15px; color:#1e293b;">
+    <div style="font-family:'Plus Jakarta Sans',sans-serif; padding:18px; color:#1e293b;">
       <h2 style="color:#0f766e; margin-top:0;">🏏 BT360MAK Web Dashboard</h2>
-      <p>Your Battrick Premium Intelligence Center is live.</p>
-      <p>Deploy as Web App in Apps Script (Deploy > New Deployment > Web App) or run locally.</p>
+      <p>Your Battrick Premium Intelligence Center is connected.</p>
       <div style="margin:20px 0;">
         <a href="${ScriptApp.getService().getUrl() || '#'}" target="_blank" 
            style="background:#0f766e; color:#fff; padding:10px 18px; text-decoration:none; border-radius:6px; font-weight:bold;">
            🚀 Launch Web Dashboard
         </a>
       </div>
-      <p style="font-size:12px; color:#64748b;">Script ID: ${CONFIG.SCRIPT_ID}<br>Sheet ID: ${CONFIG.SHEET_ID}</p>
+      <p style="font-size:12px; color:#64748b;">
+        Script ID: ${CONFIG.SCRIPT_ID}<br>
+        Sheet ID: ${CONFIG.SHEET_ID}<br>
+        Typography: Plus Jakarta Sans
+      </p>
     </div>
   `;
   SpreadsheetApp.getUi().showModalDialog(HtmlService.createHtmlOutput(html).setWidth(480).setHeight(280), 'BT360MAK Web App');
@@ -215,7 +240,6 @@ function openWebAppModal() {
  * Background Automation Cron Triggers
  */
 function installAutomatedTriggers() {
-  // Clear old triggers
   const triggers = ScriptApp.getProjectTriggers();
   for (let i = 0; i < triggers.length; i++) {
     ScriptApp.deleteTrigger(triggers[i]);
@@ -242,7 +266,10 @@ function installAutomatedTriggers() {
     .atHour(2)
     .create();
 
-  SpreadsheetApp.getActiveSpreadsheet().toast('⏰ Automated Weekly Cron Triggers successfully installed!', 'Automations Active', 6);
+  const ss = getMasterSpreadsheet();
+  if (ss) {
+    ss.toast('⏰ Automated Weekly Cron Triggers successfully installed!', 'Automations Active', 6);
+  }
 }
 
 function onFridayTrainingTrigger() {

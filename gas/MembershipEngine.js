@@ -23,7 +23,8 @@ const MembershipEngine = {
    * Detects weekly skill increases (Pops) by comparing latest squad against history
    */
   detectPops: function() {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) return;
     const squadSheet = ss.getSheetByName(CONFIG.TABS.SQUAD);
     const trainSheet = ss.getSheetByName(CONFIG.TABS.TRAINING);
     if (!squadSheet || !trainSheet) return;
@@ -48,7 +49,8 @@ const MembershipEngine = {
    * Calculate optimal stadium distribution based on division and fan club size
    */
   calculateOptimalGround: function() {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) return;
     const stadiumSheet = ss.getSheetByName(CONFIG.TABS.STADIUM);
     const dashSheet = ss.getSheetByName(CONFIG.TABS.DASHBOARD);
     if (!stadiumSheet) return;
@@ -122,7 +124,8 @@ const MembershipEngine = {
   },
 
   saveTacticalOrders: function(orders) {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) return { success: false, message: 'Spreadsheet not found' };
     const sheet = ss.getSheetByName(CONFIG.TABS.TACTICS);
     if (!sheet) return { success: false, message: 'Tactics sheet not found' };
 
@@ -135,7 +138,8 @@ const MembershipEngine = {
   },
 
   updateNetsAllocation: function(netsArray) {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) return { success: false, message: 'Spreadsheet not found' };
     const sheet = ss.getSheetByName(CONFIG.TABS.NETS);
     if (!sheet) return { success: false, message: 'Nets sheet not found' };
 
@@ -154,7 +158,8 @@ const MembershipEngine = {
   },
 
   getTrainingLog: function() {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) return [];
     const sheet = ss.getSheetByName(CONFIG.TABS.TRAINING);
     if (!sheet) return [];
     const lastRow = sheet.getLastRow();
@@ -163,7 +168,8 @@ const MembershipEngine = {
   },
 
   getFinancialRecords: function() {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) return [];
     const sheet = ss.getSheetByName(CONFIG.TABS.FINANCES);
     if (!sheet) return [];
     const lastRow = sheet.getLastRow();
@@ -172,14 +178,16 @@ const MembershipEngine = {
   },
 
   getStadiumPlannerData: function() {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) return [];
     const sheet = ss.getSheetByName(CONFIG.TABS.STADIUM);
     if (!sheet) return [];
     return sheet.getRange(4, 1, 5, 8).getValues();
   },
 
   recordWeeklyFinances: function() {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) return;
     const sheet = ss.getSheetByName(CONFIG.TABS.FINANCES);
     if (!sheet) return;
 

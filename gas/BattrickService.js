@@ -36,7 +36,8 @@ const BattrickService = {
   },
 
   getSquadFromSheet: function() {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) return [];
     const sheet = ss.getSheetByName(CONFIG.TABS.SQUAD);
     if (!sheet) return [];
 
@@ -78,8 +79,8 @@ const BattrickService = {
   },
 
   getClubSummary: function() {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const dashSheet = ss.getSheetByName(CONFIG.TABS.DASHBOARD);
+    const ss = getMasterSpreadsheet();
+    const dashSheet = ss ? ss.getSheetByName(CONFIG.TABS.DASHBOARD) : null;
     const squad = this.getSquadFromSheet();
 
     let totalWage = 0;
@@ -113,7 +114,8 @@ const BattrickService = {
       return { success: false, message: 'Squad data is empty or invalid' };
     }
 
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) return { success: false, message: 'Spreadsheet inaccessible' };
     const sheet = ss.getSheetByName(CONFIG.TABS.SQUAD);
     if (!sheet) SheetSetup.setupAllSheets();
 
@@ -167,8 +169,8 @@ const BattrickService = {
   },
 
   fetchAndSyncClubData: function() {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const configSheet = ss.getSheetByName(CONFIG.TABS.SETTINGS);
+    const ss = getMasterSpreadsheet();
+    const configSheet = ss ? ss.getSheetByName(CONFIG.TABS.SETTINGS) : null;
     const clubId = configSheet ? configSheet.getRange('B4').getValue() : '';
     const securityCode = configSheet ? configSheet.getRange('B5').getValue() : '';
 

@@ -13,8 +13,8 @@ const GoogleAppsConnector = {
    */
   syncCalendarEvents: function(fixturesArray) {
     try {
-      const ss = SpreadsheetApp.getActiveSpreadsheet();
-      const configSheet = ss.getSheetByName(CONFIG.TABS.SETTINGS);
+      const ss = getMasterSpreadsheet();
+      const configSheet = ss ? ss.getSheetByName(CONFIG.TABS.SETTINGS) : null;
       const calendarId = configSheet ? configSheet.getRange('B6').getValue() : 'primary';
       const cal = CalendarApp.getCalendarById(calendarId) || CalendarApp.getDefaultCalendar();
 
@@ -107,8 +107,8 @@ const GoogleAppsConnector = {
    */
   sendWeeklyDigest: function() {
     try {
-      const ss = SpreadsheetApp.getActiveSpreadsheet();
-      const configSheet = ss.getSheetByName(CONFIG.TABS.SETTINGS);
+      const ss = getMasterSpreadsheet();
+      const configSheet = ss ? ss.getSheetByName(CONFIG.TABS.SETTINGS) : null;
       const recipient = configSheet ? configSheet.getRange('B7').getValue() : Session.getActiveUser().getEmail();
 
       if (!recipient) return { success: false, message: 'No recipient email configured' };
@@ -150,7 +150,7 @@ const GoogleAppsConnector = {
             </p>
 
             <div style="margin-top:25px; text-align:center;">
-              <a href="${SpreadsheetApp.getActiveSpreadsheet().getUrl()}" style="background:#0f766e; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">
+              <a href="https://docs.google.com/spreadsheets/d/1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E/edit" style="background:#0f766e; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block;">
                 Open BT360MAK Google Sheet
               </a>
             </div>
@@ -233,7 +233,8 @@ const GoogleAppsConnector = {
   },
 
   getUpcomingMatchesFromSheet: function() {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getMasterSpreadsheet();
+    if (!ss) return [];
     const sheet = ss.getSheetByName(CONFIG.TABS.MATCHES);
     if (!sheet) return [];
 
