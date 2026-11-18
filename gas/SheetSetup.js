@@ -22,9 +22,9 @@ const SheetSetup = {
     TEXT_MUTED: '#64748b'
   },
 
-  setupAllSheets: function() {
-    const ss = getMasterSpreadsheet();
-    if (!ss) throw new Error('Spreadsheet could not be accessed with ID: ' + CONFIG.SHEET_ID);
+  setupAllSheets: function(targetSs) {
+    const ss = targetSs || getMasterSpreadsheet();
+    if (!ss) throw new Error('Spreadsheet could not be accessed');
 
     this.createOrFormatTab(ss, CONFIG.TABS.DASHBOARD, 8, 30, this.buildDashboardTab);
     this.createOrFormatTab(ss, CONFIG.TABS.SQUAD, 22, 50, this.buildSquadTab);
