@@ -1,9 +1,9 @@
 # 🏏 BT360MAK - Battrick Sovereign Intelligence & SaaS Manager Suite
 
 > **GitHub Repository:** [https://github.com/shaktidevelops/bt360mak](https://github.com/shaktidevelops/bt360mak)  
-> **Google Apps Script ID:** `1GuCVl28B7I-KJ9o-pdYJl6MGaX0FYqTH9u5yzOMuoQpXBLqW2ULLQxpS`  
-> **Google Sheet Master Database:** [1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E](https://docs.google.com/spreadsheets/d/1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E/edit)  
-> **Active Web App Portal:** [https://script.google.com/macros/s/AKfycby_56P0m_Mij_N-zz0K44NntJNyts_8bUtl1VoPZQhlSnUFsCOq-lh33A3B9b9npmA/exec](https://script.google.com/macros/s/AKfycby_56P0m_Mij_N-zz0K44NntJNyts_8bUtl1VoPZQhlSnUFsCOq-lh33A3B9b9npmA/exec)
+> **Supabase Project:** `xyvezmzsbmoqxepwblfq` ([https://xyvezmzsbmoqxepwblfq.supabase.co](https://xyvezmzsbmoqxepwblfq.supabase.co))  
+> **Production Frontend:** Hosted on GitHub Pages via automated GitHub Actions CI/CD  
+> **Legacy Google Sheet Database:** [1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E](https://docs.google.com/spreadsheets/d/1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E/edit)
 
 ---
 
@@ -23,70 +23,42 @@
 
 ---
 
-## 🏗️ Architecture & Business Model: Subscriber Isolation (Model B)
-
-**BT360MAK** operates as a commercial-grade SaaS intelligence tool.
-Subscribers access only the high-performance frontend portal without any visibility or access to the underlying Apps Script backend algorithms, pricing models, or sheet formulas.
+## 🚀 Modern v2.0 Architecture: Supabase PostgreSQL + GitHub Pages
 
 ```
  ┌─────────────────────────────────────────────────────────────────┐
- │                   BT360MAK SOVEREIGN FRONTEND                   │
- │  • Single Signature Theme: Sovereign Turf & Gold                │
- │  • Sticky Header (Live Ticking Server Clock & Financial Ticker) │
- │  • Structured 4-Column Luxury Footer                            │
- │  • Multi-Page Ingestion Studio (squad, finances, ground, etc.)  │
- │  • 10 Live Consoles: Command Center, Squad, Tactics, Nets, etc. │
- └────────────────────────────────▲────────────────────────────────┘
-                                  │ HTTPS REST / google.script.run
+ │               BT360MAK SOVEREIGN REACT 19 FRONTEND              │
+ │  • Built with Vite + TypeScript + Tailwind CSS v4 + Lucide      │
+ │  • Static Edge Deployment via GitHub Pages & GitHub Actions     │
+ │  • Real-time Clubhouse Consoles: Dashboard, Squad, Tactics,     │
+ │    10-Net Training, 52-Week Finances & 10k Stadium Planner      │
+ └────────────────────────────────┬────────────────────────────────┘
+                                  │ HTTPS REST / Realtime WebSockets
  ┌────────────────────────────────▼────────────────────────────────┐
- │             GOOGLE APPS SCRIPT BACKEND (V8 ENGINE)              │
- │  • Code.js                     • SheetSetup.js (10 Tabs)        │
- │  • BattrickService.js          • MembershipEngine.js            │
- │  • GoogleAppsConnector.js                                       │
- └────────▲────────────────▲────────────────▲────────────────▲─────┘
-          │                │                │                │
- ┌────────▼────────┐ ┌─────▼──────┐ ┌───────▼──────┐ ┌───────▼──────┐
- │  GOOGLE SHEETS  │ │   GOOGLE   │ │ GOOGLE DRIVE │ │   GMAIL &    │
- │ Master Database │ │  CALENDAR  │ │ Auto Backups │ │     DOCS     │
- │  (10 Pro Tabs)  │ │  Fixtures  │ │  JSON Dumps  │ │   Digests    │
- └─────────────────┘ └────────────┘ └──────────────┘ └──────────────┘
+ │                 SUPABASE POSTGRESQL DATABASE                    │
+ │  • Row Level Security (RLS) for Model B Subscriber Isolation    │
+ │  • Relational Schema: clubs, players, training_logs, nets,      │
+ │    matches, tactics_lineup, financial_ledger, stadium_tiers     │
+ │  • High-Speed Performance Indexes & Generated P&L Columns       │
+ └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🎨 Single Signature Theme: Sovereign Turf & Gold
-- **Obsidian Turf Palette**: Deep pitch background (`#05100c`) with ambient emerald glows (`#10b981`), trophy gold highlights (`#f59e0b`), and cherry seam red accents (`#f43f5e`).
-- **Glassmorphic Cards**: Translucent cards (`rgba(13, 34, 28, 0.78)`) with 1px luminous borders, smooth hover lifts, and glowing status markers.
-- **Typography Standards**: Primary text in **Plus Jakarta Sans** (weights 300 to 800) with currencies, ratings, and IDs in **JetBrains Mono**.
+## ⚡ 1-Click Database Setup (Supabase)
+
+To initialize your Supabase PostgreSQL database:
+1. Open the **SQL Editor** in your [Supabase Dashboard](https://supabase.com/dashboard/project/xyvezmzsbmoqxepwblfq/sql).
+2. Open [`supabase/COMPLETE_SETUP.sql`](supabase/COMPLETE_SETUP.sql) in this repository.
+3. Paste and click **Run**.
+4. This instantly creates all 9 relational tables, indexes, Row Level Security policies, and seeds all 14 Somnath Super Devs players and club statistics.
 
 ---
 
-## ⚡ Multi-Page Ingestion Studio
-The Ingestion Studio accepts ANY raw HTML page from Battrick:
-1. `squad.asp`: Extracts all 14+ players, ages, wages, BTI, 11 skills, bowling styles, and roles.
-2. `finances.asp`: Extracts weekly turnover, gate receipts, sponsor payments, wages, upkeep, and bank balance.
-3. `ground.asp`: Extracts stadium capacity by tier (Standing, Uncovered, Covered, Members) and pitch condition.
-4. `fixtures.asp` & `matchinfo.asp`: Extracts fixture schedules, match results, and detailed batting/bowling scorecards.
-5. `nets.asp`: Extracts 10-net coaching assignments and pop countdowns.
-
----
-
-## 🛠️ Step-by-Step Setup & Troubleshooting
-
-### 1. Enabling GitHub Pages (Free Hosting)
-If GitHub displays *"Upgrade or make this repository public to enable Pages"*:
-1. Go to repository **Settings** -> **General**.
-2. Scroll to the **Danger Zone** at the bottom.
-3. Click **Change repository visibility** -> Select **Make public**.
-4. Go to **Pages** in Settings -> Set Source to Branch: `main`, Folder: `/docs` -> Click **Save**.
-5. Your portal will be live at: `https://shaktidevelops.github.io/bt360mak/`!
-
-### 2. Google Apps Script 1-Time Authorization
-If you see *"Google hasn't verified this app"*:
-1. Click the small link **"Advanced"**.
-2. Click **"Go to bt360mak (unsafe)"**.
-3. Click **"Allow"**.
-4. Your script is now fully authorized to synchronize Google Sheets, Drive, and Calendar.
+## 🎨 Signature Theme: Sovereign Turf & Gold
+- **Obsidian Turf Palette**: Deep pitch background (`#041512`) with ambient emerald glows (`#10b981`), trophy gold highlights (`#f59e0b`), and clean slate borders.
+- **Glassmorphic Cards**: Translucent consoles with 1px luminous borders, smooth hover lifts, and glowing status beacons.
+- **Typography Standards**: Primary text in **Plus Jakarta Sans** with currencies, ratings, and IDs in **JetBrains Mono**.
 
 ---
 
@@ -94,22 +66,31 @@ If you see *"Google hasn't verified this app"*:
 
 ```
 bt360mak/
-├── docs/                          # GitHub Pages Root & Documentation
-│   ├── index.html                 # Production Web App Portal
-│   ├── css/                       # main.css & themes.css
-│   ├── js/                        # app.js, battrickData.js, api.js, charts.js
-│   └── conversations/             # Full conversation transcripts & logs
-│       ├── transcript.jsonl       # JSONL conversation logs
-│       └── SESSION_TRANSCRIPT.md  # Detailed human-readable change log
-├── frontend/                      # Development Source Code (Mirrored to docs/)
-├── gas/                           # Google Apps Script Backend Project
-│   ├── appsscript.json            # Manifest & Scopes
-│   ├── Code.js                    # Web App controller & triggers
-│   ├── SheetSetup.js              # 10-Tab sheet formatting & formulas
-│   ├── BattrickService.js         # Multi-page HTML / XML parser
-│   ├── MembershipEngine.js        # Valuation, tactics & pitch formulas
-│   ├── GoogleAppsConnector.js     # Sheets, Drive, Calendar, Gmail, Docs
-│   └── index.html                 # Bundled standalone web application
-├── .clasp.json                    # Google Clasp Script binding configuration
+├── .github/workflows/deploy.yml   # Automated GitHub Pages CI/CD workflow
+├── supabase/                      # Database Schema & Migrations
+│   ├── COMPLETE_SETUP.sql         # Single 1-Click Setup Script (DDL + RLS + Seed)
+│   ├── migrations/                # Schema DDL & Row Level Security policies
+│   └── seed.sql                   # Somnath Super Devs real data seed
+├── src/                           # Modern Vite + React 19 Frontend
+│   ├── components/                # Modular Clubhouse Consoles
+│   │   ├── Header.tsx             # Live clock & Financial Ticker
+│   │   ├── Sidebar.tsx            # Navigation
+│   │   ├── DashboardView.tsx      # Executive Intelligence Console
+│   │   ├── SquadView.tsx          # 14-Man Squad Grid with Valuations
+│   │   ├── TacticsView.tsx        # Pitch Synergy Simulator
+│   │   ├── TrainingView.tsx       # 10-Net Matrix & Friday Pop Tracker
+│   │   ├── FinancesView.tsx       # 52-Week Cashflow & 10k Stadium Planner
+│   │   ├── MatchesView.tsx        # Match Center & Archives
+│   │   └── SettingsView.tsx       # Cloud & Supabase Config
+│   ├── lib/                       # Supabase client & fallback data
+│   ├── types/                     # Strict TypeScript interfaces
+│   ├── App.tsx                    # Main App Controller
+│   └── main.tsx                   # Entry point
+├── dist/                          # Production Build Distribution
+├── docs/                          # Legacy GitHub Pages Portal
+├── frontend/                      # Legacy Vanilla Frontend
+├── gas/                           # Legacy Google Apps Script Backend
+├── package.json                   # Modern Node dependencies
+├── vite.config.ts                 # Vite bundler configuration
 └── README.md                      # Comprehensive Documentation
 ```
