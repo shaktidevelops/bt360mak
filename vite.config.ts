@@ -8,5 +8,9 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
-  base: './' // Portable relative base for GitHub Pages and local development
+  base: './', // Portable relative base for GitHub Pages and local development
+  build: {
+    outDir: 'docs',
+    emptyOutDir: false // Preserve docs/conversations while updating production bundle
+  }
 });

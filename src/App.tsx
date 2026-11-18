@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Header, AppTheme } from './components/Header';
+import { Header } from './components/Header';
 import { Sidebar, TabType } from './components/Sidebar';
 import { DashboardView } from './components/DashboardView';
 import { SquadView } from './components/SquadView';
+import { PlayerProfileView } from './components/PlayerProfileView';
 import { TacticsView } from './components/TacticsView';
 import { TrainingView } from './components/TrainingView';
+import { YouthView } from './components/YouthView';
 import { FinancesView } from './components/FinancesView';
 import { StadiumView } from './components/StadiumView';
 import { MatchesView } from './components/MatchesView';
+import { CalendarView } from './components/CalendarView';
+import { StaffView } from './components/StaffView';
+import { RecordsView } from './components/RecordsView';
 import { SettingsView } from './components/SettingsView';
 import { 
   fallbackClub, 
@@ -16,16 +21,28 @@ import {
   fallbackNets, 
   fallbackMatches, 
   fallbackStadiumTiers, 
-  fallbackFinances 
+  fallbackFinances,
+  fallbackStaff,
+  fallbackCalendar,
+  fallbackRecords
 } from './lib/mockData';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
-import { Club, Player, TrainingLog, NetAllocation, MatchRecord, StadiumTier, FinancialRecord } from './types/database';
+import { 
+  Club, 
+  Player, 
+  TrainingLog, 
+  NetAllocation, 
+  MatchRecord, 
+  StadiumTier, 
+  FinancialRecord,
+  StaffMember,
+  CalendarEvent,
+  CricketRecord 
+} from './types/database';
 
 export function App() {
-  const [currentTab, setCurrentTab] = useState<TabType>('dashboard');
-  const [theme, setTheme] = useState<AppTheme>(() => {
-    return (localStorage.getItem('bt360mak_theme') as AppTheme) || 'emerald';
-  });
+  const [currentTab, setCurrentTab] = useState<TabType>('overview');
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>('6099466');
 
   const [club, setClub] = useState<Club>(fallbackClub);
   const [squad, setSquad] = useState<Player[]>(fallbackSquad);
@@ -34,12 +51,9 @@ export function App() {
   const [matches, setMatches] = useState<MatchRecord[]>(fallbackMatches);
   const [stadiumTiers, setStadiumTiers] = useState<StadiumTier[]>(fallbackStadiumTiers);
   const [finances, setFinances] = useState<FinancialRecord[]>(fallbackFinances);
-
-  // Sync theme to body class
-  useEffect(() => {
-    document.body.className = `theme-${theme}`;
-    localStorage.setItem('bt360mak_theme', theme);
-  }, [theme]);
+  const [staff, setStaff] = useState<StaffMember[]>(fallbackStaff);
+  const [calendar, setCalendar] = useState<CalendarEvent[]>(fallbackCalendar);
+  const [records, setRecords] = useState<CricketRecord[]>(fallbackRecords);
 
   // Fetch from Supabase if credentials are provided and tables exist
   useEffect(() => {
@@ -67,8 +81,17 @@ export function App() {
 
         const { data: finData } = await supabase.from('financial_ledger').select('*').eq('club_id', '13108');
         if (finData && finData.length > 0) setFinances(finData);
+
+        const { data: staffData } = await supabase.from('staff_members').select('*').eq('club_id', '13108');
+        if (staffData && staffData.length > 0) setStaff(staffData);
+
+        const { data: calData } = await supabase.from('calendar_events').select('*').eq('club_id', '13108');
+        if (calData && calData.length > 0) setCalendar(calData);
+
+        const { data: recData } = await supabase.from('cricket_records').select('*').eq('club_id', '13108');
+        if (recData && recData.length > 0) setRecords(recData);
       } catch (err) {
-        console.warn('Supabase query fallback to verified local records:', err);
+        console.warn('Supabase live query fallback to verified club records:', err);
       }
     };
 
@@ -76,15 +99,9 @@ export function App() {
   }, []);
 
   return (
-    <div className={`min-h-screen flex flex-col transition-colors ${
-      theme === 'light' ? 'bg-[#f1f5f9] text-slate-800' : theme === 'midnight' ? 'bg-[#0a1128] text-slate-100' : 'bg-[#0d1e20] text-slate-100'
-    }`}>
-      {/* Elevated Luxury Header with Theme Switcher */}
-      <Header 
-        club={club} 
-        theme={theme}
-        onThemeChange={setTheme}
-      />
+    <div className="min-h-screen flex flex-col bg-[#061713] text-slate-100">
+      {/* Immersive Cricket Sport Header */}
+      <Header club={club} />
 
       {/* Main Workspace: Navigation Sidebar + Console Stage */}
       <div className="flex flex-1">
@@ -93,24 +110,78 @@ export function App() {
           onSelectTab={setCurrentTab}
           squadCount={squad.length}
           popsCount={trainingLogs.length}
-          theme={theme}
         />
 
         <main className="flex-1 p-6 max-w-7xl overflow-y-auto">
-          {currentTab === 'dashboard' && (
+          {currentTab === 'overview' && (
             <DashboardView 
               club={club} 
               squad={squad} 
               onNavigate={(tab) => setCurrentTab(tab)} 
+              onSelectPlayer={(pid) => setSelectedPlayerId(pid)}
             />
           )}
-          {currentTab === 'squad' && <SquadView squad={squad} />}
-          {currentTab === 'tactics' && <TacticsView squad={squad} />}
-          {currentTab === 'training' && <TrainingView logs={trainingLogs} nets={nets} squad={squad} />}
-          {currentTab === 'finances' && <FinancesView finances={finances} />}
-          {currentTab === 'stadium' && <StadiumView tiers={stadiumTiers} />}
-          {currentTab === 'matches' && <MatchesView matches={matches} />}
-          {currentTab === 'settings' && <SettingsView />}
+
+          {currentTab === 'squad' && (
+            <SquadView 
+              squad={squad} 
+              onViewDossier={(pid) => {
+                setSelectedPlayerId(pid);
+                setCurrentTab('player-dossier');
+              }}
+            />
+          )}
+
+          {currentTab === 'player-dossier' && (
+            <PlayerProfileView 
+              squad={squad} 
+              selectedPlayerId={selectedPlayerId} 
+            />
+          )}
+
+          {(currentTab === 'best-xi' || currentTab === 'tactics') && (
+            <TacticsView squad={squad} />
+          )}
+
+          {currentTab === 'training' && (
+            <TrainingView 
+              logs={trainingLogs} 
+              nets={nets} 
+              squad={squad} 
+            />
+          )}
+
+          {currentTab === 'youth' && (
+            <YouthView squad={squad} />
+          )}
+
+          {currentTab === 'finances' && (
+            <FinancesView finances={finances} />
+          )}
+
+          {currentTab === 'stadium' && (
+            <StadiumView tiers={stadiumTiers} />
+          )}
+
+          {currentTab === 'fixtures' && (
+            <MatchesView matches={matches} />
+          )}
+
+          {currentTab === 'calendar' && (
+            <CalendarView events={calendar} />
+          )}
+
+          {currentTab === 'staff' && (
+            <StaffView staff={staff} />
+          )}
+
+          {currentTab === 'records' && (
+            <RecordsView records={records} />
+          )}
+
+          {currentTab === 'database' && (
+            <SettingsView />
+          )}
         </main>
       </div>
     </div>

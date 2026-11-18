@@ -17,12 +17,31 @@ export interface Club {
   form_avg: string;
   coach_quality: string;
   its_points: number;
-  created_at?: string;
-  updated_at?: string;
+}
+
+export interface PlayerStats {
+  matches: number;
+  innings: number;
+  runs: number;
+  highestScore: string;
+  average: number;
+  strikeRate: number;
+  centuries: number;
+  fifties: number;
+  fours: number;
+  sixes: number;
+  oversBowled: number;
+  wickets: number;
+  bestBowling: string;
+  bowlingAverage: number;
+  economy: number;
+  fiveWickets: number;
+  catches: number;
+  stumpings: number;
 }
 
 export interface Player {
-  id: string;
+  id: string; // Clean number without "BT-" e.g. "6099466"
   club_id: string;
   name: string;
   age: number;
@@ -46,6 +65,41 @@ export interface Player {
   market_value: number;
   tactical_role: string;
   is_wonderkid: boolean;
+  uniqueRecords: string[];
+  statsFC: PlayerStats;
+  statsOD: PlayerStats;
+  statsT20: PlayerStats;
+}
+
+export interface StaffMember {
+  id: string;
+  role: string;
+  name: string;
+  skillLevel: string;
+  weeklyWage: number;
+  impactDescription: string;
+  synergyBonus: string;
+}
+
+export interface CalendarEvent {
+  id: string;
+  date: string;
+  dayOfWeek: string;
+  time: string;
+  type: 'MATCH_FC' | 'MATCH_OD' | 'MATCH_T20' | 'TRAINING_POP' | 'FINANCE_UPDATE' | 'YOUTH_DRAFT' | 'SPONSOR_PAYMENT';
+  title: string;
+  details: string;
+  venue?: string;
+  importance: 'HIGH' | 'CRITICAL' | 'NORMAL';
+}
+
+export interface CricketRecord {
+  category: 'BATTING' | 'BOWLING' | 'PARTNERSHIP' | 'TEAM';
+  recordName: string;
+  holder: string;
+  value: string;
+  matchContext: string;
+  date: string;
 }
 
 export interface TrainingLog {
@@ -84,18 +138,8 @@ export interface MatchRecord {
   pitch_type: string;
   result?: string;
   status: 'completed' | 'upcoming';
-}
-
-export interface TacticsLineup {
-  id: string;
-  club_id: string;
-  batting_order: number;
-  player_id: string;
-  role: string;
-  aggression: string;
-  bowling_order: string;
-  max_overs?: number | null;
-  player_name?: string;
+  scoreSummary?: string;
+  topPerformer?: string;
 }
 
 export interface FinancialRecord {
@@ -115,6 +159,7 @@ export interface FinancialRecord {
   total_outflow: number;
   net_weekly_pnl: number;
   cumulative_bank_balance: number;
+  category?: string;
 }
 
 export interface StadiumTier {

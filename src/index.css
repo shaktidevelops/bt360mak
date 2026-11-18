@@ -5,38 +5,52 @@
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
-}
 
-/* Theme: Sovereign Emerald (Vibrant, high-contrast sporting slate) */
-body.theme-emerald {
-  background-color: #0d1e20;
-  color: #f8fafc;
-}
-
-/* Theme: Daylight Pavilion (Crisp, radiant light mode - completely fixes darkness) */
-body.theme-light {
-  background-color: #f1f5f9;
-  color: #0f172a;
-}
-
-/* Theme: Midnight Sapphire (Deep luxury navy & cyan) */
-body.theme-midnight {
-  background-color: #0a1128;
-  color: #f8fafc;
+  body {
+    font-family: var(--font-sans);
+    /* Authentic Mountain Cricket Ground Atmosphere: Lush turf, grandstand floodlights, mountain horizon */
+    background-color: #0c1a17;
+    background-image: 
+      radial-gradient(ellipse at 50% 0%, rgba(34, 197, 94, 0.15) 0%, transparent 55%),
+      radial-gradient(ellipse at 15% 100%, rgba(245, 158, 11, 0.08) 0%, transparent 40%),
+      radial-gradient(ellipse at 85% 100%, rgba(225, 29, 72, 0.06) 0%, transparent 40%),
+      linear-gradient(180deg, #071512 0%, #0c1f1b 50%, #081613 100%);
+    background-attachment: fixed;
+    color: #f8fafc;
+    min-height: 100vh;
+  }
 }
 
 /* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: #06120f;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.3);
+  background: #15803d;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.6);
+  background: #22c55e;
+}
+
+/* Cricket Equipment & Stadium Decorative Utilities */
+.cricket-card {
+  background: rgba(14, 34, 29, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px -3px rgba(34, 197, 94, 0.15);
+}
+
+.cricket-card-highlight {
+  background: linear-gradient(135deg, rgba(20, 52, 44, 0.95) 0%, rgba(13, 35, 30, 0.95) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.6), 0 0 20px -3px rgba(245, 158, 11, 0.2);
+}
+
+.cricket-table tr:hover td {
+  background-color: rgba(34, 197, 94, 0.08);
 }
