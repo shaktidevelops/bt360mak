@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Player } from '../types/database';
-import { Award, Sparkles, TrendingUp, BarChart3, UserCheck } from 'lucide-react';
+import { Award, Sparkles, TrendingUp, BarChart3, UserCheck, Search, ChevronDown, Check } from 'lucide-react';
 
 interface PlayerProfileViewProps {
   squad: Player[];
@@ -24,6 +24,10 @@ function getSkillBadgeColor(level: number): string {
   if (level >= 7) return 'bg-cyan-950 text-cyan-300 border-cyan-500/70';
   if (level >= 5) return 'bg-amber-950/80 text-amber-300 border-amber-600/60';
   return 'bg-slate-900 text-slate-400 border-slate-700/50';
+}
+
+function cleanId(id?: string): string {
+  return String(id || '').replace(/^BT-/, '').trim();
 }
 
 interface CareerStats {
@@ -129,17 +133,105 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
   squad, 
   selectedPlayerId
 }) => {
-  const [currentId, setCurrentId] = useState<string>(selectedPlayerId || (squad[0]?.id ?? '6099466'));
+  const [currentId, setCurrentId] = useState<string>(cleanId(selectedPlayerId) || cleanId(squad[0]?.id));
+  
+  // Advanced Combobox state
+  const [inputValue, setInputValue] = useState<string>('');
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
+  const comboboxRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync state whenever selectedPlayerId changes from external components (Squad, Dashboard)
+  // Sync state whenever selectedPlayerId changes externally
   useEffect(() => {
     if (selectedPlayerId) {
-      setCurrentId(selectedPlayerId);
+      setCurrentId(cleanId(selectedPlayerId));
     }
   }, [selectedPlayerId]);
 
-  const player = squad.find(p => p.id === currentId) || squad[0] || {} as Player;
+  const player = useMemo(() => {
+    const targetClean = cleanId(currentId);
+    return squad.find(p => cleanId(p.id) === targetClean) || squad[0] || {} as Player;
+  }, [squad, currentId]);
+
   const stats = resolvePlayerStats(player);
+
+  // Filter squad based on combobox input
+  const filteredSuggestions = useMemo(() => {
+    const q = inputValue.trim().toLowerCase();
+    if (!q) return squad;
+    return squad.filter(p => 
+      p.name.toLowerCase().includes(q) ||
+      cleanId(p.id).includes(q) ||
+      (p.tactical_role && p.tactical_role.toLowerCase().includes(q))
+    );
+  }, [squad, inputValue]);
+
+  // Compute inline suggestion (auto-append)
+  const inlineSuggestion = useMemo(() => {
+    if (!inputValue.trim() || filteredSuggestions.length === 0) return '';
+    const topMatch = filteredSuggestions[0];
+    if (topMatch.name.toLowerCase().startsWith(inputValue.toLowerCase())) {
+      return inputValue + topMatch.name.slice(inputValue.length);
+    }
+    return '';
+  }, [inputValue, filteredSuggestions]);
+
+  // Close combobox when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (comboboxRef.current && !comboboxRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Handle keyboard navigation for advanced combobox (ArrowUp, ArrowDown, Enter, Tab, Escape)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!isOpen) {
+        setIsOpen(true);
+        setHighlightedIndex(0);
+      } else {
+        setHighlightedIndex(prev => Math.min(prev + 1, filteredSuggestions.length - 1));
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!isOpen) {
+        setIsOpen(true);
+      } else {
+        setHighlightedIndex(prev => Math.max(prev - 1, 0));
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (isOpen && filteredSuggestions.length > 0) {
+        const picked = filteredSuggestions[highlightedIndex] || filteredSuggestions[0];
+        selectPlayer(picked);
+      } else if (inlineSuggestion) {
+        const topMatch = filteredSuggestions[0];
+        if (topMatch) selectPlayer(topMatch);
+      }
+    } else if (e.key === 'Tab' || e.key === 'ArrowRight') {
+      if (inlineSuggestion && inputValue.length < inlineSuggestion.length) {
+        e.preventDefault();
+        setInputValue(inlineSuggestion);
+        const topMatch = filteredSuggestions[0];
+        if (topMatch) selectPlayer(topMatch);
+      }
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
+    }
+  };
+
+  const selectPlayer = (p: Player) => {
+    const targetClean = cleanId(p.id);
+    setCurrentId(targetClean);
+    setInputValue(p.name);
+    setIsOpen(false);
+  };
 
   const skillsList = [
     { label: 'Batting', value: player.batting, category: 'primary' },
@@ -157,27 +249,121 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Player Selector Strip */}
-      <div className="bg-[#0b241e] p-4 rounded-2xl border border-emerald-600/30 flex items-center justify-between gap-4 overflow-x-auto shadow-xl">
+      {/* ADVANCED COMBOBOX & PLAYER SELECTOR BAR */}
+      <div className="bg-[#0b241e] p-4 rounded-2xl border border-emerald-600/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-2 text-xs font-black uppercase text-emerald-400 whitespace-nowrap">
           <UserCheck className="w-4 h-4 text-emerald-400" />
           <span>Active Squad Dossier:</span>
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto py-1">
-          {squad.map((p) => {
-            const isSelected = p.id === player.id;
+
+        {/* Advanced Combobox with auto-suggest, append, and arrow key navigation */}
+        <div className="relative flex-1 max-w-md" ref={comboboxRef}>
+          <div className="relative">
+            {/* Inline auto-append suggestion overlay */}
+            {inlineSuggestion && isOpen && (
+              <div className="absolute left-9 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500 pointer-events-none whitespace-pre">
+                {inlineSuggestion}
+              </div>
+            )}
+            <Search className="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder={`Search player (e.g. ${player.name})...`}
+              value={inputValue || (isOpen ? '' : player.name)}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                setIsOpen(true);
+                setHighlightedIndex(0);
+              }}
+              onFocus={() => {
+                setIsOpen(true);
+                setHighlightedIndex(0);
+              }}
+              onKeyDown={handleKeyDown}
+              className="w-full pl-9 pr-8 py-2 rounded-xl bg-[#061713] border border-emerald-700/60 text-xs font-bold text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400 shadow-inner"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(!isOpen);
+                inputRef.current?.focus();
+              }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-emerald-300 transition-colors"
+            >
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+
+          {/* Autocomplete Dropdown List */}
+          {isOpen && (
+            <div className="absolute z-50 left-0 right-0 mt-1 max-h-72 overflow-y-auto rounded-xl bg-[#081e18] border border-emerald-600/50 shadow-2xl divide-y divide-emerald-950/60 backdrop-blur-xl">
+              <div className="px-3 py-1.5 bg-[#051410] text-[10px] font-mono text-emerald-400 flex items-center justify-between border-b border-emerald-800/40">
+                <span>Select with Arrow Keys &bull; Enter to Confirm</span>
+                <span>{filteredSuggestions.length} Matches</span>
+              </div>
+              {filteredSuggestions.length > 0 ? (
+                filteredSuggestions.map((p, idx) => {
+                  const isHighlighted = idx === highlightedIndex;
+                  const isCurrent = cleanId(p.id) === cleanId(player.id);
+
+                  return (
+                    <div
+                      key={p.id}
+                      onClick={() => selectPlayer(p)}
+                      onMouseEnter={() => setHighlightedIndex(idx)}
+                      className={`px-3.5 py-2.5 flex items-center justify-between cursor-pointer transition-colors ${
+                        isHighlighted 
+                          ? 'bg-emerald-600/30 text-white border-l-4 border-emerald-400' 
+                          : 'text-slate-300 hover:bg-[#0c2820]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-extrabold text-xs text-white flex items-center gap-1">
+                          {p.name}
+                          {p.is_wonderkid && <span title="17yo Wonderkid">⭐</span>}
+                        </span>
+                        <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950 px-1.5 py-0.2 rounded border border-emerald-700/50">
+                          ID: {cleanId(p.id)}
+                        </span>
+                        <span className="text-[11px] text-slate-400">
+                          {p.tactical_role}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-amber-300 font-bold">
+                          BTI: {(p.bti ?? 0).toLocaleString()}
+                        </span>
+                        {isCurrent && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="p-3 text-xs text-slate-400 text-center">
+                  No player found matching "{inputValue}"
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Quick-Access Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto py-1 max-w-full">
+          {squad.slice(0, 5).map((p) => {
+            const isSelected = cleanId(p.id) === cleanId(player.id);
             return (
               <button
                 key={p.id}
-                onClick={() => setCurrentId(p.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                onClick={() => selectPlayer(p)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1 ${
                   isSelected
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg ring-2 ring-emerald-400/50 scale-105'
-                    : 'bg-[#061713] text-slate-300 hover:text-white border border-emerald-800/40 hover:border-emerald-600/60'
+                    ? 'bg-emerald-600 text-white shadow font-black scale-105'
+                    : 'bg-[#061713] text-slate-300 hover:text-white border border-emerald-800/40'
                 }`}
               >
-                <span>{p.name}</span>
-                <span className="font-mono text-[10px] text-emerald-300/80">({String(p.id).replace(/^BT-/, '')})</span>
+                <span>{p.name.split(' ')[0]}</span>
                 {p.is_wonderkid && <span>⭐</span>}
               </button>
             );
@@ -202,7 +388,7 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs px-2.5 py-0.5 rounded-full font-mono font-black bg-emerald-950 text-emerald-300 border border-emerald-600/60">
-                  ID: {String(player.id).replace(/^BT-/, '')}
+                  ID: {cleanId(player.id)}
                 </span>
                 {player.is_wonderkid && (
                   <span className="flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-amber-950 text-amber-300 border border-amber-600/70 animate-pulse">
