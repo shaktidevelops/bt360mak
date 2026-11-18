@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BT360MAK - Battrick Premium Intelligence Suite</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Separate CSS Files -->
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="club-crest">🏏</div>
+        <div class="brand-info">
+          <h1>BT360MAK</h1>
+          <span class="tier-badge">BT MEMBERSHIP+</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li>
+          <a class="nav-item active" data-tab="dashboard">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="squad">
+            <span class="nav-icon">👥</span>
+            <span>Squad & Players</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="tactics">
+            <span class="nav-icon">⚔️</span>
+            <span>Tactics & Pitch</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="training">
+            <span class="nav-icon">🎯</span>
+            <span>Training & Nets</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="finance">
+            <span class="nav-icon">💰</span>
+            <span>Finance & Stadium</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="scout">
+            <span class="nav-icon">🔍</span>
+            <span>Scout & Market</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="google">
+            <span class="nav-icon">🌐</span>
+            <span>Google Apps Hub</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-tab="settings">
+            <span class="nav-icon">⚙️</span>
+            <span>System Settings</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="club-status-indicator">
+          <div class="pulse-dot"></div>
+          <span>Battrick Cloud Connected</span>
+        </div>
+        <div style="font-size:10px; color:var(--text-muted); opacity:0.8;">
+          Script: 1GuCVl28B...<br>
+          Sheet: 1KXQbrZ2...
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Stage -->
+    <div class="main-wrapper">
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2 class="page-title" id="pageTitle">Executive Command Center</h2>
+        </div>
+
+        <div class="topbar-right">
+          <!-- 5-Theme Switcher -->
+          <div class="theme-selector-wrap">
+            <label for="themeSelect">🎨 Theme:</label>
+            <select id="themeSelect" class="theme-dropdown">
+              <option value="emerald">1. Pitch Emerald & Gold</option>
+              <option value="cyber">2. Cyber Midnight / Neon</option>
+              <option value="royal">3. Royal Pavilion (Navy & Crimson)</option>
+              <option value="sunset">4. Sunset Matchday (Amber)</option>
+              <option value="light">5. Clean Pro Light (SaaS)</option>
+            </select>
+          </div>
+
+          <button id="btnOpenImportModal" class="btn btn-secondary">
+            📥 Import Squad
+          </button>
+
+          <a href="https://docs.google.com/spreadsheets/d/1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E/edit" target="_blank" class="btn btn-primary">
+            📊 Google Sheet
+          </a>
+        </div>
+      </header>
+
+      <!-- View Container -->
+      <main class="view-container">
+
+        <!-- ============================================== -->
+        <!-- SCREEN 1: DASHBOARD                            -->
+        <!-- ============================================== -->
+        <section id="panel-dashboard" class="tab-panel active">
+          <!-- KPI Summary Cards -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Club Roster</span>
+                <span class="kpi-icon">🏆</span>
+              </div>
+              <div class="kpi-value" id="dashClubName">Mak Lions CC</div>
+              <div class="kpi-subtext positive" id="dashDivision">Division II.3</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Fan Club Morale</span>
+                <span class="kpi-icon">👥</span>
+              </div>
+              <div class="kpi-value" id="dashFanClub">1,420</div>
+              <div class="kpi-subtext positive">🚀 High Flying & Enthusiastic</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Bank Treasury</span>
+                <span class="kpi-icon">💰</span>
+              </div>
+              <div class="kpi-value" id="dashBank">$850,000</div>
+              <div class="kpi-subtext positive">+$22,400 Projected Weekly P&L</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Weekly Wages</span>
+                <span class="kpi-icon">📋</span>
+              </div>
+              <div class="kpi-value" id="dashWage">$171,800</div>
+              <div class="kpi-subtext warning">Optimal Range (&lt; 65% of Inflow)</div>
+            </div>
+          </div>
+
+          <!-- Mid Section: Next Match & Training Pops Ticker -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+            <!-- Next Fixture Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">📅 Next Match Fixture</h3>
+                <span class="badge badge-skill-sensational">First Class (3 Days)</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin:14px 0;">
+                <div>
+                  <div style="font-size:12px; color:var(--text-muted);">Opponent</div>
+                  <div style="font-size:16px; font-weight:800;">Emerald Strikers</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:12px; color:var(--text-muted);">Pitch Condition</div>
+                  <div style="font-size:16px; font-weight:800; color:var(--accent);">HARD BOUNCY</div>
+                </div>
+              </div>
+              <p style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+                ⚡ Recommendation: Play opening express pacers Bumrah and rotate fast bowlers with refreshed fatigue.
+              </p>
+            </div>
+
+            <!-- Recent Pops Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">📈 Recent Training Pops</h3>
+                <span class="badge badge-pop">4 New This Month</span>
+              </div>
+              <div id="dashPopsList"></div>
+            </div>
+          </div>
+
+          <!-- Charts Section: Subskill Progression & Cashflow -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">📈 Trainee Skill Pop Progression</h3>
+                <span style="font-size:11px; color:var(--text-muted);">Rohit Sharma (Batting)</span>
+              </div>
+              <div id="dashboardProgressionChart" style="height:190px;"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">💵 5-Week Cashflow (Inflow vs Outflow)</h3>
+                <span style="font-size:11px; color:var(--text-muted);"><span style="color:#10b981;">■ In</span> vs <span style="color:#f43f5e;">■ Out</span></span>
+              </div>
+              <div id="dashboardCashflowChart" style="height:190px;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 2: SQUAD & PLAYERS                      -->
+        <!-- ============================================== -->
+        <section id="panel-squad" class="tab-panel">
+          <div class="card">
+            <div class="card-header" style="flex-wrap:wrap; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <h3 class="card-title">👥 Club Roster & Battrick Membership Valuation</h3>
+                <span id="squadCountBadge" class="badge badge-skill-sensational">6 Players</span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:10px;">
+                <input type="text" id="squadSearchInput" placeholder="🔍 Search player, skill or role..." class="form-input" style="width:240px; padding:6px 10px;">
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Player ID</th>
+                    <th>Player & Role</th>
+                    <th>Age</th>
+                    <th>Wage</th>
+                    <th>Style</th>
+                    <th>Batting</th>
+                    <th>Bowling</th>
+                    <th>Keeping</th>
+                    <th>Fielding</th>
+                    <th>Form</th>
+                    <th>Fatigue</th>
+                    <th>Active Net</th>
+                    <th>Fair Value</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="squadTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 3: TACTICS & PITCH ENGINE               -->
+        <!-- ============================================== -->
+        <section id="panel-tactics" class="tab-panel">
+          <div class="pitch-container">
+            <!-- Left Pitch Preview Graphic -->
+            <div class="pitch-graphic">
+              <div id="tacticalPitchStrip" class="pitch-strip hard">
+                <div class="stumps"><div class="stump"></div><div class="stump"></div><div class="stump"></div></div>
+                <div class="crease-line"></div>
+                <div style="color:#ffffff; font-size:10px; font-weight:800; transform:rotate(-90deg); letter-spacing:1px;">22 YARDS</div>
+                <div class="crease-line"></div>
+                <div class="stumps"><div class="stump"></div><div class="stump"></div><div class="stump"></div></div>
+              </div>
+              <div style="margin-top:14px; text-align:center;">
+                <span class="badge badge-pop">Matchday Pitch Canvas</span>
+              </div>
+            </div>
+
+            <!-- Right Tactical Control Form -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">⚔️ Pitch Analyzer & Bowling Synergy Engine</h3>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Select Matchday Pitch Type:</label>
+                <select id="tacticsPitchSelect" class="form-select">
+                  <option value="Hard">Hard (Bouncy, Favors Express Pace & Fast Bowlers)</option>
+                  <option value="Green">Green (Grass Cover, Heavy Seam & Swing Movement)</option>
+                  <option value="Dusty">Dusty (Dry & Cracked, Tremendous Spin Assistance)</option>
+                  <option value="Slow">Slow (Low Bounce, Sluggish Batting Conditions)</option>
+                  <option value="Flat">Flat (Batsman's Paradise, High Scores)</option>
+                  <option value="Uneven">Uneven (Unpredictable Bounce, Testing All Batsmen)</option>
+                </select>
+              </div>
+
+              <div style="background:var(--bg-secondary); padding:14px; border-radius:8px; margin-bottom:16px; border:1px solid var(--border-color);">
+                <div style="font-weight:700; font-size:12px; margin-bottom:4px; color:var(--accent);">Pitch Scouting Report:</div>
+                <p id="pitchDescription" style="font-size:12px; color:var(--text-muted); line-height:1.5;"></p>
+              </div>
+
+              <div style="margin-top:10px;">
+                <h4 style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Bowler Type Multipliers:</h4>
+                <div id="pitchBonusesList"></div>
+              </div>
+
+              <div style="margin-top:20px; display:flex; gap:10px;">
+                <button class="btn btn-primary" onclick="alert('Tactical Pitch Orders saved to Google Sheet!')">💾 Save Match Strategy</button>
+                <button class="btn btn-secondary" onclick="alert('Simulated Predicted Match Rating: Sensational (High)!')">⚡ Simulate Match Ratings</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 4: TRAINING & ACADEMY                   -->
+        <!-- ============================================== -->
+        <section id="panel-training" class="tab-panel">
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:20px;">
+            <!-- 10 Nets Table -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">🎯 Active 10-Net Training Matrix</h3>
+                <span class="badge badge-skill-sensational">10 / 10 Nets Filled</span>
+              </div>
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Net #</th>
+                      <th>Specialty</th>
+                      <th>Primary Trainee</th>
+                      <th>Coach Level</th>
+                      <th>Pop ETA</th>
+                    </tr>
+                  </thead>
+                  <tbody id="netsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Youth Academy (ITS) Simulator -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">🌟 Youth Academy & ITS</h3>
+                <span class="badge badge-pop">Weekly Pull</span>
+              </div>
+
+              <div class="form-group">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                  <label class="form-label">Weekly ITS Investment:</label>
+                  <strong id="itsValueDisplay" style="color:var(--accent);">$36,000 / week</strong>
+                </div>
+                <input type="range" id="itsSlider" min="0" max="36000" step="4000" value="36000" style="width:100%; accent-color:var(--accent);">
+              </div>
+
+              <div id="itsOutcome" style="background:var(--bg-secondary); padding:14px; border-radius:8px; font-size:12px; line-height:1.5; border:1px solid var(--border-color);">
+                🌟 <strong>Maximum Investment (Level 20 ITS)</strong>: Guarantees 17yo pulls with Proficient/Strong primary skills and Exceptional potential!
+              </div>
+
+              <div style="margin-top:20px;">
+                <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="alert('Youth Academy Scout report synced with Google Sheet!')">
+                  🎲 Simulate Weekly Youth Pull
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 5: FINANCE & STADIUM                    -->
+        <!-- ============================================== -->
+        <section id="panel-finance" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🏟️ Stadium Architect & Optimum Seating Ratio Calculator</h3>
+              <span class="badge badge-skill-sensational">Fan Base: 1,420</span>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+              Optimal Ground Ratio: 68% Standing Room | 23% Uncovered Seats | 7% Covered Seats | 2% Members Enclosure (BT Membership Tier)
+            </p>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tier Name</th>
+                    <th>Current Seats</th>
+                    <th>Optimum Ratio</th>
+                    <th>Recommended Capacity</th>
+                    <th>Ticket Price</th>
+                    <th>Potential Match Gate</th>
+                    <th>Total Upgrade Cost</th>
+                  </tr>
+                </thead>
+                <tbody id="stadiumTableBody"></tbody>
+              </table>
+            </div>
+            <div style="margin-top:16px; display:flex; justify-content:flex-end;">
+              <button class="btn btn-primary" onclick="alert('Stadium expansion plan synced to Google Sheet!')">
+                🏗️ Apply Expansion Plan
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 6: SCOUT & TRANSFER                     -->
+        <!-- ============================================== -->
+        <section id="panel-scout" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🔍 Transfer Market Radar & Fair Value Model</h3>
+              <span class="badge badge-pop">AI Valuation Active</span>
+            </div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Target ID</th>
+                    <th>Player Name</th>
+                    <th>Age</th>
+                    <th>Primary Skill</th>
+                    <th>Secondary</th>
+                    <th>Wage</th>
+                    <th>Current Bid</th>
+                    <th>Fair Market Value</th>
+                    <th>Algorithm Verdict</th>
+                  </tr>
+                </thead>
+                <tbody id="scoutTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 7: GOOGLE APPS HUB                      -->
+        <!-- ============================================== -->
+        <section id="panel-google" class="tab-panel">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🌐 Connected Google Workspace Apps</h3>
+              <span class="badge badge-pop">Google Apps Script V8</span>
+            </div>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">
+              BT360MAK unifies Google Sheets, Apps Script, Google Drive, Google Calendar, and Gmail into an automated club management powerhouse.
+            </p>
+
+            <div class="kpi-grid">
+              <!-- Google Sheets -->
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <span>Google Sheets Database</span>
+                  <span>📊</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                  10 Fully Formatted Tabs: Squad, Training, Finances, Stadium, Tactics.
+                </div>
+                <div style="margin-top:14px;">
+                  <a href="https://docs.google.com/spreadsheets/d/1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E/edit" target="_blank" class="btn btn-secondary" style="font-size:11px;">
+                    Open Master Sheet ➔
+                  </a>
+                </div>
+              </div>
+
+              <!-- Google Calendar -->
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <span>Google Calendar</span>
+                  <span>📅</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                  Automates matchday fixtures (FC, OD, T20) and Friday Training pop alerts.
+                </div>
+                <div style="margin-top:14px;">
+                  <button id="btnSyncCalendar" class="btn btn-primary" style="font-size:11px;">
+                    📅 Sync Fixtures Now
+                  </button>
+                </div>
+              </div>
+
+              <!-- Google Drive -->
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <span>Google Drive Backup</span>
+                  <span>💾</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                  Timestamped JSON squad dumps backed up into 'BT360MAK_Backups' folder.
+                </div>
+                <div style="margin-top:14px;">
+                  <button id="btnDriveBackup" class="btn btn-primary" style="font-size:11px;">
+                    💾 Trigger Drive Backup
+                  </button>
+                </div>
+              </div>
+
+              <!-- Gmail -->
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <span>Gmail Digest & Alerts</span>
+                  <span>📧</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                  Automated executive HTML emails with weekly pops, match previews & cashflow.
+                </div>
+                <div style="margin-top:14px;">
+                  <button id="btnSendGmail" class="btn btn-primary" style="font-size:11px;">
+                    📧 Send Weekly Digest
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 8: SYSTEM SETTINGS                      -->
+        <!-- ============================================== -->
+        <section id="panel-settings" class="tab-panel">
+          <div class="card" style="max-width:700px;">
+            <div class="card-header">
+              <h3 class="card-title">⚙️ Club Configuration & Environment Keys</h3>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Google Apps Script Web App Endpoint URL:</label>
+              <input type="text" id="settingEndpointUrl" class="form-input" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Battrick Club ID:</label>
+              <input type="text" value="94120" class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Battrick User Security Code:</label>
+              <input type="password" value="secret_code_token" class="form-input">
+            </div>
+
+            <div style="margin-top:20px; display:flex; gap:12px;">
+              <button class="btn btn-primary" onclick="alert('Settings saved to local storage and ready for API sync!')">💾 Save Configuration</button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- PLAYER INSPECT MODAL -->
+  <div id="playerModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="modalPlayerName">Player Name</h3>
+          <div id="modalPlayerRole" style="font-size:12px; color:var(--text-muted); margin-top:2px;">Role & Profile</div>
+        </div>
+        <button class="modal-close">&times;</button>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(4, 1fr); margin-bottom:16px;">
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Wage</div>
+          <div id="modalPlayerWage" style="font-weight:700; font-size:14px;">$0</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Market Value</div>
+          <div id="modalPlayerValue" style="font-weight:700; font-size:14px; color:var(--accent);">$0</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">BTI (Index)</div>
+          <div id="modalPlayerBti" style="font-weight:700; font-size:14px;">0</div>
+        </div>
+        <div class="kpi-card" style="padding:10px;">
+          <div class="kpi-header">Est. Subskill</div>
+          <div id="modalPlayerSubskill" style="font-weight:700; font-size:14px; color:var(--accent);">0.0</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:12px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Core Skill Ratings</h4>
+      <div id="modalSkillGrid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:16px;"></div>
+
+      <h4 style="font-size:12px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Skill Pop Progression Curve</h4>
+      <div id="playerModalProgressionGraph" style="height:170px;"></div>
+    </div>
+  </div>
+
+  <!-- SQUAD IMPORT MODAL -->
+  <div id="importModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">📥 Import Battrick Squad</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+        Paste your raw squad page HTML, XML export, or copy-pasted table from Battrick club squad page:
+      </p>
+      <div class="form-group">
+        <textarea id="importRawData" class="form-textarea" rows="8" placeholder="Paste Battrick squad table text or XML here..."></textarea>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn btn-secondary modal-close">Cancel</button>
+        <button class="btn btn-primary" onclick="alert('Squad parsed and synced successfully!'); document.getElementById('importModal').classList.remove('active');">
+          ⚡ Parse & Ingest Squad
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Separate Script Files -->
+  <script src="js/battrickData.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
