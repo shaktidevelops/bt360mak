@@ -605,7 +605,7 @@ const BT_APP = {
         const btrMatch = block.match(/class="player_btr">([0-9,]+)</);
         const bti = btrMatch ? parseInt(btrMatch[1].replace(/,/g, '')) : 5000;
 
-        extracted.push({ id: 'BT-' + pId, name, age, wage, bti });
+        extracted.push({ id: '' + pId, name, age, wage, bti });
       }
 
       return {

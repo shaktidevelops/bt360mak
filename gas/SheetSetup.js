@@ -163,20 +163,20 @@ const SheetSetup = {
     sheet.setRowHeight(3, 34);
 
     const realSquad = [
-      ['BT-6099459', 'Arjun Ashraf', 21, 284, 'LHB', 'L FM', 'abysmal', 'woeful', 'feeble', 'mediocre', 'abysmal', 'mediocre', 'feeble', 'abysmal', 'sublime', 'respectable', 'abysmal', 2664, '6.2', 'None', 164240, 'Squad Player'],
-      ['BT-6099472', 'Issa Baboor', 26, 546, 'RHB', 'R F', 'competent', 'woeful', 'abysmal', 'mediocre', 'woeful', 'competent', 'competent', 'strong', 'sublime', 'respectable', 'feeble', 7440, '6.2', 'None', 396900, 'Middle-Order Batter'],
-      ['BT-6099468', 'Kamadev Battasi', 25, 543, 'RHB', 'R H finger spin', 'feeble', 'competent', 'feeble', 'woeful', 'competent', 'woeful', 'competent', 'respectable', 'sublime', 'abysmal', 'woeful', 6665, '6.2', 'None', 369025, 'Lead Finger Spinner'],
-      ['BT-6099466', 'Bhadraksh Hemalatha', 17, 545, 'RHB', 'R H finger spin', 'abysmal', 'competent', 'feeble', 'abysmal', 'competent', 'feeble', 'competent', 'superb', 'sublime', 'feeble', 'abysmal', 6989, '6.7', 'Bowling (1)', 685557, 'Lead Finger Spinner (Wonderkid)'],
-      ['BT-6099470', 'Kamal Hydrose', 25, 538, 'LHB', 'L M', 'woeful', 'competent', 'woeful', 'woeful', 'competent', 'abysmal', 'competent', 'superb', 'sublime', 'woeful', 'feeble', 6085, '6.2', 'None', 347475, 'Opening Bowler'],
-      ['BT-6099461', 'Lalit Kadam', 23, 369, 'RHB', 'R FM', 'mediocre', 'woeful', 'woeful', 'feeble', 'woeful', 'feeble', 'abysmal', 'woeful', 'sublime', 'abysmal', 'worthless', 2206, '6.2', 'Stamina (1)', 169460, 'Squad Player'],
-      ['BT-6099475', 'Achintya Kharge', 26, 553, 'RHB', 'R M', 'competent', 'woeful', 'woeful', 'competent', 'woeful', 'competent', 'competent', 'superb', 'sublime', 'competent', 'mediocre', 8436, '6.2', 'Fielding (1)', 433510, 'Middle-Order Batter (C)'],
-      ['BT-6099473', 'Vasant Malla', 28, 544, 'LHB', 'L FM', 'competent', 'feeble', 'woeful', 'mediocre', 'abysmal', 'competent', 'competent', 'superb', 'sublime', 'competent', 'feeble', 7468, '6.2', 'None', 397380, 'Middle-Order Batter'],
-      ['BT-6099476', 'Ankur Palanisamy', 27, 510, 'RHB', 'R H finger spin', 'mediocre', 'woeful', 'competent', 'feeble', 'mediocre', 'woeful', 'competent', 'woeful', 'sublime', 'proficient', 'abysmal', 5601, '6.2', 'Wicket Keeping (1)', 323535, 'Primary Wicketkeeper'],
-      ['BT-6099471', 'Nandakishor Ramdhyani', 17, 559, 'LHB', 'L M', 'competent', 'mediocre', 'woeful', 'woeful', 'feeble', 'competent', 'competent', 'mediocre', 'sublime', 'competent', 'abysmal', 6360, '6.7', 'Batting (1)', 652230, 'Young Top-Order Batter (Wonderkid)'],
-      ['BT-6099469', 'Purumitra Rishi', 29, 549, 'RHB', 'R M', 'feeble', 'competent', 'woeful', 'woeful', 'competent', 'feeble', 'competent', 'superb', 'sublime', 'feeble', 'abysmal', 7286, '6.2', 'None', 392260, 'Opening Bowler'],
-      ['BT-6099474', 'Viplav Sinduvalli', 25, 544, 'LHB', 'L M', 'competent', 'woeful', 'feeble', 'abysmal', 'feeble', 'competent', 'competent', 'superb', 'sublime', 'competent', 'mediocre', 7031, '6.2', 'None', 382085, 'Middle-Order Batter'],
-      ['BT-6099467', 'Arvind Somal', 27, 552, 'LHB', 'L M', 'woeful', 'competent', 'feeble', 'woeful', 'competent', 'feeble', 'competent', 'proficient', 'energetic', 'respectable', 'abysmal', 6775, '6.2', 'None', 375125, 'Opening Bowler'],
-      ['BT-6099462', 'Atulya Surya Teja', 24, 398, 'RHB', 'R M', 'mediocre', 'woeful', 'mediocre', 'woeful', 'feeble', 'woeful', 'woeful', 'worthless', 'sublime', 'woeful', 'abysmal', 2813, '6.2', 'None', 197955, 'Squad Player']
+      ['6099459', 'Arjun Ashraf', 21, 284, 'LHB', 'L FM', 'abysmal', 'woeful', 'feeble', 'mediocre', 'abysmal', 'mediocre', 'feeble', 'abysmal', 'sublime', 'respectable', 'abysmal', 2664, '6.2', 'None', 164240, 'Squad Player'],
+      ['6099472', 'Issa Baboor', 26, 546, 'RHB', 'R F', 'competent', 'woeful', 'abysmal', 'mediocre', 'woeful', 'competent', 'competent', 'strong', 'sublime', 'respectable', 'feeble', 7440, '6.2', 'None', 396900, 'Middle-Order Batter'],
+      ['6099468', 'Kamadev Battasi', 25, 543, 'RHB', 'R H finger spin', 'feeble', 'competent', 'feeble', 'woeful', 'competent', 'woeful', 'competent', 'respectable', 'sublime', 'abysmal', 'woeful', 6665, '6.2', 'None', 369025, 'Lead Finger Spinner'],
+      ['6099466', 'Bhadraksh Hemalatha', 17, 545, 'RHB', 'R H finger spin', 'abysmal', 'competent', 'feeble', 'abysmal', 'competent', 'feeble', 'competent', 'superb', 'sublime', 'feeble', 'abysmal', 6989, '6.7', 'Bowling (1)', 685557, 'Lead Finger Spinner (Wonderkid)'],
+      ['6099470', 'Kamal Hydrose', 25, 538, 'LHB', 'L M', 'woeful', 'competent', 'woeful', 'woeful', 'competent', 'abysmal', 'competent', 'superb', 'sublime', 'woeful', 'feeble', 6085, '6.2', 'None', 347475, 'Opening Bowler'],
+      ['6099461', 'Lalit Kadam', 23, 369, 'RHB', 'R FM', 'mediocre', 'woeful', 'woeful', 'feeble', 'woeful', 'feeble', 'abysmal', 'woeful', 'sublime', 'abysmal', 'worthless', 2206, '6.2', 'Stamina (1)', 169460, 'Squad Player'],
+      ['6099475', 'Achintya Kharge', 26, 553, 'RHB', 'R M', 'competent', 'woeful', 'woeful', 'competent', 'woeful', 'competent', 'competent', 'superb', 'sublime', 'competent', 'mediocre', 8436, '6.2', 'Fielding (1)', 433510, 'Middle-Order Batter (C)'],
+      ['6099473', 'Vasant Malla', 28, 544, 'LHB', 'L FM', 'competent', 'feeble', 'woeful', 'mediocre', 'abysmal', 'competent', 'competent', 'superb', 'sublime', 'competent', 'feeble', 7468, '6.2', 'None', 397380, 'Middle-Order Batter'],
+      ['6099476', 'Ankur Palanisamy', 27, 510, 'RHB', 'R H finger spin', 'mediocre', 'woeful', 'competent', 'feeble', 'mediocre', 'woeful', 'competent', 'woeful', 'sublime', 'proficient', 'abysmal', 5601, '6.2', 'Wicket Keeping (1)', 323535, 'Primary Wicketkeeper'],
+      ['6099471', 'Nandakishor Ramdhyani', 17, 559, 'LHB', 'L M', 'competent', 'mediocre', 'woeful', 'woeful', 'feeble', 'competent', 'competent', 'mediocre', 'sublime', 'competent', 'abysmal', 6360, '6.7', 'Batting (1)', 652230, 'Young Top-Order Batter (Wonderkid)'],
+      ['6099469', 'Purumitra Rishi', 29, 549, 'RHB', 'R M', 'feeble', 'competent', 'woeful', 'woeful', 'competent', 'feeble', 'competent', 'superb', 'sublime', 'feeble', 'abysmal', 7286, '6.2', 'None', 392260, 'Opening Bowler'],
+      ['6099474', 'Viplav Sinduvalli', 25, 544, 'LHB', 'L M', 'competent', 'woeful', 'feeble', 'abysmal', 'feeble', 'competent', 'competent', 'superb', 'sublime', 'competent', 'mediocre', 7031, '6.2', 'None', 382085, 'Middle-Order Batter'],
+      ['6099467', 'Arvind Somal', 27, 552, 'LHB', 'L M', 'woeful', 'competent', 'feeble', 'woeful', 'competent', 'feeble', 'competent', 'proficient', 'energetic', 'respectable', 'abysmal', 6775, '6.2', 'None', 375125, 'Opening Bowler'],
+      ['6099462', 'Atulya Surya Teja', 24, 398, 'RHB', 'R M', 'mediocre', 'woeful', 'mediocre', 'woeful', 'feeble', 'woeful', 'woeful', 'worthless', 'sublime', 'woeful', 'abysmal', 2813, '6.2', 'None', 197955, 'Squad Player']
     ];
 
     sheet.getRange(4, 1, realSquad.length, headers.length).setValues(realSquad);
@@ -220,8 +220,8 @@ const SheetSetup = {
       .setHorizontalAlignment('center');
 
     const realPops = [
-      ['2026-11-13', 'BT-6099466', 'Bhadraksh Hemalatha', 'Bowling', 'Mediocre', 'Competent', '6.05', 7, 'Competent', 'YES'],
-      ['2026-11-06', 'BT-6099471', 'Nandakishor Ramdhyani', 'Batting', 'Mediocre', 'Competent', '6.08', 8, 'Competent', 'YES']
+      ['2026-11-13', '6099466', 'Bhadraksh Hemalatha', 'Bowling', 'Mediocre', 'Competent', '6.05', 7, 'Competent', 'YES'],
+      ['2026-11-06', '6099471', 'Nandakishor Ramdhyani', 'Batting', 'Mediocre', 'Competent', '6.08', 8, 'Competent', 'YES']
     ];
     sheet.getRange(4, 1, realPops.length, headers.length).setValues(realPops);
 
@@ -250,11 +250,11 @@ const SheetSetup = {
       .setHorizontalAlignment('center');
 
     const nets = [
-      [1, 'Bowling', 'BT-6099466', 'Bhadraksh Hemalatha (17yo)', '1.00x (Competent Coach)', 7, 'Primary finger spin wonderkid progression'],
-      [2, 'Batting', 'BT-6099471', 'Nandakishor Ramdhyani (17yo)', '1.00x (Competent Coach)', 7, 'Primary top-order youth batter development'],
-      [3, 'Fielding', 'BT-6099475', 'Achintya Kharge', '1.00x (Competent Coach)', 5, 'Captain middle-order fielding boost'],
-      [4, 'Wicket Keeping', 'BT-6099476', 'Ankur Palanisamy', '1.00x (Competent Coach)', 8, 'Primary keeper glovework'],
-      [5, 'Fitness / Stamina', 'BT-6099461', 'Lalit Kadam', '1.00x', 4, 'Squad player stamina recovery'],
+      [1, 'Bowling', '6099466', 'Bhadraksh Hemalatha (17yo)', '1.00x (Competent Coach)', 7, 'Primary finger spin wonderkid progression'],
+      [2, 'Batting', '6099471', 'Nandakishor Ramdhyani (17yo)', '1.00x (Competent Coach)', 7, 'Primary top-order youth batter development'],
+      [3, 'Fielding', '6099475', 'Achintya Kharge', '1.00x (Competent Coach)', 5, 'Captain middle-order fielding boost'],
+      [4, 'Wicket Keeping', '6099476', 'Ankur Palanisamy', '1.00x (Competent Coach)', 8, 'Primary keeper glovework'],
+      [5, 'Fitness / Stamina', '6099461', 'Lalit Kadam', '1.00x', 4, 'Squad player stamina recovery'],
       [6, 'Open / Available', '-', 'Unassigned', '-', '-', 'Ready for next youth pull'],
       [7, 'Open / Available', '-', 'Unassigned', '-', '-', 'Ready for squad rotation'],
       [8, 'Open / Available', '-', 'Unassigned', '-', '-', 'Available net'],
@@ -325,17 +325,17 @@ const SheetSetup = {
       .setHorizontalAlignment('center');
 
     const lineup = [
-      [1, 'BT-6099471', 'Nandakishor Ramdhyani', 'Young Opening Batter (LHB)', 'Attacking', '-', '-'],
-      [2, 'BT-6099472', 'Issa Baboor', 'Middle-Order Batter (RHB)', 'Moderate', '-', '-'],
-      [3, 'BT-6099475', 'Achintya Kharge', 'Captain & Anchor (RHB)', 'Moderate', '4th Change (RM)', 4],
-      [4, 'BT-6099473', 'Vasant Malla', 'Middle-Order Batter (LHB)', 'Attacking', '-', '-'],
-      [5, 'BT-6099474', 'Viplav Sinduvalli', 'Middle-Order Batter (LHB)', 'Attacking', '-', '-'],
-      [6, 'BT-6099476', 'Ankur Palanisamy', 'Primary Wicketkeeper (RHB)', 'Moderate', '-', '-'],
-      [7, 'BT-6099467', 'Arvind Somal', 'All-Rounder (LHB / LM)', 'Defensive', '2nd Bowler', 10],
-      [8, 'BT-6099468', 'Kamadev Battasi', 'Lead Finger Spinner (RHB)', 'Moderate', '3rd Bowler', 10],
-      [9, 'BT-6099466', 'Bhadraksh Hemalatha', 'Strike Finger Spinner (RHB)', 'Attacking', '1st Change', 10],
-      [10, 'BT-6099470', 'Kamal Hydrose', 'Opening Bowler (LHB / LM)', 'Defensive', '1st Bowler', 10],
-      [11, 'BT-6099469', 'Purumitra Rishi', 'Opening Strike Seamer (RHB / RM)', 'Attacking', '2nd Bowler', 10]
+      [1, '6099471', 'Nandakishor Ramdhyani', 'Young Opening Batter (LHB)', 'Attacking', '-', '-'],
+      [2, '6099472', 'Issa Baboor', 'Middle-Order Batter (RHB)', 'Moderate', '-', '-'],
+      [3, '6099475', 'Achintya Kharge', 'Captain & Anchor (RHB)', 'Moderate', '4th Change (RM)', 4],
+      [4, '6099473', 'Vasant Malla', 'Middle-Order Batter (LHB)', 'Attacking', '-', '-'],
+      [5, '6099474', 'Viplav Sinduvalli', 'Middle-Order Batter (LHB)', 'Attacking', '-', '-'],
+      [6, '6099476', 'Ankur Palanisamy', 'Primary Wicketkeeper (RHB)', 'Moderate', '-', '-'],
+      [7, '6099467', 'Arvind Somal', 'All-Rounder (LHB / LM)', 'Defensive', '2nd Bowler', 10],
+      [8, '6099468', 'Kamadev Battasi', 'Lead Finger Spinner (RHB)', 'Moderate', '3rd Bowler', 10],
+      [9, '6099466', 'Bhadraksh Hemalatha', 'Strike Finger Spinner (RHB)', 'Attacking', '1st Change', 10],
+      [10, '6099470', 'Kamal Hydrose', 'Opening Bowler (LHB / LM)', 'Defensive', '1st Bowler', 10],
+      [11, '6099469', 'Purumitra Rishi', 'Opening Strike Seamer (RHB / RM)', 'Attacking', '2nd Bowler', 10]
     ];
     sheet.getRange(4, 1, lineup.length, headers.length).setValues(lineup);
     for (let c = 1; c <= headers.length; c++) sheet.setColumnWidth(c, 140);
@@ -433,10 +433,10 @@ const SheetSetup = {
       .setHorizontalAlignment('center');
 
     const realTargets = [
-      ['BT-6102144', 'Tapan Chander', 18, 'Strong (8)', 'Competent (6)', 'Competent (6)', 640, 45000, 75000],
-      ['BT-6088219', 'Hariprasad Nair', 19, 'Proficient (7)', 'Respectable (6)', 'Respectable (6)', 720, 60000, 85000],
-      ['BT-6045192', 'Eswar Venkatesh', 24, 'Strong (8)', 'Mediocre (5)', 'Competent (6)', 950, 110000, 95000],
-      ['BT-6110984', 'Gautam Shenoy', 17, 'Respectable (6)', 'Competent (6)', 'Strong (8)', 580, 38000, 65000]
+      ['6102144', 'Tapan Chander', 18, 'Strong (8)', 'Competent (6)', 'Competent (6)', 640, 45000, 75000],
+      ['6088219', 'Hariprasad Nair', 19, 'Proficient (7)', 'Respectable (6)', 'Respectable (6)', 720, 60000, 85000],
+      ['6045192', 'Eswar Venkatesh', 24, 'Strong (8)', 'Mediocre (5)', 'Competent (6)', 950, 110000, 95000],
+      ['6110984', 'Gautam Shenoy', 17, 'Respectable (6)', 'Competent (6)', 'Strong (8)', 580, 38000, 65000]
     ];
     sheet.getRange(4, 1, realTargets.length, headers.length).setValues(realTargets);
     sheet.getRange(4, 7, realTargets.length, 3).setNumberFormat('£#,##0');

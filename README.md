@@ -64,7 +64,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 | :---: | :--- | :--- |
 | 1 | **Overview** | Executive command center, upcoming fixture scout report, season MVPs, and backroom staff status. |
 | 2 | **Squad** | Master player roster with clean numeric IDs (e.g. `6099466`), BTI talent ratings, subskills, market values, and 1-click dossier navigation. |
-| 3 | **Player Dossier** | ESPNCricinfo-style career statistics (FC, OD, T20 batting & bowling tables, averages, strike rates, 100s, 50s, 5w hauls) and unique club milestones. |
+| 3 | **Player Dossier** | Comprehensive Battrick career statistics (FC, OD, T20 batting & bowling tables, averages, strike rates, 100s, 50s, 5w hauls) and unique club milestones. |
 | 4 | **Best XI** | Tactical starting lineup generator with Captaincy (Leadership + Experience) and Wicketkeeper efficiency calculators. |
 | 5 | **Tactics & Pitch** | Pitch condition synergy matrix (Hard, Green, Dusty, Flat, Slow) and **5-phase authentic cricket bowling spells** (New ball seam, 1st change, middle spin, reverse swing, death overs). |
 | 6 | **Training Nets** | 10-net player development matrix defaulting to **Unassigned**, with Sports Psychologist (+15% mental focus), Physio, and Coach multiplier synergies. |

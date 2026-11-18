@@ -121,7 +121,7 @@ const BattrickService = {
 
     // Map squad objects to sheet rows
     const rows = squadArray.map(p => [
-      p.id || ('BT-' + Math.floor(10000 + Math.random() * 90000)),
+      p.id || ('' + Math.floor(10000 + Math.random() * 90000)),
       p.name || 'Unknown',
       Number(p.age) || 20,
       Number(p.wage) || 15000,
@@ -213,7 +213,7 @@ const BattrickService = {
     for (let i = 0; i < playerNodes.length; i++) {
       const p = playerNodes[i];
       parsedSquad.push({
-        id: p.getChildText('playerid') || ('BT-' + i),
+        id: p.getChildText('playerid') || ('' + i),
         name: p.getChildText('name') || 'Player ' + i,
         age: p.getChildText('age') || 20,
         wage: p.getChildText('wage') || 15000,

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
+import { Footer } from './components/Footer';
 import { Sidebar, TabType } from './components/Sidebar';
 import { DashboardView } from './components/DashboardView';
 import { SquadView } from './components/SquadView';
@@ -65,13 +66,32 @@ export function App() {
         if (clubData) setClub(clubData);
 
         const { data: squadData } = await supabase.from('players').select('*').eq('club_id', '13108');
-        if (squadData && squadData.length > 0) setSquad(squadData);
+        if (squadData && squadData.length > 0) {
+          const cleanSquad = squadData.map(p => ({
+            ...p,
+            id: String(p.id).replace(/^BT-/, ''),
+            club_id: String(p.club_id).replace(/^BT-/, '')
+          }));
+          setSquad(cleanSquad);
+        }
 
         const { data: logsData } = await supabase.from('training_logs').select('*').eq('club_id', '13108');
-        if (logsData && logsData.length > 0) setTrainingLogs(logsData);
+        if (logsData && logsData.length > 0) {
+          const cleanLogs = logsData.map(l => ({
+            ...l,
+            player_id: String(l.player_id).replace(/^BT-/, '')
+          }));
+          setTrainingLogs(cleanLogs);
+        }
 
         const { data: netsData } = await supabase.from('nets_matrix').select('*').eq('club_id', '13108');
-        if (netsData && netsData.length > 0) setNets(netsData);
+        if (netsData && netsData.length > 0) {
+          const cleanNets = netsData.map(n => ({
+            ...n,
+            player_id: n.player_id ? String(n.player_id).replace(/^BT-/, '') : null
+          }));
+          setNets(cleanNets);
+        }
 
         const { data: matchesData } = await supabase.from('matches').select('*').eq('club_id', '13108');
         if (matchesData && matchesData.length > 0) setMatches(matchesData);
@@ -152,7 +172,13 @@ export function App() {
           )}
 
           {currentTab === 'youth' && (
-            <YouthView squad={squad} />
+            <YouthView 
+              squad={squad} 
+              onPromotePlayer={(newPlayer) => {
+                setSquad(prev => [newPlayer, ...prev]);
+                setSelectedPlayerId(newPlayer.id);
+              }}
+            />
           )}
 
           {currentTab === 'finances' && (
@@ -184,6 +210,9 @@ export function App() {
           )}
         </main>
       </div>
+
+      {/* Sovereign Intelligence Suite Footer */}
+      <Footer club={club} />
     </div>
   );
 }

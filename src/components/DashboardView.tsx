@@ -254,7 +254,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="mt-4 w-full py-2 rounded-xl bg-[#061713] hover:bg-emerald-950 text-emerald-300 border border-emerald-700/50 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
             <UserSquare2 className="w-3.5 h-3.5" />
-            <span>Open Cricinfo Dossier</span>
+            <span>Open Player Dossier</span>
           </button>
         </div>
 
@@ -305,7 +305,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="mt-4 w-full py-2 rounded-xl bg-[#061713] hover:bg-teal-950 text-teal-300 border border-teal-700/50 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
             <UserSquare2 className="w-3.5 h-3.5" />
-            <span>Open Cricinfo Dossier</span>
+            <span>Open Player Dossier</span>
           </button>
         </div>
       </div>
@@ -362,7 +362,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 }}
                 className="mt-3 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/50 text-[11px] font-bold transition-all cursor-pointer"
               >
-                Inspect Cricinfo Career Stats &rarr;
+                Inspect Player Career Dossier &rarr;
               </button>
             </div>
           ))}

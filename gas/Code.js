@@ -326,8 +326,8 @@ function validateSubscriberLicense(licenseKey) {
   if (!licenseKey || licenseKey.trim() === '') {
     return { valid: false, message: 'License key required.' };
   }
-  // Format check: active licenses (e.g. BT-PRO-xxxx or demo key)
-  if (licenseKey.startsWith('BT-PRO-') || licenseKey === 'BT-VIP-2026' || licenseKey.length >= 8) {
+  // Format check: active licenses (e.g. PRO-xxxx or demo key)
+  if (licenseKey.startsWith('PRO-') || licenseKey === 'VIP-2026' || licenseKey.length >= 8) {
     return {
       valid: true,
       tier: 'BT Membership Plus',

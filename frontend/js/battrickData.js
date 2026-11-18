@@ -78,7 +78,7 @@ const BT_DATA = {
   },
   "squad": [
     {
-      "id": "BT-6099459",
+      "id": "6099459",
       "name": "Arjun Ashraf",
       "age": 21,
       "wage": 284,
@@ -102,7 +102,7 @@ const BT_DATA = {
       "role": "Squad Player"
     },
     {
-      "id": "BT-6099472",
+      "id": "6099472",
       "name": "Issa Baboor",
       "age": 26,
       "wage": 546,
@@ -126,7 +126,7 @@ const BT_DATA = {
       "role": "Middle-Order Batter"
     },
     {
-      "id": "BT-6099468",
+      "id": "6099468",
       "name": "Kamadev Battasi",
       "age": 25,
       "wage": 543,
@@ -150,7 +150,7 @@ const BT_DATA = {
       "role": "Lead Finger Spinner"
     },
     {
-      "id": "BT-6099466",
+      "id": "6099466",
       "name": "Bhadraksh Hemalatha",
       "age": 17,
       "wage": 545,
@@ -174,7 +174,7 @@ const BT_DATA = {
       "role": "Lead Finger Spinner (Wonderkid Trainee)"
     },
     {
-      "id": "BT-6099470",
+      "id": "6099470",
       "name": "Kamal Hydrose",
       "age": 25,
       "wage": 538,
@@ -198,7 +198,7 @@ const BT_DATA = {
       "role": "Opening Bowler"
     },
     {
-      "id": "BT-6099461",
+      "id": "6099461",
       "name": "Lalit Kadam",
       "age": 23,
       "wage": 369,
@@ -222,7 +222,7 @@ const BT_DATA = {
       "role": "Squad Player"
     },
     {
-      "id": "BT-6099475",
+      "id": "6099475",
       "name": "Achintya Kharge",
       "age": 26,
       "wage": 553,
@@ -246,7 +246,7 @@ const BT_DATA = {
       "role": "Middle-Order Batter (Club Captain)"
     },
     {
-      "id": "BT-6099473",
+      "id": "6099473",
       "name": "Vasant Malla",
       "age": 28,
       "wage": 544,
@@ -270,7 +270,7 @@ const BT_DATA = {
       "role": "Middle-Order Batter"
     },
     {
-      "id": "BT-6099476",
+      "id": "6099476",
       "name": "Ankur Palanisamy",
       "age": 27,
       "wage": 510,
@@ -294,7 +294,7 @@ const BT_DATA = {
       "role": "Primary Wicketkeeper"
     },
     {
-      "id": "BT-6099471",
+      "id": "6099471",
       "name": "Nandakishor Ramdhyani",
       "age": 17,
       "wage": 559,
@@ -318,7 +318,7 @@ const BT_DATA = {
       "role": "Young Top-Order Batter (Wonderkid Trainee)"
     },
     {
-      "id": "BT-6099469",
+      "id": "6099469",
       "name": "Purumitra Rishi",
       "age": 29,
       "wage": 549,
@@ -342,7 +342,7 @@ const BT_DATA = {
       "role": "Opening Bowler"
     },
     {
-      "id": "BT-6099474",
+      "id": "6099474",
       "name": "Viplav Sinduvalli",
       "age": 25,
       "wage": 544,
@@ -366,7 +366,7 @@ const BT_DATA = {
       "role": "Middle-Order Batter"
     },
     {
-      "id": "BT-6099467",
+      "id": "6099467",
       "name": "Arvind Somal",
       "age": 27,
       "wage": 552,
@@ -390,7 +390,7 @@ const BT_DATA = {
       "role": "Opening Bowler"
     },
     {
-      "id": "BT-6099462",
+      "id": "6099462",
       "name": "Atulya Surya Teja",
       "age": 24,
       "wage": 398,
@@ -418,7 +418,7 @@ const BT_DATA = {
     {
       "net": 1,
       "type": "Bowling",
-      "playerId": "BT-6099466",
+      "playerId": "6099466",
       "name": "Bhadraksh Hemalatha (17yo)",
       "coach": "1.00x (Competent Coach)",
       "etaWeeks": 7,
@@ -427,7 +427,7 @@ const BT_DATA = {
     {
       "net": 2,
       "type": "Batting",
-      "playerId": "BT-6099471",
+      "playerId": "6099471",
       "name": "Nandakishor Ramdhyani (17yo)",
       "coach": "1.00x (Competent Coach)",
       "etaWeeks": 7,
@@ -436,7 +436,7 @@ const BT_DATA = {
     {
       "net": 3,
       "type": "Fielding",
-      "playerId": "BT-6099475",
+      "playerId": "6099475",
       "name": "Achintya Kharge",
       "coach": "1.00x (Competent Coach)",
       "etaWeeks": 5,
@@ -445,7 +445,7 @@ const BT_DATA = {
     {
       "net": 4,
       "type": "Wicket Keeping",
-      "playerId": "BT-6099476",
+      "playerId": "6099476",
       "name": "Ankur Palanisamy",
       "coach": "1.00x (Competent Coach)",
       "etaWeeks": 8,
@@ -454,7 +454,7 @@ const BT_DATA = {
     {
       "net": 5,
       "type": "Stamina",
-      "playerId": "BT-6099461",
+      "playerId": "6099461",
       "name": "Lalit Kadam",
       "coach": "1.00x",
       "etaWeeks": 4,
@@ -594,7 +594,7 @@ const BT_DATA = {
   ],
   "scouts": [
     {
-      "id": "BT-6102144",
+      "id": "6102144",
       "name": "Tapan Chander",
       "age": 18,
       "primary": "Strong Batting (8)",
@@ -605,7 +605,7 @@ const BT_DATA = {
       "verdict": "STRONG BUY (YOUTH PROSPECT)"
     },
     {
-      "id": "BT-6088219",
+      "id": "6088219",
       "name": "Hariprasad Nair",
       "age": 19,
       "primary": "Proficient Bowling (7)",
@@ -616,7 +616,7 @@ const BT_DATA = {
       "verdict": "BUY (FIRST-TEAM PACER)"
     },
     {
-      "id": "BT-6045192",
+      "id": "6045192",
       "name": "Eswar Venkatesh",
       "age": 24,
       "primary": "Strong Keeping (8)",
@@ -627,7 +627,7 @@ const BT_DATA = {
       "verdict": "HOLD (OVERPRICED WICKETKEEPER)"
     },
     {
-      "id": "BT-6110984",
+      "id": "6110984",
       "name": "Gautam Shenoy",
       "age": 17,
       "primary": "Respectable Batting (6)",
@@ -639,16 +639,16 @@ const BT_DATA = {
     }
   ],
   "startingXI": [
-    { "pos": 1, "id": "BT-6099471", "name": "Nandakishor Ramdhyani", "role": "Opening Batter", "hand": "LHB", "tactic": "Attacking" },
-    { "pos": 2, "id": "BT-6099472", "name": "Issa Baboor", "role": "Opening Batter", "hand": "RHB", "tactic": "Moderate" },
-    { "pos": 3, "id": "BT-6099475", "name": "Achintya Kharge (C)", "role": "Anchor Batsman", "hand": "RHB", "tactic": "Moderate" },
-    { "pos": 4, "id": "BT-6099473", "name": "Vasant Malla", "role": "Middle-Order Batter", "hand": "LHB", "tactic": "Attacking" },
-    { "pos": 5, "id": "BT-6099474", "name": "Viplav Sinduvalli", "role": "Middle-Order Batter", "hand": "LHB", "tactic": "Attacking" },
-    { "pos": 6, "id": "BT-6099476", "name": "Ankur Palanisamy (WK)", "role": "Wicketkeeper", "hand": "RHB", "tactic": "Moderate" },
-    { "pos": 7, "id": "BT-6099467", "name": "Arvind Somal", "role": "All-Rounder", "hand": "LHB / LM", "tactic": "Defensive" },
-    { "pos": 8, "id": "BT-6099468", "name": "Kamadev Battasi", "role": "Lead Finger Spinner", "hand": "RHB / Spin", "tactic": "Moderate" },
-    { "pos": 9, "id": "BT-6099466", "name": "Bhadraksh Hemalatha", "role": "Strike Finger Spinner", "hand": "RHB / Spin", "tactic": "Attacking" },
-    { "pos": 10, "id": "BT-6099470", "name": "Kamal Hydrose", "role": "Opening Bowler", "hand": "LHB / LM", "tactic": "Defensive" },
-    { "pos": 11, "id": "BT-6099469", "name": "Purumitra Rishi", "role": "Opening Strike Seamer", "hand": "RHB / RM", "tactic": "Attacking" }
+    { "pos": 1, "id": "6099471", "name": "Nandakishor Ramdhyani", "role": "Opening Batter", "hand": "LHB", "tactic": "Attacking" },
+    { "pos": 2, "id": "6099472", "name": "Issa Baboor", "role": "Opening Batter", "hand": "RHB", "tactic": "Moderate" },
+    { "pos": 3, "id": "6099475", "name": "Achintya Kharge (C)", "role": "Anchor Batsman", "hand": "RHB", "tactic": "Moderate" },
+    { "pos": 4, "id": "6099473", "name": "Vasant Malla", "role": "Middle-Order Batter", "hand": "LHB", "tactic": "Attacking" },
+    { "pos": 5, "id": "6099474", "name": "Viplav Sinduvalli", "role": "Middle-Order Batter", "hand": "LHB", "tactic": "Attacking" },
+    { "pos": 6, "id": "6099476", "name": "Ankur Palanisamy (WK)", "role": "Wicketkeeper", "hand": "RHB", "tactic": "Moderate" },
+    { "pos": 7, "id": "6099467", "name": "Arvind Somal", "role": "All-Rounder", "hand": "LHB / LM", "tactic": "Defensive" },
+    { "pos": 8, "id": "6099468", "name": "Kamadev Battasi", "role": "Lead Finger Spinner", "hand": "RHB / Spin", "tactic": "Moderate" },
+    { "pos": 9, "id": "6099466", "name": "Bhadraksh Hemalatha", "role": "Strike Finger Spinner", "hand": "RHB / Spin", "tactic": "Attacking" },
+    { "pos": 10, "id": "6099470", "name": "Kamal Hydrose", "role": "Opening Bowler", "hand": "LHB / LM", "tactic": "Defensive" },
+    { "pos": 11, "id": "6099469", "name": "Purumitra Rishi", "role": "Opening Strike Seamer", "hand": "RHB / RM", "tactic": "Attacking" }
   ]
 };

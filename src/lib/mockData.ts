@@ -32,7 +32,7 @@ export const fallbackClub: Club = {
   its_points: 70
 };
 
-// 14 Real Somnath Super Devs Players (Clean IDs without "BT-", Full Cricinfo Stats, Unique Records)
+// 14 Real Somnath Super Devs Players (Clean IDs without "BT-", Full Battrick Career Stats, Unique Records)
 export const fallbackSquad: Player[] = [
   {
     id: '6099466',
@@ -502,7 +502,7 @@ export const fallbackCalendar: CalendarEvent[] = [
   { id: 'cal-7', date: '2026-11-29', dayOfWeek: 'Sunday', time: '12:00 UTC', type: 'SPONSOR_PAYMENT', title: 'Mid-Season Sponsor Confidence Audit', details: 'Fan club mood currently Over the Moon 🚀; Sponsors Delighted 💎.', importance: 'NORMAL' }
 ];
 
-// Club All-Time Cricket Records (Cricinfo Style Hall of Fame)
+// Club All-Time Cricket Records (Battrick Hall of Fame)
 export const fallbackRecords: CricketRecord[] = [
   { category: 'BATTING', recordName: 'Highest Individual Score', holder: 'Achintya Kharge', value: '144 (218b)', matchContext: 'FC vs Whykickamoocows', date: '2026-09-14' },
   { category: 'BATTING', recordName: 'Youngest Century Maker', holder: 'Nandakishor Ramdhyani', value: '112* (17y 14d)', matchContext: 'FC vs Pitch Punishers', date: '2026-10-02' },

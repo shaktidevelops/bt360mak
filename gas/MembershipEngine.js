@@ -146,7 +146,7 @@ const MembershipEngine = {
     const rows = netsArray.map((net, idx) => [
       idx + 1,
       net.type || 'Batting',
-      net.playerId || 'BT-00000',
+      net.playerId || '00000',
       net.playerName || 'None',
       net.coach || '1.15x',
       net.etaWeeks || 6,
