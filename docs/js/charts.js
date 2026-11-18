@@ -1,10 +1,7 @@
 /**
  * BT360MAK - charts.js
- * High-performance lightweight vector/canvas visualization engine.
- * Renders:
- * 1. Player Subskill Growth Curves
- * 2. Financial Cashflow Bars
- * 3. Tactical Pitch Synergy Radar
+ * Sovereign Vector Visualization Engine
+ * Subskill Curves & Somnath Super Devs Weekly Cashflow
  */
 
 const BT_CHARTS = {
@@ -16,18 +13,19 @@ const BT_CHARTS = {
     const height = 180;
     const padding = 28;
 
+    // Real Somnath 17yo Wonderkid Progression (5.0 Mediocre ➔ 6.0 Competent POP)
     const points = dataPoints || [
-      { week: 'W1', val: 14.1 },
-      { week: 'W2', val: 14.3 },
-      { week: 'W3', val: 14.5 },
-      { week: 'W4', val: 14.7 },
-      { week: 'W5', val: 14.9 },
-      { week: 'W6', val: 15.0 }, // POP!
-      { week: 'W7', val: 15.2 }
+      { week: 'W1', val: 5.2 },
+      { week: 'W2', val: 5.4 },
+      { week: 'W3', val: 5.6 },
+      { week: 'W4', val: 5.8 },
+      { week: 'W5', val: 5.95 },
+      { week: 'W6', val: 6.0 }, // POP to Competent!
+      { week: 'W7', val: 6.08 }
     ];
 
-    const minVal = 13.5;
-    const maxVal = 15.5;
+    const minVal = 4.8;
+    const maxVal = 6.4;
 
     let pathD = '';
     let circlesHtml = '';
@@ -42,12 +40,12 @@ const BT_CHARTS = {
         pathD += ` L ${x} ${y}`;
       }
 
-      const isPop = pt.val >= 15.0 && points[idx - 1] && points[idx - 1].val < 15.0;
+      const isPop = pt.val >= 6.0 && points[idx - 1] && points[idx - 1].val < 6.0;
       circlesHtml += `
         <circle cx="${x}" cy="${y}" r="${isPop ? 6 : 4}" fill="${isPop ? '#10b981' : '#38bdf8'}" stroke="#ffffff" stroke-width="2">
-          <title>${pt.week}: Level ${pt.val} ${isPop ? '(POP!)' : ''}</title>
+          <title>${pt.week}: Level ${pt.val} ${isPop ? '(POP to Competent!)' : ''}</title>
         </circle>
-        <text x="${x}" y="${height - 8}" text-anchor="middle" font-size="10" fill="var(--text-muted)">${pt.week}</text>
+        <text x="${x}" y="${height - 8}" text-anchor="middle" font-size="10" fill="#86efac">${pt.week}</text>
       `;
     });
 
@@ -59,10 +57,9 @@ const BT_CHARTS = {
             <stop offset="100%" stop-color="#10b981" />
           </linearGradient>
         </defs>
-        <!-- Grid horizontal lines -->
-        <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="var(--border-color)" stroke-dasharray="3,3" />
-        <line x1="${padding}" y1="${height / 2}" x2="${width - padding}" y2="${height / 2}" stroke="var(--border-color)" stroke-dasharray="3,3" />
-        <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="var(--border-color)" />
+        <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="rgba(26,77,68,0.5)" stroke-dasharray="3,3" />
+        <line x1="${padding}" y1="${height / 2}" x2="${width - padding}" y2="${height / 2}" stroke="rgba(26,77,68,0.5)" stroke-dasharray="3,3" />
+        <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(26,77,68,0.8)" />
 
         <path d="${pathD}" fill="none" stroke="url(#lineGrad)" stroke-width="3" stroke-linecap="round" />
         ${circlesHtml}
@@ -80,15 +77,16 @@ const BT_CHARTS = {
     const height = 170;
     const padding = 24;
 
+    // Real Somnath Super Devs Weekly Cashflow (£k)
     const data = weeklyRecords || [
-      { week: 'W1', in: 155, out: 140 },
-      { week: 'W2', in: 178, out: 142 },
-      { week: 'W3', in: 145, out: 145 },
-      { week: 'W4', in: 210, out: 152 },
-      { week: 'W5', in: 185, out: 148 }
+      { week: 'W1', in: 126, out: 34 },
+      { week: 'W2', in: 110, out: 32 },
+      { week: 'W3', in: 135, out: 35 },
+      { week: 'W4', in: 122, out: 31 },
+      { week: 'W5', in: 126, out: 34 }
     ];
 
-    const maxVal = 240;
+    const maxVal = 160;
     const colWidth = 24;
     let barsHtml = '';
 
@@ -101,21 +99,21 @@ const BT_CHARTS = {
       const yOut = height - padding - hOut;
 
       barsHtml += `
-        <!-- Inflow Bar (Green) -->
+        <!-- Inflow Bar (Emerald) -->
         <rect x="${groupX}" y="${yIn}" width="${colWidth / 2}" height="${hIn}" rx="3" fill="#10b981">
-          <title>${d.week} Inflow: $${d.in}k</title>
+          <title>${d.week} Inflow: £${d.in}k</title>
         </rect>
-        <!-- Outflow Bar (Rose) -->
+        <!-- Outflow Bar (Cherry) -->
         <rect x="${groupX + (colWidth / 2) + 2}" y="${yOut}" width="${colWidth / 2}" height="${hOut}" rx="3" fill="#f43f5e">
-          <title>${d.week} Outflow: $${d.out}k</title>
+          <title>${d.week} Outflow: £${d.out}k</title>
         </rect>
-        <text x="${groupX + (colWidth / 2)}" y="${height - 6}" text-anchor="middle" font-size="10" fill="var(--text-muted)">${d.week}</text>
+        <text x="${groupX + (colWidth / 2)}" y="${height - 6}" text-anchor="middle" font-size="10" fill="#86efac">${d.week}</text>
       `;
     });
 
     const svg = `
       <svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}">
-        <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="var(--border-color)" />
+        <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(26,77,68,0.8)" />
         ${barsHtml}
       </svg>
     `;

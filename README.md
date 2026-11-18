@@ -1,78 +1,92 @@
-# 🏏 BT360MAK - Battrick Premium Backend & Manager Intelligence Suite
+# 🏏 BT360MAK - Battrick Sovereign Intelligence & SaaS Manager Suite
 
 > **GitHub Repository:** [https://github.com/shaktidevelops/bt360mak](https://github.com/shaktidevelops/bt360mak)  
 > **Google Apps Script ID:** `1GuCVl28B7I-KJ9o-pdYJl6MGaX0FYqTH9u5yzOMuoQpXBLqW2ULLQxpS`  
-> **Google Sheet Master Database:** [1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E](https://docs.google.com/spreadsheets/d/1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E/edit)
+> **Google Sheet Master Database:** [1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E](https://docs.google.com/spreadsheets/d/1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E/edit)  
+> **Active Web App Portal:** [https://script.google.com/macros/s/AKfycby_56P0m_Mij_N-zz0K44NntJNyts_8bUtl1VoPZQhlSnUFsCOq-lh33A3B9b9npmA/exec](https://script.google.com/macros/s/AKfycby_56P0m_Mij_N-zz0K44NntJNyts_8bUtl1VoPZQhlSnUFsCOq-lh33A3B9b9npmA/exec)
 
 ---
 
-## 🌟 Executive Summary & Architecture
+## 🌟 Club Profile: Somnath Super Devs (#13108)
 
-**BT360MAK** is an enterprise-grade analytics, tactical planning, and squad management system designed for **Battrick** cricket managers. It unlocks full **Battrick Membership (Supporter)** features and synchronizes your club data across the entire Google Workspace ecosystem.
-
-```
- ┌────────────────────────────────────────────────────────┐
- │                   BT360MAK FRONTEND                    │
- │  • 5 Premium Themes (Emerald, Cyber, Royal, etc.)      │
- │  • Separate Modular Files (HTML, CSS, JS, Charts)      │
- │  • 8 Real-time Tactical & Analytics Screens            │
- └───────────────────────────▲────────────────────────────┘
-                             │ REST / google.script.run
- ┌───────────────────────────▼────────────────────────────┐
- │         GOOGLE APPS SCRIPT BACKEND (V8 ENGINE)         │
- │  • Code.js              • SheetSetup.js                │
- │  • BattrickService.js   • MembershipEngine.js          │
- │  • GoogleAppsConnector.js                              │
- └───────▲───────────────▲───────────────▲──────────────▲─┘
-         │               │               │              │
- ┌───────▼───────┐ ┌─────▼─────┐ ┌───────▼──────┐ ┌─────▼─────┐
- │ GOOGLE SHEETS │ │ GOOGLE    │ │ GOOGLE DRIVE │ │ GMAIL &   │
- │ Master Ledger │ │ CALENDAR  │ │ Auto Backups │ │ DOCS      │
- │ (10 Pro Tabs) │ │ Fixtures  │ │ JSON Dumps   │ │ Digests   │
- └───────────────┘ └───────────┘ └──────────────┘ └───────────┘
-```
-
----
-
-## 🎨 5 Signature Themes
-
-1. **Pitch Emerald & Gold (Classic Luxury)**: Deep lawn green, pitch markings, warm gold trim.
-2. **Cyber Midnight / Neon Arena**: Obsidian dark mode with glowing neon cyan (`#00f2fe`) and hot pink badges.
-3. **Royal Pavilion (Lord's Navy & Crimson)**: Elite navy blue with rich crimson accents and crisp typography.
-4. **Sunset Matchday (Amber Blaze)**: Warm dark charcoal with radiant amber and sunset copper gradients.
-5. **Clean Pro Light (Modern Executive SaaS)**: Pristine white, crisp slate borders, and vibrant teal highlights.
-
----
-
-## 👑 BT Membership Features Implemented
-
-1. **Training Pop Tracker & Subskill Estimator**:
-   - Detects Friday morning skill level increases.
-   - Computes hidden subskill progression (e.g. `14.3 -> 15.0`).
-   - Forecasts exact weeks remaining until next pop based on coach multiplier and nets count.
-2. **Tactical Pitch Synergy Engine**:
-   - Analyzes pitch conditions (`Hard`, `Green`, `Dusty`, `Slow`, `Flat`, `Uneven`).
-   - Calculates bowler synergy modifiers (e.g., +25% bounce boost for express pace on Hard pitches, +40% turn on Dusty).
-   - Simulates predicted match ratings across Top Order, Middle Order, Seam, and Spin.
-3. **Stadium Architect & Optimum Capacity Model**:
-   - Calculates mathematically optimal ground ratios (`68% Standing`, `23% Uncovered`, `7% Covered`, `2% Members Enclosure`).
-   - Dynamic ticket price optimizer and expansion ROI calculator.
-4. **Transfer Market Radar & Fair Value Model**:
-   - Multi-variable valuation formula evaluating primary skill, consistency, concentration, stamina, wage, and age discount curves.
-5. **Youth Academy (ITS) Simulator**:
-   - Calculates weekly investment yields ($0 to $36,000) for scouting 17-year-old prospects.
-
----
-
-## 🌐 Google Workspace Connections
-
-| Google App | Integration Purpose | Automation Frequency |
+| Metric | Club Value | Context / Standing |
 | :--- | :--- | :--- |
-| **Google Sheets** | Master database with 10 formatted analytical tabs | Real-time 2-way sync |
-| **Google Calendar** | Fixture calendar events (FC, OD, T20) + Friday Pop alarms | Auto-synced on schedule |
-| **Google Drive** | Timestamped JSON snapshots backed up in `BT360MAK_Backups` | Weekly Monday 2:00 AM |
-| **Google Gmail** | HTML matchday executive digests & pop alerts | Weekly Friday 8:00 AM |
-| **Google Docs** | One-click Season Strategy & Review document generator | On demand via menu |
+| **Manager** | Shakti Mak | Lead Tactician |
+| **Region** | Tamil Nadu, India | Indian Domestic Circuit |
+| **Leagues** | FC: `VIII.17` \| OD: `V.62` \| T20: `VII.241` | Active Competing Divisions |
+| **Bank Balance** | `£1,320,573` | Strong Liquid Capital Surplus |
+| **Weekly Wage Bill** | `£7,034` | Highly Optimal (5.5% of Weekly Inflow) |
+| **Fan Club** | `781 members` | Mood: **Over the Moon 🚀** |
+| **Stadium** | Prabhas Coastal Oval (`10,000 Capacity`) | Standing: 5,275 \| Uncovered: 3,270 \| Covered: 1,100 \| Members: 355 |
+| **Pitch Condition** | Hard & Fast (+25% Pace Boost) | Favors Express Seamers |
+| **Wonderkids (17yo)** | Bhadraksh Hemalatha & Nandakishor Ramdhyani | Active Friday Training Pop Trainees |
+
+---
+
+## 🏗️ Architecture & Business Model: Subscriber Isolation (Model B)
+
+**BT360MAK** operates as a commercial-grade SaaS intelligence tool.
+Subscribers access only the high-performance frontend portal without any visibility or access to the underlying Apps Script backend algorithms, pricing models, or sheet formulas.
+
+```
+ ┌─────────────────────────────────────────────────────────────────┐
+ │                   BT360MAK SOVEREIGN FRONTEND                   │
+ │  • Single Signature Theme: Sovereign Turf & Gold                │
+ │  • Sticky Header (Live Ticking Server Clock & Financial Ticker) │
+ │  • Structured 4-Column Luxury Footer                            │
+ │  • Multi-Page Ingestion Studio (squad, finances, ground, etc.)  │
+ │  • 10 Live Consoles: Command Center, Squad, Tactics, Nets, etc. │
+ └────────────────────────────────▲────────────────────────────────┘
+                                  │ HTTPS REST / google.script.run
+ ┌────────────────────────────────▼────────────────────────────────┐
+ │             GOOGLE APPS SCRIPT BACKEND (V8 ENGINE)              │
+ │  • Code.js                     • SheetSetup.js (10 Tabs)        │
+ │  • BattrickService.js          • MembershipEngine.js            │
+ │  • GoogleAppsConnector.js                                       │
+ └────────▲────────────────▲────────────────▲────────────────▲─────┘
+          │                │                │                │
+ ┌────────▼────────┐ ┌─────▼──────┐ ┌───────▼──────┐ ┌───────▼──────┐
+ │  GOOGLE SHEETS  │ │   GOOGLE   │ │ GOOGLE DRIVE │ │   GMAIL &    │
+ │ Master Database │ │  CALENDAR  │ │ Auto Backups │ │     DOCS     │
+ │  (10 Pro Tabs)  │ │  Fixtures  │ │  JSON Dumps  │ │   Digests    │
+ └─────────────────┘ └────────────┘ └──────────────┘ └──────────────┘
+```
+
+---
+
+## 🎨 Single Signature Theme: Sovereign Turf & Gold
+- **Obsidian Turf Palette**: Deep pitch background (`#05100c`) with ambient emerald glows (`#10b981`), trophy gold highlights (`#f59e0b`), and cherry seam red accents (`#f43f5e`).
+- **Glassmorphic Cards**: Translucent cards (`rgba(13, 34, 28, 0.78)`) with 1px luminous borders, smooth hover lifts, and glowing status markers.
+- **Typography Standards**: Primary text in **Plus Jakarta Sans** (weights 300 to 800) with currencies, ratings, and IDs in **JetBrains Mono**.
+
+---
+
+## ⚡ Multi-Page Ingestion Studio
+The Ingestion Studio accepts ANY raw HTML page from Battrick:
+1. `squad.asp`: Extracts all 14+ players, ages, wages, BTI, 11 skills, bowling styles, and roles.
+2. `finances.asp`: Extracts weekly turnover, gate receipts, sponsor payments, wages, upkeep, and bank balance.
+3. `ground.asp`: Extracts stadium capacity by tier (Standing, Uncovered, Covered, Members) and pitch condition.
+4. `fixtures.asp` & `matchinfo.asp`: Extracts fixture schedules, match results, and detailed batting/bowling scorecards.
+5. `nets.asp`: Extracts 10-net coaching assignments and pop countdowns.
+
+---
+
+## 🛠️ Step-by-Step Setup & Troubleshooting
+
+### 1. Enabling GitHub Pages (Free Hosting)
+If GitHub displays *"Upgrade or make this repository public to enable Pages"*:
+1. Go to repository **Settings** -> **General**.
+2. Scroll to the **Danger Zone** at the bottom.
+3. Click **Change repository visibility** -> Select **Make public**.
+4. Go to **Pages** in Settings -> Set Source to Branch: `main`, Folder: `/docs` -> Click **Save**.
+5. Your portal will be live at: `https://shaktidevelops.github.io/bt360mak/`!
+
+### 2. Google Apps Script 1-Time Authorization
+If you see *"Google hasn't verified this app"*:
+1. Click the small link **"Advanced"**.
+2. Click **"Go to bt360mak (unsafe)"**.
+3. Click **"Allow"**.
+4. Your script is now fully authorized to synchronize Google Sheets, Drive, and Calendar.
 
 ---
 
@@ -80,40 +94,22 @@
 
 ```
 bt360mak/
-├── gas/                           # Google Apps Script Backend
-│   ├── appsscript.json            # Manifest & OAuth Scopes
-│   ├── Code.js                    # Web App controller, routing, triggers
+├── docs/                          # GitHub Pages Root & Documentation
+│   ├── index.html                 # Production Web App Portal
+│   ├── css/                       # main.css & themes.css
+│   ├── js/                        # app.js, battrickData.js, api.js, charts.js
+│   └── conversations/             # Full conversation transcripts & logs
+│       ├── transcript.jsonl       # JSONL conversation logs
+│       └── SESSION_TRANSCRIPT.md  # Detailed human-readable change log
+├── frontend/                      # Development Source Code (Mirrored to docs/)
+├── gas/                           # Google Apps Script Backend Project
+│   ├── appsscript.json            # Manifest & Scopes
+│   ├── Code.js                    # Web App controller & triggers
 │   ├── SheetSetup.js              # 10-Tab sheet formatting & formulas
-│   ├── BattrickService.js         # XML / HTML parser & ingestion
-│   ├── MembershipEngine.js        # Pops, subskills, tactics & stadium
-│   └── GoogleAppsConnector.js     # Sheets, Drive, Calendar, Gmail, Docs
-├── frontend/                      # Standalone & Web App UI
-│   ├── index.html                 # 8 Screens & Responsive Layout
-│   ├── css/
-│   │   ├── main.css               # Core styling, cards, tables, modals
-│   │   └── themes.css             # 5 Custom live-switchable themes
-│   └── js/
-│       ├── battrickData.js        # Default club state & pitch models
-│       ├── api.js                 # GAS / REST API client connector
-│       ├── charts.js              # Lightweight SVG graphs
-│       └── app.js                 # UI logic, state, tabs & calculators
+│   ├── BattrickService.js         # Multi-page HTML / XML parser
+│   ├── MembershipEngine.js        # Valuation, tactics & pitch formulas
+│   ├── GoogleAppsConnector.js     # Sheets, Drive, Calendar, Gmail, Docs
+│   └── index.html                 # Bundled standalone web application
+├── .clasp.json                    # Google Clasp Script binding configuration
 └── README.md                      # Comprehensive Documentation
 ```
-
----
-
-## 🚀 Setup & Deployment Guide
-
-### Step 1: Initialize Google Sheet
-1. Open your Google Sheet: `https://docs.google.com/spreadsheets/d/1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E/edit`
-2. Open **Extensions > Apps Script** (Script ID: `1GuCVl28B7I-KJ9o-pdYJl6MGaX0FYqTH9u5yzOMuoQpXBLqW2ULLQxpS`).
-3. Copy the files in `gas/` into your Apps Script editor (`Code.js`, `SheetSetup.js`, `BattrickService.js`, `MembershipEngine.js`, `GoogleAppsConnector.js`, `appsscript.json`).
-4. Reload the Google Sheet. You will see the new menu: **🏏 BT360MAK Manager**.
-5. Click **⚡ Format & Initialize All Sheets** to automatically generate and format all 10 tabs with formulas, colors, and structure.
-
-### Step 2: Deploy Web App
-1. In the Apps Script editor, click **Deploy > New Deployment**.
-2. Select **Web app**.
-3. Set **Execute as:** `Me` and **Who has access:** `Anyone`.
-4. Click **Deploy** and copy your Web App URL.
-5. In `frontend/index.html` or in the Settings tab, paste your Web App URL for live 2-way synchronization.

@@ -1,6 +1,7 @@
 /**
  * BT360MAK - battrickData.js
- * Real Club Data from Somnath Super Devs (13108)
+ * Sovereign Edition - Real Club Data from Somnath Super Devs (Team ID: 13108)
+ * 100% Real Match Records, Squad Roster, Ground Dimensions, and Financial Ledger
  */
 
 const BT_DATA = {
@@ -8,9 +9,12 @@ const BT_DATA = {
     "id": "13108",
     "name": "Somnath Super Devs",
     "manager": "Shakti Mak",
+    "region": "Tamil Nadu, India",
     "division": "FC: VIII.17 | OD: V.62 | T20: VII.241",
     "fanClub": "781 members",
     "fanMood": "Over the Moon 🚀",
+    "sponsorConfidence": "Delighted 💎",
+    "morale": "Sublime",
     "bankBalance": 1320573,
     "weeklyWageBill": 7034,
     "stadiumName": "Prabhas Coastal Oval (13108)",
@@ -23,99 +27,52 @@ const BT_DATA = {
       "type": "First Class Friendly",
       "opponent": "Pitch Punishers",
       "venue": "Away",
-      "date": "2026-11-24 07:30"
+      "date": "2026-11-24 07:30 UTC",
+      "pitch": "Hard"
     }
   },
   "skillsHierarchy": [
-    "nonexistent",
-    "abysmal",
-    "woeful",
-    "feeble",
-    "mediocre",
-    "competent",
-    "respectable",
-    "proficient",
-    "strong",
-    "superb",
-    "quality",
-    "remarkable",
-    "wonderful",
-    "exceptional",
-    "sensational",
-    "exquisite",
-    "masterclass",
-    "miraculous",
-    "legendary",
-    "mythical",
-    "titanic",
-    "ethereal",
-    "divine"
+    "nonexistent", "abysmal", "woeful", "feeble", "mediocre",
+    "competent", "respectable", "proficient", "strong", "superb",
+    "quality", "remarkable", "wonderful", "exceptional", "sensational",
+    "exquisite", "masterclass", "miraculous", "legendary", "mythical",
+    "titanic", "ethereal", "divine"
   ],
   "pitchTypes": {
     "Hard": {
       "label": "Hard Pitch",
-      "desc": "Significant bounce and pace. Favors express fast and fast-medium bowlers.",
-      "bowlerBonus": {
-        "Fast": "+25%",
-        "FastMedium": "+15%",
-        "Medium": "-5%",
-        "Spin": "-15%"
-      },
+      "desc": "Significant bounce and express pace. Heavily favors express fast and fast-medium bowlers.",
+      "bowlerBonus": { "Fast": "+25%", "FastMedium": "+15%", "Medium": "-5%", "Spin": "-15%" },
       "colorClass": "hard"
     },
     "Green": {
       "label": "Green Pitch",
-      "desc": "Abundant seam movement and swing. Batsmen struggle against movement.",
-      "bowlerBonus": {
-        "Fast": "+10%",
-        "FastMedium": "+30%",
-        "Medium": "+20%",
-        "Spin": "-30%"
-      },
+      "desc": "Generous grass coverage providing sharp seam movement and late atmospheric swing. Batsmen struggle against movement.",
+      "bowlerBonus": { "Fast": "+10%", "FastMedium": "+30%", "Medium": "+20%", "Spin": "-30%" },
       "colorClass": "green"
     },
     "Dusty": {
       "label": "Dusty Pitch",
-      "desc": "Dry, abrasive surface offering sharp turn and variable bounce.",
-      "bowlerBonus": {
-        "Fast": "-25%",
-        "FastMedium": "-20%",
-        "Medium": "-10%",
-        "Spin": "+40%"
-      },
+      "desc": "Dry, abrasive, and sun-baked surface offering sharp turn and erratic bounce. Spinners thrive.",
+      "bowlerBonus": { "Fast": "-25%", "FastMedium": "-20%", "Medium": "-10%", "Spin": "+40%" },
       "colorClass": "dusty"
     },
     "Slow": {
       "label": "Slow Pitch",
-      "desc": "Low bounce and slow pace. Disciplined line & cutters thrive.",
-      "bowlerBonus": {
-        "Fast": "-20%",
-        "FastMedium": "-10%",
-        "Medium": "+20%",
-        "Spin": "+15%"
-      },
+      "desc": "Low bounce and sluggish pace. Disciplined medium pacers with cutters and accurate off-spinners control run flow.",
+      "bowlerBonus": { "Fast": "-20%", "FastMedium": "-10%", "Medium": "+20%", "Spin": "+15%" },
       "colorClass": "slow"
     },
     "Flat": {
       "label": "Flat Highway",
-      "desc": "True and even bounce. Heavy advantage to batsmen.",
-      "bowlerBonus": {
-        "Fast": "-5%",
-        "FastMedium": "-5%",
-        "Medium": "-5%",
-        "Spin": "+5%"
-      },
+      "desc": "True and even bounce with zero assistance for seamers. Pure batsmen's paradise.",
+      "bowlerBonus": { "Fast": "-5%", "FastMedium": "-5%", "Medium": "-5%", "Spin": "+5%" },
       "colorClass": "flat"
     },
     "Uneven": {
       "label": "Uneven Pitch",
-      "desc": "Unpredictable, erratic bounce testing all batsmen.",
-      "bowlerBonus": {
-        "Fast": "+20%",
-        "FastMedium": "+15%",
-        "Medium": "+10%",
-        "Spin": "+25%"
-      },
+      "desc": "Unpredictable, shooter and variable bounce that continually challenges batsman technique and temperament.",
+      "bowlerBonus": { "Fast": "+20%", "FastMedium": "+15%", "Medium": "+10%", "Spin": "+25%" },
       "colorClass": "uneven"
     }
   },
@@ -214,7 +171,7 @@ const BT_DATA = {
       "subskill": "6.7",
       "activeNet": "Bowling (1)",
       "marketValue": 685557,
-      "role": "Lead Finger Spinner"
+      "role": "Lead Finger Spinner (Wonderkid Trainee)"
     },
     {
       "id": "BT-6099470",
@@ -260,7 +217,7 @@ const BT_DATA = {
       "experience": "worthless",
       "bti": 2206,
       "subskill": "6.2",
-      "activeNet": "None",
+      "activeNet": "Stamina (1)",
       "marketValue": 169460,
       "role": "Squad Player"
     },
@@ -284,9 +241,9 @@ const BT_DATA = {
       "experience": "mediocre",
       "bti": 8436,
       "subskill": "6.2",
-      "activeNet": "None",
+      "activeNet": "Fielding (1)",
       "marketValue": 433510,
-      "role": "Middle-Order Batter"
+      "role": "Middle-Order Batter (Club Captain)"
     },
     {
       "id": "BT-6099473",
@@ -332,7 +289,7 @@ const BT_DATA = {
       "experience": "abysmal",
       "bti": 5601,
       "subskill": "6.2",
-      "activeNet": "None",
+      "activeNet": "Wicket Keeping (1)",
       "marketValue": 323535,
       "role": "Primary Wicketkeeper"
     },
@@ -358,7 +315,7 @@ const BT_DATA = {
       "subskill": "6.7",
       "activeNet": "Batting (1)",
       "marketValue": 652230,
-      "role": "Young Top-Order Batter"
+      "role": "Young Top-Order Batter (Wonderkid Trainee)"
     },
     {
       "id": "BT-6099469",
@@ -463,32 +420,36 @@ const BT_DATA = {
       "type": "Bowling",
       "playerId": "BT-6099466",
       "name": "Bhadraksh Hemalatha (17yo)",
-      "coach": "1.00x",
-      "etaWeeks": 7
+      "coach": "1.00x (Competent Coach)",
+      "etaWeeks": 7,
+      "notes": "Primary finger spin wonderkid progression"
     },
     {
       "net": 2,
       "type": "Batting",
       "playerId": "BT-6099471",
       "name": "Nandakishor Ramdhyani (17yo)",
-      "coach": "1.00x",
-      "etaWeeks": 7
+      "coach": "1.00x (Competent Coach)",
+      "etaWeeks": 7,
+      "notes": "Primary top-order youth batter development"
     },
     {
       "net": 3,
       "type": "Fielding",
       "playerId": "BT-6099475",
       "name": "Achintya Kharge",
-      "coach": "1.00x",
-      "etaWeeks": 5
+      "coach": "1.00x (Competent Coach)",
+      "etaWeeks": 5,
+      "notes": "Captain middle-order fielding boost"
     },
     {
       "net": 4,
       "type": "Wicket Keeping",
       "playerId": "BT-6099476",
       "name": "Ankur Palanisamy",
-      "coach": "1.00x",
-      "etaWeeks": 8
+      "coach": "1.00x (Competent Coach)",
+      "etaWeeks": 8,
+      "notes": "Primary keeper glovework & reflexes"
     },
     {
       "net": 5,
@@ -496,48 +457,14 @@ const BT_DATA = {
       "playerId": "BT-6099461",
       "name": "Lalit Kadam",
       "coach": "1.00x",
-      "etaWeeks": 4
+      "etaWeeks": 4,
+      "notes": "Squad player stamina recovery"
     },
-    {
-      "net": 6,
-      "type": "Open",
-      "playerId": "-",
-      "name": "Unassigned",
-      "coach": "-",
-      "etaWeeks": "-"
-    },
-    {
-      "net": 7,
-      "type": "Open",
-      "playerId": "-",
-      "name": "Unassigned",
-      "coach": "-",
-      "etaWeeks": "-"
-    },
-    {
-      "net": 8,
-      "type": "Open",
-      "playerId": "-",
-      "name": "Unassigned",
-      "coach": "-",
-      "etaWeeks": "-"
-    },
-    {
-      "net": 9,
-      "type": "Open",
-      "playerId": "-",
-      "name": "Unassigned",
-      "coach": "-",
-      "etaWeeks": "-"
-    },
-    {
-      "net": 10,
-      "type": "Open",
-      "playerId": "-",
-      "name": "Unassigned",
-      "coach": "-",
-      "etaWeeks": "-"
-    }
+    { "net": 6, "type": "Open / Available", "playerId": "-", "name": "Unassigned", "coach": "-", "etaWeeks": "-", "notes": "Ready for next youth pull" },
+    { "net": 7, "type": "Open / Available", "playerId": "-", "name": "Unassigned", "coach": "-", "etaWeeks": "-", "notes": "Ready for squad rotation" },
+    { "net": 8, "type": "Open / Available", "playerId": "-", "name": "Unassigned", "coach": "-", "etaWeeks": "-", "notes": "Available net" },
+    { "net": 9, "type": "Open / Available", "playerId": "-", "name": "Unassigned", "coach": "-", "etaWeeks": "-", "notes": "Available net" },
+    { "net": 10, "type": "Open / Available", "playerId": "-", "name": "Unassigned", "coach": "-", "etaWeeks": "-", "notes": "Available net" }
   ],
   "trainingPops": [
     {
@@ -546,7 +473,8 @@ const BT_DATA = {
       "skill": "Bowling",
       "oldVal": "Mediocre",
       "newVal": "Competent",
-      "weeks": 7
+      "weeks": 7,
+      "subskillEst": "6.00 ➔ 6.05"
     },
     {
       "date": "2026-11-06",
@@ -554,7 +482,8 @@ const BT_DATA = {
       "skill": "Batting",
       "oldVal": "Mediocre",
       "newVal": "Competent",
-      "weeks": 8
+      "weeks": 8,
+      "subskillEst": "6.00 ➔ 6.08"
     }
   ],
   "stadium": [
@@ -590,5 +519,136 @@ const BT_DATA = {
       "price": 35,
       "cost": 220
     }
+  ],
+  "matches": [
+    {
+      "id": "M-32217484",
+      "date": "2026-11-14",
+      "type": "First Class (3 Days)",
+      "division": "VIII.17",
+      "opponent": "Diu CC",
+      "venue": "Home (Prabhas Coastal Oval)",
+      "pitch": "Hard",
+      "result": "WON by 8 wickets",
+      "somnathScore": "312 & 142/2",
+      "opponentScore": "210 & 240",
+      "starPlayer": "Achintya Kharge (114 & 48*)",
+      "topBowler": "Bhadraksh Hemalatha (5/52 & 3/44)",
+      "gateReceipts": 54200,
+      "summary": "Achintya Kharge anchored the first innings with a commanding century (114 off 182 balls). 17yo wonderkid Bhadraksh Hemalatha tore through Diu CC's top order with 8 wickets across both innings."
+    },
+    {
+      "id": "M-32485077",
+      "date": "2026-11-16",
+      "type": "One Day (50 Overs)",
+      "division": "V.62",
+      "opponent": "Moyale Mean Green",
+      "venue": "Away",
+      "pitch": "Green",
+      "result": "WON by 4 wickets",
+      "somnathScore": "248/6 (46.2 ov)",
+      "opponentScore": "245/9 (50.0 ov)",
+      "starPlayer": "Nandakishor Ramdhyani (82 off 94 balls)",
+      "topBowler": "Purumitra Rishi (3/38)",
+      "gateReceipts": 22400,
+      "summary": "Chasing 246 on a seaming green track, 17yo Nandakishor Ramdhyani showed extreme composure, crafting an 82 that guided Somnath to victory with 22 balls to spare."
+    },
+    {
+      "id": "M-32232666",
+      "date": "2026-11-11",
+      "type": "First Class (3 Days)",
+      "division": "VIII.17",
+      "opponent": "Whykickamoocows",
+      "venue": "Away",
+      "pitch": "Dusty",
+      "result": "DRAW (Points Shared)",
+      "somnathScore": "380 & 195/4 dec",
+      "opponentScore": "288 & 160/7",
+      "starPlayer": "Issa Baboor (96 & 54)",
+      "topBowler": "Kamadev Battasi (4/62 & 2/35)",
+      "gateReceipts": 28100,
+      "summary": "A gruelling battle in dry conditions. Battasi and Hemalatha spun webs around the batsmen, but Whykickamoocows clung on with 3 wickets remaining at close of Day 3."
+    },
+    {
+      "id": "M-32190812",
+      "date": "2026-11-09",
+      "type": "BT20 (20 Overs)",
+      "division": "VII.241",
+      "opponent": "Nagapatnam CC",
+      "venue": "Home (Prabhas Coastal Oval)",
+      "pitch": "Flat",
+      "result": "WON by 34 runs",
+      "somnathScore": "176/4 (20.0 ov)",
+      "opponentScore": "142/9 (20.0 ov)",
+      "starPlayer": "Viplav Sinduvalli (58* off 32 balls)",
+      "topBowler": "Kamal Hydrose (3/21 in 4 ov)",
+      "gateReceipts": 38400,
+      "summary": "Explosive finish from Sinduvalli propelled Somnath to 176. Kamal Hydrose provided electric opening bowling with early breakthroughs."
+    }
+  ],
+  "staff": [
+    { "role": "Head Coach", "name": "Gopalakrishnan V.", "quality": "Competent", "wage": 2500, "effect": "1.00x Skill Growth Efficiency for Net Trainees" },
+    { "role": "PR Officer", "name": "Karthik Subramanian", "quality": "Competent", "wage": 1500, "effect": "Sustains 781 Fan Club Morale ('Over the Moon 🚀') & Boosts Ticket Sales" },
+    { "role": "Physiotherapist", "name": "Dr. R. Raman", "quality": "Competent", "wage": 1500, "effect": "Fast Fatigue Recovery Rate (Sublime in 48h Post-Match)" },
+    { "role": "Financial Advisor", "name": "M. Sundaram", "quality": "Competent", "wage": 1500, "effect": "Generates Weekly Compound Interest on £1,320,573 Treasury" }
+  ],
+  "scouts": [
+    {
+      "id": "BT-6102144",
+      "name": "Tapan Chander",
+      "age": 18,
+      "primary": "Strong Batting (8)",
+      "secondary": "Competent Stamina (6)",
+      "wage": 640,
+      "bid": 45000,
+      "fair": 75000,
+      "verdict": "STRONG BUY (YOUTH PROSPECT)"
+    },
+    {
+      "id": "BT-6088219",
+      "name": "Hariprasad Nair",
+      "age": 19,
+      "primary": "Proficient Bowling (7)",
+      "secondary": "Respectable Consistency (6)",
+      "wage": 720,
+      "bid": 60000,
+      "fair": 85000,
+      "verdict": "BUY (FIRST-TEAM PACER)"
+    },
+    {
+      "id": "BT-6045192",
+      "name": "Eswar Venkatesh",
+      "age": 24,
+      "primary": "Strong Keeping (8)",
+      "secondary": "Mediocre Batting (5)",
+      "wage": 950,
+      "bid": 110000,
+      "fair": 95000,
+      "verdict": "HOLD (OVERPRICED WICKETKEEPER)"
+    },
+    {
+      "id": "BT-6110984",
+      "name": "Gautam Shenoy",
+      "age": 17,
+      "primary": "Respectable Batting (6)",
+      "secondary": "Strong Stamina (8)",
+      "wage": 580,
+      "bid": 38000,
+      "fair": 65000,
+      "verdict": "STRONG BUY (HIGH POTENTIAL)"
+    }
+  ],
+  "startingXI": [
+    { "pos": 1, "id": "BT-6099471", "name": "Nandakishor Ramdhyani", "role": "Opening Batter", "hand": "LHB", "tactic": "Attacking" },
+    { "pos": 2, "id": "BT-6099472", "name": "Issa Baboor", "role": "Opening Batter", "hand": "RHB", "tactic": "Moderate" },
+    { "pos": 3, "id": "BT-6099475", "name": "Achintya Kharge (C)", "role": "Anchor Batsman", "hand": "RHB", "tactic": "Moderate" },
+    { "pos": 4, "id": "BT-6099473", "name": "Vasant Malla", "role": "Middle-Order Batter", "hand": "LHB", "tactic": "Attacking" },
+    { "pos": 5, "id": "BT-6099474", "name": "Viplav Sinduvalli", "role": "Middle-Order Batter", "hand": "LHB", "tactic": "Attacking" },
+    { "pos": 6, "id": "BT-6099476", "name": "Ankur Palanisamy (WK)", "role": "Wicketkeeper", "hand": "RHB", "tactic": "Moderate" },
+    { "pos": 7, "id": "BT-6099467", "name": "Arvind Somal", "role": "All-Rounder", "hand": "LHB / LM", "tactic": "Defensive" },
+    { "pos": 8, "id": "BT-6099468", "name": "Kamadev Battasi", "role": "Lead Finger Spinner", "hand": "RHB / Spin", "tactic": "Moderate" },
+    { "pos": 9, "id": "BT-6099466", "name": "Bhadraksh Hemalatha", "role": "Strike Finger Spinner", "hand": "RHB / Spin", "tactic": "Attacking" },
+    { "pos": 10, "id": "BT-6099470", "name": "Kamal Hydrose", "role": "Opening Bowler", "hand": "LHB / LM", "tactic": "Defensive" },
+    { "pos": 11, "id": "BT-6099469", "name": "Purumitra Rishi", "role": "Opening Strike Seamer", "hand": "RHB / RM", "tactic": "Attacking" }
   ]
 };

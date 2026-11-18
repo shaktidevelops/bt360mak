@@ -1,135 +1,52 @@
 /**
  * BT360MAK - themes.css
- * 5 Premium Custom Themes:
- * 1. theme-pitch-emerald (Classic Cricket Luxury)
- * 2. theme-cyber-arena (Cyber Midnight / Neon)
- * 3. theme-royal-pavilion (Royal Lords Navy & Crimson)
- * 4. theme-sunset-blaze (Sunset Matchday / Amber)
- * 5. theme-clean-pro (Modern Dashboard Light / SaaS)
+ * Sovereign Edition Accent & Visual Embellishments Module
  */
 
-:root {
-  /* Default: Theme 1 - Pitch Emerald */
-  --bg-primary: #071714;
-  --bg-secondary: #0b221e;
-  --bg-card: #0f2e29;
-  --bg-card-hover: #133a34;
-  --bg-surface: #143e37;
-  --text-main: #f0fdf4;
-  --text-muted: #86efac;
-  --text-sub: #a7f3d0;
-  --accent: #10b981;
-  --accent-glow: rgba(16, 185, 129, 0.25);
-  --accent-secondary: #f59e0b;
-  --border-color: #1a4d44;
-  --border-highlight: #34d399;
-  --badge-bg: rgba(16, 185, 129, 0.15);
-  --badge-text: #6ee7b7;
-  --danger: #ef4444;
-  --warning: #f59e0b;
-  --success: #10b981;
-  --info: #06b6d4;
-  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --header-grad: linear-gradient(135deg, #064e3b 0%, #042f2e 100%);
+/* Shimmer Glow Animation */
+@keyframes goldShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-/* 1. THEME: Pitch Emerald & Gold (Classic Luxury Cricket) */
-[data-theme="emerald"] {
-  --bg-primary: #071714;
-  --bg-secondary: #0b221e;
-  --bg-card: #0f2e29;
-  --bg-card-hover: #133a34;
-  --bg-surface: #143e37;
-  --text-main: #f0fdf4;
-  --text-muted: #86efac;
-  --text-sub: #a7f3d0;
-  --accent: #10b981;
-  --accent-glow: rgba(16, 185, 129, 0.25);
-  --accent-secondary: #fbbf24;
-  --border-color: #1a4d44;
-  --border-highlight: #34d399;
-  --badge-bg: rgba(16, 185, 129, 0.15);
-  --badge-text: #6ee7b7;
-  --header-grad: linear-gradient(135deg, #064e3b 0%, #042f2e 100%);
+.text-gold-shimmer {
+  background: linear-gradient(90deg, #f59e0b 0%, #fef08a 50%, #f59e0b 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldShimmer 3s linear infinite;
 }
 
-/* 2. THEME: Cyber Midnight / Neon Arena (Dark Sci-Fi Stadium) */
-[data-theme="cyber"] {
-  --bg-primary: #080b14;
-  --bg-secondary: #0e1322;
-  --bg-card: #131b31;
-  --bg-card-hover: #1b2645;
-  --bg-surface: #1e2a4a;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-sub: #38bdf8;
-  --accent: #00f2fe;
-  --accent-glow: rgba(0, 242, 254, 0.3);
-  --accent-secondary: #ec4899;
-  --border-color: #24345c;
-  --border-highlight: #00f2fe;
-  --badge-bg: rgba(0, 242, 254, 0.15);
-  --badge-text: #38bdf8;
-  --header-grad: linear-gradient(135deg, #1e1b4b 0%, #0c4a6e 100%);
+/* Neon Pulse Border */
+.border-pulse-emerald {
+  animation: borderGlow 2.5s infinite alternate;
 }
 
-/* 3. THEME: Royal Pavilion (Lord's Navy & Crimson) */
-[data-theme="royal"] {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-card: #243249;
-  --bg-card-hover: #2e3e5b;
-  --bg-surface: #334155;
-  --text-main: #ffffff;
-  --text-muted: #cbd5e1;
-  --text-sub: #fca5a5;
-  --accent: #e11d48;
-  --accent-glow: rgba(225, 29, 72, 0.3);
-  --accent-secondary: #f59e0b;
-  --border-color: #3b4c68;
-  --border-highlight: #e11d48;
-  --badge-bg: rgba(225, 29, 72, 0.18);
-  --badge-text: #fda4af;
-  --header-grad: linear-gradient(135deg, #881337 0%, #1e293b 100%);
+@keyframes borderGlow {
+  0% { border-color: rgba(16, 185, 129, 0.3); box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+  100% { border-color: rgba(52, 211, 153, 0.8); box-shadow: 0 0 25px rgba(16, 185, 129, 0.4); }
 }
 
-/* 4. THEME: Sunset Matchday / Amber Flame */
-[data-theme="sunset"] {
-  --bg-primary: #121014;
-  --bg-secondary: #1c1820;
-  --bg-card: #27212d;
-  --bg-card-hover: #352c3c;
-  --bg-surface: #3f3448;
-  --text-main: #fff7ed;
-  --text-muted: #fed7aa;
-  --text-sub: #fdba74;
-  --accent: #f97316;
-  --accent-glow: rgba(249, 115, 22, 0.3);
-  --accent-secondary: #e11d48;
-  --border-color: #4a3a54;
-  --border-highlight: #f97316;
-  --badge-bg: rgba(249, 115, 22, 0.18);
-  --badge-text: #fdba74;
-  --header-grad: linear-gradient(135deg, #7c2d12 0%, #27212d 100%);
+/* Radar ping */
+.radar-ping {
+  position: relative;
+  display: inline-block;
 }
 
-/* 5. THEME: Clean Pro Light (Modern Executive SaaS) */
-[data-theme="light"] {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
-  --bg-surface: #e2e8f0;
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --text-sub: #2563eb;
-  --accent: #0f766e;
-  --accent-glow: rgba(15, 118, 110, 0.2);
-  --accent-secondary: #d97706;
-  --border-color: #e2e8f0;
-  --border-highlight: #0f766e;
-  --badge-bg: #ccfbf1;
-  --badge-text: #0f766e;
-  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --header-grad: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+.radar-ping::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--emerald-bright);
+  animation: radarWave 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+@keyframes radarWave {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 35px; height: 35px; opacity: 0; }
 }
