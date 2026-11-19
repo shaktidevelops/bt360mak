@@ -12,16 +12,16 @@ INSERT INTO public.clubs (
 ) VALUES (
     '13108',
     'Somnath Super Devs',
-    'Shakti Mak',
+    'Devs',
     'Tamil Nadu, India',
-    'VIII.17',
-    'V.62',
-    'VII.241',
+    'VIII.17 (#1)',
+    'V.62 (#2)',
+    'VII.241 (#1)',
     781,
     'Over the Moon 🚀',
-    'Delighted 💎',
-    'Sublime',
-    1320573,
+    'Ecstatic 💎',
+    'Over the Moon',
+    1325820,
     7034,
     'Prabhas Coastal Oval (13108)',
     10000,
@@ -40,20 +40,20 @@ INSERT INTO public.players (
     stamina, form, fatigue, leadership, experience, bti, subskill,
     active_net, market_value, tactical_role, is_wonderkid
 ) VALUES
-('6099459', '13108', 'Arjun Ashraf', 21, 284, 'LHB', 'L FM', 'abysmal', 'woeful', 'feeble', 'mediocre', 'abysmal', 'mediocre', 'feeble', 'abysmal', 'sublime', 'respectable', 'abysmal', 2664, 6.20, 'None', 164240, 'Squad Player', false),
-('6099472', '13108', 'Issa Baboor', 26, 546, 'RHB', 'R F', 'competent', 'woeful', 'abysmal', 'mediocre', 'woeful', 'competent', 'competent', 'strong', 'sublime', 'respectable', 'feeble', 7440, 6.20, 'None', 396900, 'Middle-Order Batter', false),
-('6099468', '13108', 'Kamadev Battasi', 25, 543, 'RHB', 'R H finger spin', 'feeble', 'competent', 'feeble', 'woeful', 'competent', 'woeful', 'competent', 'respectable', 'sublime', 'abysmal', 'woeful', 6665, 6.20, 'None', 369025, 'Lead Finger Spinner', false),
-('6099466', '13108', 'Bhadraksh Hemalatha', 17, 545, 'RHB', 'R H finger spin', 'abysmal', 'competent', 'feeble', 'abysmal', 'competent', 'feeble', 'competent', 'superb', 'sublime', 'feeble', 'abysmal', 6989, 6.70, 'Bowling (1)', 685557, 'Lead Finger Spinner (Wonderkid)', true),
-('6099470', '13108', 'Kamal Hydrose', 25, 538, 'LHB', 'L M', 'woeful', 'competent', 'woeful', 'woeful', 'competent', 'abysmal', 'competent', 'superb', 'sublime', 'woeful', 'feeble', 6085, 6.20, 'None', 347475, 'Opening Bowler', false),
-('6099461', '13108', 'Lalit Kadam', 23, 369, 'RHB', 'R FM', 'mediocre', 'woeful', 'woeful', 'feeble', 'woeful', 'feeble', 'abysmal', 'woeful', 'sublime', 'abysmal', 'worthless', 2206, 6.20, 'Stamina (1)', 169460, 'Squad Player', false),
-('6099475', '13108', 'Achintya Kharge', 26, 553, 'RHB', 'R M', 'competent', 'woeful', 'woeful', 'competent', 'woeful', 'competent', 'competent', 'superb', 'sublime', 'competent', 'mediocre', 8436, 6.20, 'Fielding (1)', 433510, 'Middle-Order Batter (C)', false),
-('6099473', '13108', 'Vasant Malla', 28, 544, 'LHB', 'L FM', 'competent', 'feeble', 'woeful', 'mediocre', 'abysmal', 'competent', 'competent', 'superb', 'sublime', 'competent', 'feeble', 7468, 6.20, 'None', 397380, 'Middle-Order Batter', false),
-('6099476', '13108', 'Ankur Palanisamy', 27, 510, 'RHB', 'R H finger spin', 'mediocre', 'woeful', 'competent', 'feeble', 'mediocre', 'woeful', 'competent', 'woeful', 'sublime', 'proficient', 'abysmal', 5601, 6.20, 'Wicket Keeping (1)', 323535, 'Primary Wicketkeeper', false),
-('6099471', '13108', 'Nandakishor Ramdhyani', 17, 559, 'LHB', 'L M', 'competent', 'mediocre', 'woeful', 'woeful', 'feeble', 'competent', 'competent', 'mediocre', 'sublime', 'competent', 'abysmal', 6360, 6.70, 'Batting (1)', 652230, 'Young Top-Order Batter (Wonderkid)', true),
-('6099469', '13108', 'Purumitra Rishi', 29, 549, 'RHB', 'R M', 'feeble', 'competent', 'woeful', 'woeful', 'competent', 'feeble', 'competent', 'superb', 'sublime', 'feeble', 'abysmal', 7286, 6.20, 'None', 392260, 'Opening Bowler', false),
-('6099474', '13108', 'Viplav Sinduvalli', 25, 544, 'LHB', 'L M', 'competent', 'woeful', 'feeble', 'abysmal', 'feeble', 'competent', 'competent', 'superb', 'sublime', 'competent', 'mediocre', 7031, 6.20, 'None', 382085, 'Middle-Order Batter', false),
-('6099467', '13108', 'Arvind Somal', 27, 552, 'LHB', 'L M', 'woeful', 'competent', 'feeble', 'woeful', 'competent', 'feeble', 'competent', 'proficient', 'energetic', 'respectable', 'abysmal', 6775, 6.20, 'None', 375125, 'Opening Bowler', false),
-('6099462', '13108', 'Atulya Surya Teja', 24, 398, 'RHB', 'R M', 'mediocre', 'woeful', 'mediocre', 'woeful', 'feeble', 'woeful', 'woeful', 'worthless', 'sublime', 'woeful', 'abysmal', 2813, 6.20, 'None', 197955, 'Squad Player', false)
+('6099459', '13108', 'Arjun Ashraf', 21, 284, 'LHB', 'Left-arm Fast Medium', 'abysmal', 'woeful', 'feeble', 'mediocre', 'abysmal', 'mediocre', 'feeble', 'abysmal', 'sublime', 'respectable', 'abysmal', 2664, 6.20, 'Unassigned', 226440, 'Squad Player', false),
+('6099472', '13108', 'Issa Baboor', 26, 546, 'RHB', 'Right-arm Fast', 'competent', 'woeful', 'abysmal', 'mediocre', 'woeful', 'competent', 'competent', 'strong', 'sublime', 'respectable', 'feeble', 7440, 6.20, 'Unassigned', 632400, 'Middle Order Batsman', false),
+('6099468', '13108', 'Kamadev Battasi', 25, 543, 'RHB', 'Right-arm Finger Spin', 'feeble', 'competent', 'feeble', 'woeful', 'competent', 'woeful', 'competent', 'respectable', 'sublime', 'abysmal', 'woeful', 6665, 6.20, 'Unassigned', 566525, 'Lead Spinner', false),
+('6099466', '13108', 'Bhadraksh Hemalatha', 17, 545, 'RHB', 'Right-arm Finger Spin', 'abysmal', 'competent', 'feeble', 'abysmal', 'competent', 'feeble', 'competent', 'superb', 'sublime', 'feeble', 'abysmal', 6989, 6.70, 'Unassigned', 594065, 'Wonderkid Spinner', true),
+('6099470', '13108', 'Kamal Hydrose', 25, 538, 'LHB', 'Left-arm Medium', 'woeful', 'competent', 'woeful', 'woeful', 'competent', 'abysmal', 'competent', 'superb', 'sublime', 'woeful', 'feeble', 6085, 6.20, 'Unassigned', 517225, 'Opening Bowler', false),
+('6099461', '13108', 'Lalit Kadam', 23, 369, 'RHB', 'Right-arm Fast Medium', 'mediocre', 'woeful', 'woeful', 'feeble', 'woeful', 'feeble', 'abysmal', 'woeful', 'sublime', 'abysmal', 'worthless', 2206, 6.20, 'Unassigned', 187510, 'Squad Player', false),
+('6099475', '13108', 'Achintya Kharge', 26, 553, 'RHB', 'Right-arm Medium', 'competent', 'woeful', 'woeful', 'competent', 'woeful', 'competent', 'competent', 'superb', 'sublime', 'competent', 'mediocre', 8436, 6.20, 'Unassigned', 717060, 'Captain & Top Order Batsman', false),
+('6099473', '13108', 'Vasant Malla', 28, 544, 'LHB', 'Left-arm Fast Medium', 'competent', 'feeble', 'woeful', 'mediocre', 'abysmal', 'competent', 'competent', 'superb', 'sublime', 'competent', 'feeble', 7468, 6.20, 'Unassigned', 634780, 'Top Order Batsman', false),
+('6099476', '13108', 'Ankur Palanisamy', 27, 510, 'RHB', 'Right-arm Finger Spin', 'mediocre', 'woeful', 'competent', 'feeble', 'mediocre', 'woeful', 'competent', 'woeful', 'sublime', 'proficient', 'abysmal', 5601, 6.20, 'Unassigned', 476085, 'Primary Wicketkeeper', false),
+('6099471', '13108', 'Nandakishor Ramdhyani', 17, 559, 'LHB', 'Left-arm Medium', 'competent', 'mediocre', 'woeful', 'woeful', 'feeble', 'competent', 'competent', 'mediocre', 'sublime', 'competent', 'abysmal', 6360, 6.70, 'Unassigned', 540600, 'Wonderkid Batter', true),
+('6099469', '13108', 'Purumitra Rishi', 29, 549, 'RHB', 'Right-arm Medium', 'feeble', 'competent', 'woeful', 'woeful', 'competent', 'feeble', 'competent', 'superb', 'sublime', 'feeble', 'abysmal', 7286, 6.20, 'Unassigned', 619310, 'Opening Bowler', false),
+('6099474', '13108', 'Viplav Sinduvalli', 25, 544, 'LHB', 'Left-arm Medium', 'competent', 'woeful', 'feeble', 'abysmal', 'feeble', 'competent', 'competent', 'superb', 'sublime', 'competent', 'mediocre', 7031, 6.20, 'Unassigned', 597635, 'Top Order Batsman', false),
+('6099467', '13108', 'Arvind Somal', 27, 552, 'LHB', 'Left-arm Medium', 'woeful', 'competent', 'feeble', 'woeful', 'competent', 'feeble', 'competent', 'proficient', 'energetic', 'respectable', 'abysmal', 6775, 6.20, 'Unassigned', 575875, 'Opening Bowler', false),
+('6099462', '13108', 'Atulya Surya Teja', 24, 398, 'RHB', 'Right-arm Medium', 'mediocre', 'woeful', 'mediocre', 'woeful', 'feeble', 'woeful', 'woeful', 'worthless', 'sublime', 'woeful', 'abysmal', 2813, 6.20, 'Unassigned', 239105, 'Squad Player', false)
 ON CONFLICT (id) DO UPDATE SET
     wage = EXCLUDED.wage,
     form = EXCLUDED.form,
@@ -67,19 +67,19 @@ VALUES
 ('13108', '6099466', '2026-11-13', 'Bowling', 'Mediocre', 'Competent', 6.05, 7, 'Competent', true),
 ('13108', '6099471', '2026-11-06', 'Batting', 'Mediocre', 'Competent', 6.08, 8, 'Competent', true);
 
--- 4. Insert 10 Nets Matrix
+-- 4. Insert 10 Nets Matrix (Squad Fielding Session - all nets unassigned by default)
 INSERT INTO public.nets_matrix (club_id, net_number, training_type, player_id, coach_multiplier, pops_estimated_weeks, notes)
 VALUES
-('13108', 1, 'Bowling', '6099466', 1.00, 7, 'Primary finger spin wonderkid progression'),
-('13108', 2, 'Batting', '6099471', 1.00, 7, 'Primary top-order youth batter development'),
-('13108', 3, 'Fielding', '6099475', 1.00, 5, 'Captain middle-order fielding boost'),
-('13108', 4, 'Wicket Keeping', '6099476', 1.00, 8, 'Primary keeper glovework'),
-('13108', 5, 'Fitness / Stamina', '6099461', 1.00, 4, 'Squad player stamina recovery'),
-('13108', 6, 'Open / Available', NULL, 1.00, NULL, 'Ready for next youth pull'),
-('13108', 7, 'Open / Available', NULL, 1.00, NULL, 'Ready for squad rotation'),
-('13108', 8, 'Open / Available', NULL, 1.00, NULL, 'Available net'),
-('13108', 9, 'Open / Available', NULL, 1.00, NULL, 'Available net'),
-('13108', 10, 'Open / Available', NULL, 1.00, NULL, 'Available net')
+('13108', 1, 'Bowling (Finger Spin)', NULL, 1.00, NULL, 'Squad training: Fielding active'),
+('13108', 2, 'Batting (Opening Technique)', NULL, 1.00, NULL, 'Squad training: Fielding active'),
+('13108', 3, 'Fielding (Slip Catching)', NULL, 1.00, NULL, 'Squad training: Fielding active'),
+('13108', 4, 'Wicket Keeping (Glovework)', NULL, 1.00, NULL, 'Squad training: Fielding active'),
+('13108', 5, 'Fitness & Stamina', NULL, 1.00, NULL, 'Squad training: Fielding active'),
+('13108', 6, 'Batting (Middle Order)', NULL, 1.00, NULL, 'Squad training: Fielding active'),
+('13108', 7, 'Bowling (Opening Seam)', NULL, 1.00, NULL, 'Squad training: Fielding active'),
+('13108', 8, 'Bowling (Strike Pace)', NULL, 1.00, NULL, 'Squad training: Fielding active'),
+('13108', 9, 'Batting (Finisher)', NULL, 1.00, NULL, 'Squad training: Fielding active'),
+('13108', 10, 'Open Net (Rotation)', NULL, 1.00, NULL, 'Squad training: Fielding active')
 ON CONFLICT (club_id, net_number) DO UPDATE SET
     training_type = EXCLUDED.training_type,
     player_id = EXCLUDED.player_id,
@@ -88,11 +88,12 @@ ON CONFLICT (club_id, net_number) DO UPDATE SET
 -- 5. Insert Matches
 INSERT INTO public.matches (id, club_id, match_date, match_type, opponent_club, venue, pitch_type, result, status)
 VALUES
-('M-32217484', '13108', '2026-11-14', 'First Class', 'Diu CC', 'Home (Prabhas Coastal Oval)', 'Hard', 'WON (Somnath 312 & 142/2 beat Diu CC 210 & 240 by 8 wkts)', 'completed'),
-('M-32485077', '13108', '2026-11-16', 'One Day', 'Moyale Mean Green', 'Away', 'Green', 'WON (Somnath 248/6 beat Moyale 245 by 4 wkts)', 'completed'),
-('M-32232666', '13108', '2026-11-11', 'First Class', 'Whykickamoocows', 'Away', 'Dusty', 'DRAW (Somnath 380 & 195/4 dec vs 288 & 160/7)', 'completed'),
-('M-32190812', '13108', '2026-11-09', 'BT20', 'Nagapatnam CC', 'Home (Prabhas Coastal Oval)', 'Flat', 'WON (Somnath 176/4 beat Nagapatnam 142/9 by 34 runs)', 'completed'),
-('M-32510940', '13108', '2026-11-24', 'First Class', 'Pitch Punishers', 'Away', 'Hard', 'Upcoming Fixture (FC Friendly)', 'upcoming')
+('M-32232669', '13108', '2026-11-10', 'First Class', 'Whykickamoocows', 'Home (Prabhas Coastal Oval)', 'Hard & Fast', 'WON by 9 Wickets (Somnath 406/2 dec beat Whykickamoocows 166 & 240)', 'completed'),
+('M-32217484', '13108', '2026-11-13', 'One Day', 'Nagapatnam CC', 'Away', 'Green', 'WON (OD League Division V.62)', 'completed'),
+('M-32217482', '13108', '2026-11-06', 'One Day', 'madgaon CC', 'Home (Prabhas Coastal Oval)', 'Hard & Fast', 'WON (£70,775 Gate Receipts)', 'completed'),
+('M-32232666', '13108', '2026-11-03', 'First Class', 'Bhiwani CC', 'Away', 'Dusty', 'WON (FC Division VIII.17)', 'completed'),
+('M-32581217', '13108', '2026-11-18', 'BT20 Fr', 'Jeetu Lions from UP', 'Home (Prabhas Coastal Oval)', 'Flat', 'LOST (Competitive Friendly, £5,247 Gate)', 'completed'),
+('M-32510940', '13108', '2026-11-24', 'First Class Fr', 'Pitch Punishers', 'Away', 'Hard & Fast', 'Upcoming Friendly Fixture', 'upcoming')
 ON CONFLICT (id) DO UPDATE SET
     result = EXCLUDED.result,
     status = EXCLUDED.status;
@@ -124,24 +125,29 @@ INSERT INTO public.financial_ledger (
     prize_money, player_wages, staff_wages, stadium_upkeep, youth_academy,
     cumulative_bank_balance
 ) VALUES
-('13108', 1, '2026-11-18', 126546, 22823, 15128, 33114, 7034, 12250, 14702, 0, 1320573)
+('13108', 1, '2026-11-19', 5247, 22823, 0, 33114, 7034, 12250, 14702, 0, 1325820),
+('13108', 2, '2026-11-12', 158703, 22823, 0, 33114, 7034, 12250, 14702, 0, 1298622),
+('13108', 3, '2026-11-07', 70775, 22301, 0, 28635, 7034, 12250, 14702, 0, 1139919),
+('13108', 4, '2026-11-01', 7196, 22301, 0, 28635, 7034, 12250, 14702, 0, 1048174),
+('13108', 5, '2026-10-31', 0, 22301, 0, 50000, 7034, 12250, 14702, 0, 1044998)
 ON CONFLICT (club_id, week_number) DO NOTHING;
 
 -- 8. Insert Stadium Tiers (10,000 Capacity)
 INSERT INTO public.stadium_tiers (club_id, tier_name, current_seats, optimal_ratio, recommended_seats, ticket_price, expansion_cost_per_seat)
 VALUES
-('13108', 'Standing Room', 5275, 0.68, 10200, 5.00, 35.00),
-('13108', 'Uncovered Seats', 3270, 0.23, 3450, 8.00, 48.00),
-('13108', 'Covered Seats', 1100, 0.07, 1050, 14.00, 72.00),
-('13108', 'Members Enclosure', 355, 0.02, 300, 25.00, 120.00)
+('13108', 'Standing Room', 5275, 0.5275, 6000, 5.00, 35.00),
+('13108', 'Uncovered Seats', 3270, 0.3270, 4000, 8.00, 48.00),
+('13108', 'Covered Seats', 1100, 0.1100, 1500, 14.00, 72.00),
+('13108', 'Members Seats', 355, 0.0355, 500, 25.00, 120.00)
 ON CONFLICT (club_id, tier_name) DO UPDATE SET
     current_seats = EXCLUDED.current_seats,
     recommended_seats = EXCLUDED.recommended_seats;
 
--- 9. Insert Backroom Staff
+-- 9. Insert Backroom Staff (Real Staff from club.asp)
 INSERT INTO public.backroom_staff (club_id, role, name, skill_level, weekly_wage)
 VALUES
-('13108', 'Head Coach', 'Devdutt Raman', 'Competent', 4200),
-('13108', 'Lead Physiotherapist', 'Dr. Chetan Bhatt', 'Respectable', 3150),
-('13108', 'Head Scout', 'Girish Kumble', 'Competent', 2500),
-('13108', 'Financial Director', 'Shakti Mak', 'Masterclass', 2400);
+('13108', 'Fielding Coach', 'Devdutt Raman', 'Competent', 2000),
+('13108', 'Public Relations Officer (Lead)', 'Shakti Mak', 'Masterclass', 4250),
+('13108', 'Financial Advisor (Senior)', 'S. K. Verma', 'Proficient', 3000),
+('13108', 'Groundsman', 'Shyamal Dangasela', 'Competent', 2000),
+('13108', 'Youth Academy Director', 'Girish Kumble', 'Superb', 1000);
