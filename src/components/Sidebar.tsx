@@ -46,24 +46,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectTab
 }) => {
   const clubhouseItems = [
-    { id: 'overview' as TabType, label: 'Overview', emoji: '🏟️', icon: LayoutDashboard },
-    { id: 'squad' as TabType, label: 'Squad', emoji: '👥', icon: Users },
-    { id: 'player-dossier' as TabType, label: 'Player Dossier', emoji: '🏏', icon: UserSquare2 },
-    { id: 'best-xi' as TabType, label: 'Best XI', emoji: '🛡️', icon: ShieldAlert },
-    { id: 'tactics' as TabType, label: 'Tactics & Pitch', emoji: '⚔️', icon: Swords },
-    { id: 'training' as TabType, label: 'Training Nets', emoji: '🎯', icon: Target },
-    { id: 'youth' as TabType, label: 'Youth Academy', emoji: '✨', icon: Sparkles },
+    { id: 'overview' as TabType, label: 'Overview', icon: LayoutDashboard },
+    { id: 'squad' as TabType, label: 'Squad', icon: Users },
+    { id: 'player-dossier' as TabType, label: 'Player Dossier', icon: UserSquare2 },
+    { id: 'best-xi' as TabType, label: 'Best XI', icon: ShieldAlert },
+    { id: 'tactics' as TabType, label: 'Tactics & Pitch', icon: Swords },
+    { id: 'training' as TabType, label: 'Training Nets', icon: Target },
+    { id: 'youth' as TabType, label: 'Youth Academy', icon: Sparkles },
   ];
 
   const operationsItems = [
-    { id: 'import' as TabType, label: 'Import Battrick', emoji: '📥', icon: Upload },
-    { id: 'finances' as TabType, label: 'Finances', emoji: '💰', icon: CircleDollarSign },
-    { id: 'stadium' as TabType, label: 'Stadium', emoji: '🏟️', icon: Building2 },
-    { id: 'fixtures' as TabType, label: 'Fixtures', emoji: '🏆', icon: Trophy },
-    { id: 'calendar' as TabType, label: 'Calendar', emoji: '📅', icon: CalendarDays },
-    { id: 'staff' as TabType, label: 'Backroom Staff', emoji: '💼', icon: Briefcase },
-    { id: 'records' as TabType, label: 'Club Records', emoji: '🏅', icon: Medal },
-    { id: 'database' as TabType, label: 'Database', emoji: '🗄️', icon: Database },
+    { id: 'import' as TabType, label: 'Import Battrick', icon: Upload },
+    { id: 'finances' as TabType, label: 'Finances', icon: CircleDollarSign },
+    { id: 'stadium' as TabType, label: 'Stadium', icon: Building2 },
+    { id: 'fixtures' as TabType, label: 'Fixtures', icon: Trophy },
+    { id: 'calendar' as TabType, label: 'Calendar', icon: CalendarDays },
+    { id: 'staff' as TabType, label: 'Backroom Staff', icon: Briefcase },
+    { id: 'records' as TabType, label: 'Club Records', icon: Medal },
+    { id: 'database' as TabType, label: 'Database', icon: Database },
   ];
 
   return (
@@ -72,10 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Cricket Operations Section */}
         <div>
           <div className="text-[10px] font-black uppercase tracking-wider mb-1.5 px-2.5 text-emerald-400 flex items-center justify-between">
-            <span className="flex items-center gap-1.5">
-              <span>🏏</span>
-              <span>Cricket Operations</span>
-            </span>
+            <span>Cricket Operations</span>
             <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm animate-pulse"></span>
           </div>
           <nav className="space-y-0.5">
@@ -92,8 +89,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       : 'text-slate-300 hover:text-white hover:bg-emerald-950/60 border border-transparent'
                   }`}
                 >
-                  <span className="text-sm shrink-0">{item.emoji}</span>
-                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-emerald-400'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-emerald-400'}`} />
                   <span className="truncate">{item.label}</span>
                 </button>
               );
@@ -104,11 +100,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Club Administration Section */}
         <div>
           <div className="text-[10px] font-black uppercase tracking-wider mb-1.5 px-2.5 text-amber-400 flex items-center justify-between">
-            <span className="flex items-center gap-1.5">
-              <span>🏛️</span>
-              <span>Club Administration</span>
-            </span>
-            <span className="text-[10px]">⚖️</span>
+            <span>Club Administration</span>
+            <span className="text-[10px] text-amber-400/80">MGMT</span>
           </div>
           <nav className="space-y-0.5">
             {operationsItems.map((item) => {
@@ -124,8 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       : 'text-slate-300 hover:text-white hover:bg-emerald-950/60 border border-transparent'
                   }`}
                 >
-                  <span className="text-sm shrink-0">{item.emoji}</span>
-                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-amber-400'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-amber-400'}`} />
                   <span className="truncate">{item.label}</span>
                 </button>
               );
