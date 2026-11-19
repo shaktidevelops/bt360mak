@@ -91,3 +91,44 @@ To bypass it safely:
 2. Click **"Go to bt360mak (unsafe)"** at the bottom of the expanded section.
 3. On the next screen, click the blue **"Allow"** button.
 4. Your script is now fully authorized to synchronize sheets, drive backups, and calendars!
+
+
+---
+
+## 3. Phase 5: Complete Office Session & Pre-Evening Home Synchronization (2026-11-19)
+
+### User Directives & Actions Taken:
+1. **Squad Table Width Expansion**:
+   - Eliminated container width bottlenecks by lifting `max-w-7xl` from `<main>` in `src/App.tsx`.
+   - Expanded `<table className="w-full min-w-[1550px]">` with comfortable padding and sticky headers.
+   - All 11 attributes displayed with vibrant badges (Batting, Bowling, Keeping, Fielding, Consistency, Concentration, Stamina, Form, Fatigue, Leadership, Experience) alongside Player ID, Name, Role, Age, BTI, Subskills, and Wages.
+
+2. **Authentic Cricket Sport Theme**:
+   - Replaced flat dashboard styling in `src/index.css` with an authentic cricket sport aesthetic.
+   - Alternating mowed outfield grass stripes (`repeating-linear-gradient`).
+   - Radial grandstand floodlight beams from pitch corners.
+   - Cherry red leather cricket ball accents (`.cricket-ball` gradient with white seam stitch).
+   - Golden English willow timber badges (`.willow-accent`).
+   - LED stadium scoreboard dot-matrix panels (`.scoreboard-panel`).
+   - 22-Yard pitch strips for all 6 Battrick pitch types (`Hard`, `Green`, `Dusty`, `Uneven`, `Slow`, `Flat`).
+
+3. **2D Tactics & Pitch Formation Radar**:
+   - Implemented authentic top-down 2D Cricket Ground with central 22-yard pitch, batting/bowling stumps, popping creases, and 30-yard fielding circle.
+   - 11 interactive fielders dynamic to Attacking, Balanced, and Defensive tactical presets.
+   - Reorderable 1-to-11 batting lineup with ▲/▼ order shifting, C/WK toggles, and individual aggression settings.
+   - 5-bowler spell quota manager with format-specific max overs (4 ov T20, 10 ov OD).
+   - 1-Click Auto-Optimize Best XI for FC, OD, and BT20.
+
+4. **Universal Battrick Import Hub**:
+   - Created `src/components/ImportView.tsx` with smart regex parser for text & HTML.
+   - Ingests raw data from `players.asp`, `office.asp`, `finances.asp`, `ground.asp`.
+   - Real-time preview table with 1-click apply to live squad and Supabase database.
+   - Quick access from Top Header (`⚡ Import Battrick` button), Sidebar (`Import Battrick`), and Squad View toolbar.
+   - Added `battrick_raw_data/` folder for dropping raw Battrick `.html`/`.txt` files directly on disk.
+
+5. **Preparation for Evening Session at Home**:
+   - All 16 Battrick management domains mapped and cataloged (Squad, Players, Finance, Club, Fixtures, Matches, Match Summary, Nets, Diary, Calendar, Pavilion, Stadium, Staff, Youth/ITS, Tactics, Records).
+   - Raw dropzone established in `battrick_raw_data/` ready to receive the user's files at home.
+   - Verified local build (`npm run build`) passing with zero errors.
+   - Live dev server healthy at `http://localhost:5173/`.
+   - Production docs deployed for GitHub Pages.
