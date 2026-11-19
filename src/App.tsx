@@ -227,6 +227,18 @@ export function App() {
                 setFinances(newFinances);
                 setCurrentTab('finances');
               }}
+              onImportMatches={(newMatches) => {
+                setMatches(newMatches);
+                setCurrentTab('fixtures');
+              }}
+              onImportStadium={(newTiers) => {
+                setStadiumTiers(newTiers);
+                setCurrentTab('stadium');
+              }}
+              onImportNets={(newNets) => {
+                setNets(newNets);
+                setCurrentTab('training');
+              }}
             />
           )}
         </main>
