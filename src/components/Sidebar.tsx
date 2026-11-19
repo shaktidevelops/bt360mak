@@ -48,35 +48,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
   popsCount
 }) => {
   const clubhouseItems = [
-    { id: 'overview' as TabType, label: 'Overview', icon: LayoutDashboard },
-    { id: 'squad' as TabType, label: 'Squad', icon: Users, badge: squadCount },
-    { id: 'player-dossier' as TabType, label: 'Player Dossier', icon: UserSquare2 },
-    { id: 'best-xi' as TabType, label: 'Best XI', icon: ShieldAlert },
-    { id: 'tactics' as TabType, label: 'Tactics & Pitch', icon: Swords },
-    { id: 'training' as TabType, label: 'Training Nets', icon: Target, badge: `${popsCount} Pops` },
-    { id: 'youth' as TabType, label: 'Youth Academy', icon: Sparkles },
+    { id: 'overview' as TabType, label: 'Stadium Dashboard', emoji: '🏟️', icon: LayoutDashboard },
+    { id: 'squad' as TabType, label: 'Squad Master Roster', emoji: '👥', icon: Users, badge: `${squadCount} Men` },
+    { id: 'player-dossier' as TabType, label: 'Player Dossier', emoji: '🏏', icon: UserSquare2 },
+    { id: 'best-xi' as TabType, label: 'Best XI Match Lineup', emoji: '🛡️', icon: ShieldAlert, badge: 'AUTO-XI' },
+    { id: 'tactics' as TabType, label: '22-Yd Pitch & Tactics', emoji: '⚔️', icon: Swords },
+    { id: 'training' as TabType, label: '10 Training Nets', emoji: '🎯', icon: Target, badge: `${popsCount} Pops` },
+    { id: 'youth' as TabType, label: 'Youth Academy', emoji: '✨', icon: Sparkles, badge: 'ITS 70' },
   ];
 
   const operationsItems = [
-    { id: 'import' as TabType, label: 'Import Battrick', icon: Upload, badge: '⚡ SYNC' },
-    { id: 'finances' as TabType, label: 'Finances', icon: CircleDollarSign },
-    { id: 'stadium' as TabType, label: 'Stadium Arena', icon: Building2, badge: '10,000' },
-    { id: 'fixtures' as TabType, label: 'Fixtures', icon: Trophy },
-    { id: 'calendar' as TabType, label: 'Club Calendar', icon: CalendarDays },
-    { id: 'staff' as TabType, label: 'Backroom Staff', icon: Briefcase, badge: '5' },
-    { id: 'records' as TabType, label: 'Club Records', icon: Medal },
-    { id: 'database' as TabType, label: 'Database', icon: Database },
+    { id: 'import' as TabType, label: 'Sync & Import Hub', emoji: '📥', icon: Upload, badge: '12 DOMAINS' },
+    { id: 'finances' as TabType, label: 'Treasury & Ledger', emoji: '💰', icon: CircleDollarSign },
+    { id: 'stadium' as TabType, label: 'Prabhas Oval (10k)', emoji: '🏟️', icon: Building2, badge: '10,000' },
+    { id: 'fixtures' as TabType, label: 'Match Fixtures', emoji: '🏆', icon: Trophy },
+    { id: 'calendar' as TabType, label: 'Club Calendar', emoji: '📅', icon: CalendarDays, badge: 'S69' },
+    { id: 'staff' as TabType, label: 'Backroom Specialists', emoji: '💼', icon: Briefcase, badge: '5 Staff' },
+    { id: 'records' as TabType, label: 'Hall of Fame & Records', emoji: '🏅', icon: Medal },
+    { id: 'database' as TabType, label: 'Supabase Cloud DB', emoji: '🗄️', icon: Database },
   ];
 
   return (
-    <aside className="w-64 bg-[#061713]/95 border-r border-emerald-800/30 p-3.5 flex flex-col justify-between shrink-0 h-[calc(100vh-65px)] sticky top-[65px] overflow-y-auto">
+    <aside className="w-64 bg-gradient-to-b from-[#06241be6] via-[#041d16f2] to-[#031510fa] backdrop-blur-md border-r-2 border-emerald-600/40 p-3.5 flex flex-col justify-between shrink-0 h-[calc(100vh-65px)] sticky top-[65px] overflow-y-auto shadow-2xl">
       <div className="space-y-5">
         {/* Clubhouse Operations Section */}
         <div>
-          <div className="text-[10px] font-black uppercase tracking-wider mb-1.5 px-2.5 text-emerald-400">
-            Cricket Operations
+          <div className="text-[10px] font-black uppercase tracking-wider mb-2 px-2.5 text-emerald-400 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <span>🏏</span>
+              <span>Cricket Operations</span>
+            </span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm animate-pulse"></span>
           </div>
-          <nav className="space-y-0.5">
+          <nav className="space-y-1">
             {clubhouseItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentTab === item.id;
@@ -84,22 +88,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => onSelectTab(item.id)}
-                  className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
-                      : 'text-slate-300 hover:text-white hover:bg-emerald-950/40'
+                      ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-lg border border-emerald-400/50'
+                      : 'text-slate-300 hover:text-white hover:bg-emerald-950/60 border border-transparent'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm shrink-0">{item.emoji}</span>
                     <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-emerald-400'}`} />
-                    <span>{item.label}</span>
+                    <span className="truncate">{item.label}</span>
                   </div>
                   {item.badge !== undefined && (
                     <span
-                      className={`text-[9px] px-1.5 py-0.2 rounded-full font-extrabold ${
+                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ${
                         isActive
-                          ? 'bg-emerald-900/80 text-white'
-                          : 'bg-emerald-950 text-emerald-300 border border-emerald-700/50'
+                          ? 'bg-emerald-900/90 text-emerald-200 border border-emerald-400/60'
+                          : 'bg-[#06291e] text-emerald-300 border border-emerald-700/60'
                       }`}
                     >
                       {item.badge}
@@ -113,10 +118,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Club Administration Section */}
         <div>
-          <div className="text-[10px] font-black uppercase tracking-wider mb-1.5 px-2.5 text-amber-400">
-            Club Administration
+          <div className="text-[10px] font-black uppercase tracking-wider mb-2 px-2.5 text-amber-400 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <span>🏛️</span>
+              <span>Club Administration</span>
+            </span>
+            <span className="text-[10px]">⚖️</span>
           </div>
-          <nav className="space-y-0.5">
+          <nav className="space-y-1">
             {operationsItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentTab === item.id;
@@ -124,22 +133,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => onSelectTab(item.id)}
-                  className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-gradient-to-r from-amber-600 to-teal-700 text-white shadow-md'
-                      : 'text-slate-300 hover:text-white hover:bg-emerald-950/40'
+                      ? 'bg-gradient-to-r from-amber-600 via-amber-700 to-teal-800 text-white shadow-lg border border-amber-400/60'
+                      : 'text-slate-300 hover:text-white hover:bg-emerald-950/60 border border-transparent'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm shrink-0">{item.emoji}</span>
                     <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-amber-400'}`} />
-                    <span>{item.label}</span>
+                    <span className="truncate">{item.label}</span>
                   </div>
                   {item.badge !== undefined && (
                     <span
-                      className={`text-[9px] px-1.5 py-0.2 rounded-full font-extrabold ${
+                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ${
                         isActive
-                          ? 'bg-amber-900/80 text-white'
-                          : 'bg-[#153436] text-amber-300 border border-[#235355]'
+                          ? 'bg-amber-950 text-amber-200 border border-amber-400/60'
+                          : 'bg-[#153436] text-amber-300 border border-amber-700/60'
                       }`}
                     >
                       {item.badge}
@@ -152,14 +162,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Footer Info Box */}
-      <div className="p-3 rounded-xl bg-[#0a201a] border border-emerald-800/40 text-xs">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span className="font-extrabold text-emerald-300">Somnath Super Devs</span>
+      {/* Stadium Ground Atmosphere Badge */}
+      <div className="p-3.5 rounded-xl cricket-turf-card border border-emerald-600/50 shadow-inner text-xs mt-3">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-1.5 font-black text-emerald-300">
+            <span className="w-2.5 h-2.5 rounded-full cricket-ball shrink-0"></span>
+            <span>Prabhas Coastal Oval</span>
+          </div>
+          <span className="text-[10px] text-amber-300 font-mono font-bold">10,000 Cap</span>
         </div>
-        <p className="text-[11px] text-slate-300 leading-relaxed">
-          Sovereign Cricket Intelligence Platform.
+        <p className="text-[10px] text-emerald-200/90 leading-tight">
+          🏔️ Coastal Mountain backdrop &bull; Lush Hard Turf Strip &bull; 781 Members
         </p>
       </div>
     </aside>

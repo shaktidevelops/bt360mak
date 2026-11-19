@@ -7,50 +7,50 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ club }) => {
   return (
-    <footer className="mt-auto border-t border-emerald-800/40 bg-[#061713] text-slate-300 py-6 px-6 text-xs">
+    <footer className="mt-auto border-t-2 border-emerald-600/50 bg-gradient-to-r from-[#02130e] via-[#06291e] to-[#02130e] text-slate-300 py-6 px-6 text-xs shadow-2xl">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Club Status Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 flex items-center justify-center text-lg font-black text-white shadow border border-emerald-400/30">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-800 flex items-center justify-center text-xl font-black text-white shadow-lg border border-emerald-400/40">
             🏏
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-white">{club.name}</span>
-              <span className="font-mono text-[10px] text-emerald-400 font-bold bg-emerald-950 px-2 py-0.2 rounded border border-emerald-700/60">
-                ID: {club.id}
+              <span className="font-black text-white text-sm">{club.name}</span>
+              <span className="font-mono text-[10px] text-emerald-300 font-black bg-[#041a14] px-2 py-0.5 rounded border border-emerald-600/70 shadow-sm">
+                #{club.id}
               </span>
-              <span className="text-[10px] text-slate-400">&bull; {club.region}</span>
+              <span className="text-[11px] text-emerald-200 font-bold hidden sm:inline">&bull; 🏟️ Prabhas Coastal Oval 🏔️</span>
             </div>
-            <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-2 flex-wrap">
-              <span>FC: <strong className="text-white font-mono">{club.division_fc}</strong></span>
+            <div className="text-[11px] text-slate-300 mt-1 flex items-center gap-2 flex-wrap font-mono">
+              <span className="px-1.5 py-0.5 rounded bg-[#031812] border border-emerald-700/60">FC: <strong className="text-emerald-300">{club.division_fc}</strong></span>
               <span>&bull;</span>
-              <span>OD: <strong className="text-white font-mono">{club.division_od}</strong></span>
+              <span className="px-1.5 py-0.5 rounded bg-[#031812] border border-teal-700/60">OD: <strong className="text-teal-300">{club.division_od}</strong></span>
               <span>&bull;</span>
-              <span>BT20: <strong className="text-white font-mono">{club.division_t20}</strong></span>
+              <span className="px-1.5 py-0.5 rounded bg-[#031812] border border-amber-700/60">T20: <strong className="text-amber-300">{club.division_t20}</strong></span>
             </div>
           </div>
         </div>
 
         {/* Live Engine Synchronizer */}
         <div className="flex items-center gap-4 text-center">
-          <div className="flex items-center gap-2 bg-[#09221b] px-3 py-1.5 rounded-xl border border-emerald-800/50">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-[11px] font-bold text-emerald-300">Battrick Engine Synchronized</span>
+          <div className="flex items-center gap-2 bg-[#041a14] px-3.5 py-1.5 rounded-xl border border-emerald-600/60 shadow-inner">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow" />
+            <span className="text-[11px] font-black text-emerald-300">Battrick S69 Real Engine Active</span>
           </div>
-          <div className="hidden sm:block text-[11px] text-slate-400">
-            Next Cycle: <span className="text-amber-300 font-mono font-bold">Friday Training Pops (05:00 UTC)</span>
+          <div className="hidden sm:block text-[11px] text-slate-300">
+            Next Cycle: <span className="text-amber-300 font-mono font-black">Friday Training Pops (05:00 UTC)</span>
           </div>
         </div>
 
         {/* Version & Sovereign Tag */}
         <div className="flex items-center gap-3 text-right">
           <div>
-            <div className="font-mono text-[11px] font-bold text-white">
-              BT360MAK <span className="text-emerald-400 font-mono">v2.4.0 Sovereign</span>
+            <div className="font-mono text-[11px] font-black text-white">
+              BT360MAK <span className="text-emerald-300 font-mono">v2.5 Sovereign Stadium Edition</span>
             </div>
-            <div className="text-[10px] text-slate-400">
-              React 19 &bull; Vite 6 &bull; Supabase Live
+            <div className="text-[10px] text-emerald-300/80">
+              React 19 &bull; Vite 6 &bull; Supabase Live &bull; 12 Battrick Domains
             </div>
           </div>
           <a

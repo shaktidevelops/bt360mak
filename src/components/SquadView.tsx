@@ -161,145 +161,158 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
 
       {/* MATRIX VIEW: ULTRA-WIDE, SPACIOUS 11-SKILLS DATA TABLE */}
       {viewMode === 'matrix' ? (
-        <div className="w-full overflow-x-auto rounded-2xl border-2 border-emerald-600/40 bg-[#071c17] shadow-2xl">
-          <table className="w-full min-w-[1550px] text-left border-collapse text-xs">
+        <div className="w-full overflow-x-auto rounded-2xl border-2 border-emerald-500/50 bg-[#051c16] shadow-2xl">
+          <table className="w-full min-w-[1780px] text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-[#030d0a] text-slate-300 font-bold border-b-2 border-emerald-700/60 uppercase tracking-wider text-[11px] sticky top-0 z-10 shadow-sm">
-                <th className="py-3.5 px-3 w-28">Player ID</th>
+              <tr className="bg-gradient-to-r from-[#02130e] via-[#062c21] to-[#02130e] text-slate-200 font-black border-b-2 border-emerald-500/60 uppercase tracking-wider text-[11px] sticky top-0 z-10 shadow-md">
+                <th className="py-4 px-3.5 w-32">
+                  <span className="flex items-center gap-1 text-emerald-300">
+                    <span>#</span>
+                    <span>Player ID</span>
+                  </span>
+                </th>
                 <th 
                   onClick={() => toggleSort('name')}
-                  className="py-3.5 px-4 min-w-[240px] cursor-pointer hover:text-emerald-300 transition-colors"
+                  className="py-4 px-4 min-w-[280px] cursor-pointer hover:text-emerald-300 transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>Player Name & Role</span>
+                    <span>🏏 Player Name & Role</span>
                     <ArrowUpDown className="w-3.5 h-3.5" />
                   </div>
                 </th>
                 <th 
                   onClick={() => toggleSort('age')}
-                  className="py-3.5 px-2 w-14 text-center cursor-pointer hover:text-emerald-300"
+                  className="py-4 px-2 w-16 text-center cursor-pointer hover:text-emerald-300"
                 >
                   Age
                 </th>
                 <th 
                   onClick={() => toggleSort('bti')}
-                  className="py-3.5 px-3 w-24 text-right cursor-pointer hover:text-emerald-300"
+                  className="py-4 px-3.5 w-28 text-right cursor-pointer hover:text-emerald-300"
                 >
                   <div className="flex items-center justify-end gap-1">
-                    <span>BTI</span>
+                    <span>BTI Index</span>
                     <ArrowUpDown className="w-3.5 h-3.5" />
                   </div>
                 </th>
-                <th className="py-3.5 px-2 w-16 text-center">Subskill</th>
-                <th className="py-3.5 px-2 text-center w-24">Batting</th>
-                <th className="py-3.5 px-2 text-center w-24">Bowling</th>
-                <th className="py-3.5 px-2 text-center w-24">Keeping</th>
-                <th className="py-3.5 px-2 text-center w-24">Fielding</th>
-                <th className="py-3.5 px-2 text-center w-24">Consistency</th>
-                <th className="py-3.5 px-2 text-center w-24">Concentration</th>
-                <th className="py-3.5 px-2 text-center w-24">Stamina</th>
-                <th className="py-3.5 px-2 text-center w-24">Form</th>
-                <th className="py-3.5 px-2 text-center w-24">Fatigue</th>
-                <th className="py-3.5 px-2 text-center w-24">Ldr / Exp</th>
+                <th className="py-4 px-2 w-20 text-center">Subskill</th>
+                <th className="py-4 px-2 text-center w-28">Batting 🏏</th>
+                <th className="py-4 px-2 text-center w-28">Bowling 🔴</th>
+                <th className="py-4 px-2 text-center w-28">Keeping 🧤</th>
+                <th className="py-4 px-2 text-center w-28">Fielding ⚡</th>
+                <th className="py-4 px-2 text-center w-28">Consistency</th>
+                <th className="py-4 px-2 text-center w-28">Concentration</th>
+                <th className="py-4 px-2 text-center w-28">Stamina</th>
+                <th className="py-4 px-2 text-center w-28">Form</th>
+                <th className="py-4 px-2 text-center w-28">Fatigue</th>
+                <th className="py-4 px-2 text-center w-24">Ldr / Exp</th>
                 <th 
                   onClick={() => toggleSort('wage')}
-                  className="py-3.5 px-3 w-28 text-right cursor-pointer hover:text-emerald-300"
+                  className="py-4 px-3.5 w-32 text-right cursor-pointer hover:text-emerald-300"
                 >
                   Wage (£)
                 </th>
-                <th className="py-3.5 px-3 w-28 text-center">Active Net</th>
-                <th className="py-3.5 px-3 w-24 text-center">Dossier</th>
+                <th className="py-4 px-3.5 w-32 text-center">Active Net</th>
+                <th className="py-4 px-3.5 w-28 text-center">Dossier</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-emerald-950/70 font-mono">
-              {filteredSquad.map((player) => (
-                <tr key={player.id} className="hover:bg-[#103a2f]/80 transition-colors">
-                  {/* Clean Numeric ID */}
-                  <td className="py-4 px-3 font-mono text-xs text-emerald-400 font-extrabold whitespace-nowrap">
-                    {String(player.id).replace(/^BT-/, '')}
-                  </td>
+            <tbody className="divide-y divide-emerald-900/60 font-mono">
+              {filteredSquad.map((player) => {
+                const isKeeper = player.tactical_role?.includes('Keeper') || getScore(player.keeping) >= 7;
+                const isBowler = player.tactical_role?.includes('Bowler') || player.tactical_role?.includes('Spinner') || getScore(player.bowling) >= 7;
+                const isBatter = player.tactical_role?.includes('Batter') || getScore(player.batting) >= 7;
+                const roleIcon = isKeeper ? '🧤' : isBowler ? '🔴' : isBatter ? '🏏' : '⚡';
 
-                  {/* Name, Wonderkid Tag, Tactical Role */}
-                  <td className="py-4 px-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2 font-black text-white text-[13px] font-sans">
-                      <span>{player.name}</span>
-                      {player.is_wonderkid && (
-                        <span className="flex items-center gap-0.5 text-[10px] px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-600/70 font-bold font-mono">
-                          <Sparkles className="w-2.5 h-2.5 text-amber-400" /> Wonderkid
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[11px] text-slate-300 mt-1 flex items-center gap-2 font-sans">
-                      <span className="text-emerald-300 font-semibold">{player.tactical_role}</span>
-                      <span className="text-slate-500">&bull;</span>
-                      <span className="font-mono text-slate-400">{player.batting_hand}</span>
-                      <span className="text-slate-500">&bull;</span>
-                      <span className="text-slate-400">{player.bowling_type}</span>
-                    </div>
-                  </td>
+                return (
+                  <tr key={player.id} className="hover:bg-[#0c352a]/80 transition-colors">
+                    {/* Clean Numeric ID */}
+                    <td className="py-4 px-3.5 font-mono text-xs text-emerald-400 font-extrabold whitespace-nowrap">
+                      #{String(player.id).replace(/^BT-/, '')}
+                    </td>
 
-                  {/* Age */}
-                  <td className="py-4 px-2 text-center font-bold text-white text-sm">
-                    {player.age}
-                  </td>
+                    {/* Name, Wonderkid Tag, Tactical Role */}
+                    <td className="py-4 px-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2 font-black text-white text-[13px] font-sans">
+                        <span>{roleIcon}</span>
+                        <span>{player.name}</span>
+                        {player.is_wonderkid && (
+                          <span className="flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/80 font-black font-mono shadow-sm">
+                            <Sparkles className="w-2.5 h-2.5 text-amber-400" /> Wonderkid
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-emerald-200/90 mt-1 flex items-center gap-2 font-sans">
+                        <span className="text-emerald-300 font-bold">{player.tactical_role}</span>
+                        <span className="text-slate-500">&bull;</span>
+                        <span className="font-mono text-slate-300">{player.batting_hand}</span>
+                        <span className="text-slate-500">&bull;</span>
+                        <span className="text-slate-300">{player.bowling_type}</span>
+                      </div>
+                    </td>
 
-                  {/* BTI */}
-                  <td className="py-4 px-3 text-right font-mono font-black text-emerald-300 text-sm">
-                    {(player.bti ?? 0).toLocaleString()}
-                  </td>
+                    {/* Age */}
+                    <td className="py-4 px-2 text-center font-bold text-white text-sm">
+                      {player.age}
+                    </td>
 
-                  {/* Subskill */}
-                  <td className="py-4 px-2 text-center font-mono text-xs text-amber-300 font-bold">
-                    {player.subskill ?? 6.20}
-                  </td>
+                    {/* BTI */}
+                    <td className="py-4 px-3.5 text-right font-mono font-black text-emerald-300 text-sm">
+                      {(player.bti ?? 0).toLocaleString()}
+                    </td>
 
-                  {/* Complete 11 Skills Displayed Individually */}
-                  <td className="py-4 px-2 text-center">{getSkillBadge(player.batting)}</td>
-                  <td className="py-4 px-2 text-center">{getSkillBadge(player.bowling)}</td>
-                  <td className="py-4 px-2 text-center">{getSkillBadge(player.keeping)}</td>
-                  <td className="py-4 px-2 text-center">{getSkillBadge(player.fielding)}</td>
-                  <td className="py-4 px-2 text-center">{getSkillBadge(player.consistency)}</td>
-                  <td className="py-4 px-2 text-center">{getSkillBadge(player.concentration)}</td>
-                  <td className="py-4 px-2 text-center">{getSkillBadge(player.stamina)}</td>
-                  <td className="py-4 px-2 text-center">{getSkillBadge(player.form)}</td>
-                  <td className="py-4 px-2 text-center">{getSkillBadge(player.fatigue)}</td>
+                    {/* Subskill */}
+                    <td className="py-4 px-2 text-center font-mono text-xs text-amber-300 font-black">
+                      {player.subskill ?? 6.20}
+                    </td>
 
-                  {/* Leadership & Experience */}
-                  <td className="py-4 px-2 text-center font-mono text-[11px] text-slate-300">
-                    <span className="capitalize">{player.leadership?.slice(0, 4)}</span>
-                    <span className="text-slate-500"> / </span>
-                    <span className="capitalize">{player.experience?.slice(0, 4) || 'abys'}</span>
-                  </td>
+                    {/* Complete 11 Skills Displayed Individually */}
+                    <td className="py-4 px-2 text-center">{getSkillBadge(player.batting)}</td>
+                    <td className="py-4 px-2 text-center">{getSkillBadge(player.bowling)}</td>
+                    <td className="py-4 px-2 text-center">{getSkillBadge(player.keeping)}</td>
+                    <td className="py-4 px-2 text-center">{getSkillBadge(player.fielding)}</td>
+                    <td className="py-4 px-2 text-center">{getSkillBadge(player.consistency)}</td>
+                    <td className="py-4 px-2 text-center">{getSkillBadge(player.concentration)}</td>
+                    <td className="py-4 px-2 text-center">{getSkillBadge(player.stamina)}</td>
+                    <td className="py-4 px-2 text-center">{getSkillBadge(player.form)}</td>
+                    <td className="py-4 px-2 text-center">{getSkillBadge(player.fatigue)}</td>
 
-                  {/* Wage */}
-                  <td className="py-4 px-3 text-right font-mono font-extrabold text-slate-200">
-                    £{(player.wage ?? 0).toLocaleString()}
-                  </td>
+                    {/* Leadership & Experience */}
+                    <td className="py-4 px-2 text-center font-mono text-[11px] text-slate-300">
+                      <span className="capitalize">{player.leadership?.slice(0, 4)}</span>
+                      <span className="text-slate-500"> / </span>
+                      <span className="capitalize">{player.experience?.slice(0, 4) || 'abys'}</span>
+                    </td>
 
-                  {/* Active Net */}
-                  <td className="py-4 px-3 text-center whitespace-nowrap">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                      player.active_net && player.active_net !== 'Unassigned' && player.active_net !== 'None'
-                        ? 'bg-amber-950 text-amber-300 border border-amber-600/70 font-mono' 
-                        : 'text-slate-400 bg-[#04120e] border border-emerald-900/60'
-                    }`}>
-                      {player.active_net || 'Unassigned'}
-                    </span>
-                  </td>
+                    {/* Wage */}
+                    <td className="py-4 px-3.5 text-right font-mono font-extrabold text-slate-100">
+                      £{(player.wage ?? 0).toLocaleString()}
+                    </td>
 
-                  {/* Dossier Link */}
-                  <td className="py-4 px-3 text-center">
-                    <button
-                      onClick={() => onViewDossier?.(player.id)}
-                      className="flex items-center justify-center gap-1.5 mx-auto px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-xs border border-emerald-400/40 transition-all cursor-pointer shadow-md"
-                      title="Inspect full Battrick career statistics and records"
-                    >
-                      <UserSquare2 className="w-3.5 h-3.5" />
-                      <span>Dossier</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    {/* Active Net */}
+                    <td className="py-4 px-3.5 text-center whitespace-nowrap">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-black ${
+                        player.active_net && player.active_net !== 'Unassigned' && player.active_net !== 'None'
+                          ? 'bg-amber-950 text-amber-300 border border-amber-500/80 font-mono shadow-sm' 
+                          : 'text-slate-400 bg-[#03150f] border border-emerald-900/60'
+                      }`}>
+                        {player.active_net || 'Unassigned'}
+                      </span>
+                    </td>
+
+                    {/* Dossier Link */}
+                    <td className="py-4 px-3.5 text-center">
+                      <button
+                        onClick={() => onViewDossier?.(player.id)}
+                        className="flex items-center justify-center gap-1.5 mx-auto px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs border border-emerald-400/50 transition-all cursor-pointer shadow-md"
+                        title="Inspect full Battrick career statistics and records"
+                      >
+                        <UserSquare2 className="w-3.5 h-3.5" />
+                        <span>Dossier</span>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -120,7 +120,7 @@ export function App() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#061713] text-slate-100">
+    <div className="min-h-screen flex flex-col cricket-stadium-canvas text-slate-100">
       {/* Immersive Cricket Sport Header */}
       <Header club={club} onOpenImport={() => setCurrentTab('import')} />
 
@@ -161,8 +161,12 @@ export function App() {
             />
           )}
 
-          {(currentTab === 'best-xi' || currentTab === 'tactics') && (
-            <TacticsView squad={squad} />
+          {currentTab === 'best-xi' && (
+            <TacticsView squad={squad} mode="best-xi" initialTab="lineup" />
+          )}
+
+          {currentTab === 'tactics' && (
+            <TacticsView squad={squad} mode="tactics" initialTab="pitch" />
           )}
 
           {currentTab === 'training' && (

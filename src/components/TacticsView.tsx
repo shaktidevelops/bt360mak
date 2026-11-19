@@ -14,6 +14,8 @@ import {
 
 interface TacticsViewProps {
   squad: Player[];
+  initialTab?: 'lineup' | 'field' | 'bowling' | 'pitch';
+  mode?: 'best-xi' | 'tactics';
 }
 
 export type BattrickPitch = 'Hard' | 'Green' | 'Dusty' | 'Slow' | 'Flat' | 'Uneven';
@@ -35,12 +37,16 @@ function cleanId(id?: string): string {
   return String(id || '').replace(/^BT-/, '').trim();
 }
 
-export const TacticsView: React.FC<TacticsViewProps> = ({ squad }) => {
+export const TacticsView: React.FC<TacticsViewProps> = ({ 
+  squad, 
+  initialTab = 'lineup',
+  mode = 'best-xi' 
+}) => {
   const [pitch, setPitch] = useState<BattrickPitch>('Hard');
   const [matchFormat, setMatchFormat] = useState<'FC' | 'OD' | 'T20'>('FC');
   const [tossDecision, setTossDecision] = useState<'Bat First' | 'Bowl First'>('Bat First');
   const [fieldSetup, setFieldSetup] = useState<FieldSetup>('Attacking');
-  const [activeTab, setActiveTab] = useState<'lineup' | 'field' | 'bowling' | 'strategy'>('lineup');
+  const [activeTab, setActiveTab] = useState<'lineup' | 'field' | 'bowling' | 'pitch'>(initialTab);
 
   // Official Battrick 6-Pitch Engine Profiles
   const pitchProfiles: Record<BattrickPitch, {
@@ -239,54 +245,97 @@ export const TacticsView: React.FC<TacticsViewProps> = ({ squad }) => {
     });
   };
 
-  // 1-Click Auto-Optimize Lineup for Format
-  const autoOptimizeLineup = () => {
-    // Sort squad by batting for top order, bowling for tail
-    const batters = [...squad].sort((a, b) => getSkillScore(b.batting) - getSkillScore(a.batting));
-    const bowlers = [...squad].sort((a, b) => getSkillScore(b.bowling) - getSkillScore(a.bowling));
-
+  // 1-Click Auto-Optimize Lineup for Format & Pitch
+  const autoOptimizeForFormat = (fmt: 'FC' | 'OD' | 'T20') => {
+    setMatchFormat(fmt);
     const selectedIds = new Set<string>();
     const new11: string[] = [];
+    const newAgg: BattrickAggression[] = [];
 
-    // 1-5: Top batters
-    for (let p of batters) {
+    // 1. Pick Best Keeper first to secure spot in team
+    const bestKeeper = keeperRankings[0] || { player: squad[0] };
+    const kId = cleanId(bestKeeper.player.id);
+
+    // 2. Batters sorted by format requirements:
+    // For FC: Batting weighted with concentration and stamina
+    // For OD: Batting weighted with consistency and form
+    // For T20: Batting weighted with aggressive scoring potential
+    const sortedBatters = [...squad].sort((a, b) => {
+      if (cleanId(a.id) === kId) return 1;
+      if (cleanId(b.id) === kId) return -1;
+      const scoreA = getSkillScore(a.batting) * 2.5 + (fmt === 'FC' ? getSkillScore(a.concentration) + getSkillScore(a.stamina) : getSkillScore(a.consistency) * 1.5);
+      const scoreB = getSkillScore(b.batting) * 2.5 + (fmt === 'FC' ? getSkillScore(b.concentration) + getSkillScore(b.stamina) : getSkillScore(b.consistency) * 1.5);
+      return scoreB - scoreA;
+    });
+
+    // Positions 1 to 5: Top 5 specialist batters
+    for (let p of sortedBatters) {
       if (new11.length >= 5) break;
       const cid = cleanId(p.id);
       if (!selectedIds.has(cid)) {
         selectedIds.add(cid);
         new11.push(cid);
+        if (fmt === 'T20') {
+          newAgg.push(new11.length <= 2 ? 'Attacking' : 'Very Attacking');
+        } else if (fmt === 'OD') {
+          newAgg.push(new11.length <= 2 ? 'Moderate' : 'Attacking');
+        } else {
+          newAgg.push(new11.length <= 3 ? 'Moderate' : 'Moderate');
+        }
       }
     }
 
-    // 6: Best Wicketkeeper
-    const bestKeeper = keeperRankings.find(k => !selectedIds.has(cleanId(k.player.id))) || keeperRankings[0];
-    const kId = cleanId(bestKeeper.player.id);
+    // Position 6: Wicketkeeper
     selectedIds.add(kId);
     new11.push(kId);
     setKeeperId(kId);
+    newAgg.push(fmt === 'T20' ? 'Attacking' : 'Moderate');
 
-    // 7-11: Best Bowlers & All-rounders according to pitch
-    for (let p of bowlers) {
+    // Bowlers based on pitch & format
+    const isSpinPitch = pitch === 'Dusty' || pitch === 'Slow';
+    const isPacePitch = pitch === 'Hard' || pitch === 'Green' || pitch === 'Uneven';
+
+    const sortedBowlers = [...squad].sort((a, b) => {
+      if (selectedIds.has(cleanId(a.id))) return 1;
+      if (selectedIds.has(cleanId(b.id))) return -1;
+      let scoreA = getSkillScore(a.bowling) * 2 + getSkillScore(a.consistency);
+      let scoreB = getSkillScore(b.bowling) * 2 + getSkillScore(b.consistency);
+      if (isSpinPitch) {
+        if (a.bowling_type?.toLowerCase().includes('spin')) scoreA += 6;
+        if (b.bowling_type?.toLowerCase().includes('spin')) scoreB += 6;
+      }
+      if (isPacePitch) {
+        if (a.bowling_type?.toLowerCase().includes('fast')) scoreA += 6;
+        if (b.bowling_type?.toLowerCase().includes('fast')) scoreB += 6;
+      }
+      return scoreB - scoreA;
+    });
+
+    // Positions 7 to 11
+    for (let p of sortedBowlers) {
       if (new11.length >= 11) break;
       const cid = cleanId(p.id);
       if (!selectedIds.has(cid)) {
         selectedIds.add(cid);
         new11.push(cid);
+        newAgg.push(fmt === 'T20' ? 'Attacking' : 'Defensive');
       }
     }
 
-    // Pad if needed
+    // Safety pad in case squad has fewer than 11
     for (let p of squad) {
       if (new11.length >= 11) break;
       const cid = cleanId(p.id);
       if (!selectedIds.has(cid)) {
         selectedIds.add(cid);
         new11.push(cid);
+        newAgg.push('Moderate');
       }
     }
 
     setLineupPlayerIds(new11);
-    setCaptainId(cleanId(captainRankings[0].player.id));
+    setLineupAggressions(newAgg);
+    setCaptainId(cleanId(captainRankings[0]?.player?.id || squad[0]?.id));
   };
 
   // Resolve player objects in lineup
@@ -363,10 +412,10 @@ export const TacticsView: React.FC<TacticsViewProps> = ({ squad }) => {
           <div>
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
               <Swords className="w-4 h-4 text-amber-400" />
-              <span>Sovereign Match Command & Tactics Center</span>
+              <span>{mode === 'best-xi' ? '🛡️ Sovereign Best XI Lineup & Orders' : '⚔️ 22-Yd Pitch & Match Tactics Command'}</span>
             </div>
             <h2 className="text-3xl font-black text-white mt-1 flex items-center gap-3">
-              <span>Best XI Tactical Field orders</span>
+              <span>{mode === 'best-xi' ? 'Best XI Match Lineup' : 'Tactics & Ground Command'}</span>
               <span className="text-xs px-3 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/60 font-mono font-bold">
                 11 / 11 Active Positions
               </span>
@@ -411,15 +460,33 @@ export const TacticsView: React.FC<TacticsViewProps> = ({ squad }) => {
               </select>
             </div>
 
-            {/* 1-Click Auto-Optimize Button */}
-            <button
-              onClick={autoOptimizeLineup}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-xs shadow-lg transition-all cursor-pointer"
-              title="Automatically select best XI based on skill and pitch"
-            >
-              <Dices className="w-4 h-4" />
-              <span>Auto-Optimize Best XI</span>
-            </button>
+            {/* 3 Dedicated Format Auto-Optimize Buttons */}
+            <div className="flex items-center gap-1.5 bg-[#03150f] p-1 rounded-xl border border-emerald-700/60 shadow-inner">
+              <button
+                onClick={() => autoOptimizeForFormat('FC')}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-xs transition-all cursor-pointer shadow"
+                title="Optimize XI for First Class: high concentration, patient batting, 3-seam/2-spin battery"
+              >
+                <span>🏆</span>
+                <span>Auto FC XI</span>
+              </button>
+              <button
+                onClick={() => autoOptimizeForFormat('OD')}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-500 hover:to-emerald-600 text-white font-black text-xs transition-all cursor-pointer shadow"
+                title="Optimize XI for One Day: balanced run scoring, powerplay & death bowlers"
+              >
+                <span>⚡</span>
+                <span>Auto OD XI</span>
+              </button>
+              <button
+                onClick={() => autoOptimizeForFormat('T20')}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-xs transition-all cursor-pointer shadow"
+                title="Optimize XI for BT20: explosive boundary hitters & express strike bowling"
+              >
+                <span>🔥</span>
+                <span>Auto T20 XI</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -514,6 +581,18 @@ export const TacticsView: React.FC<TacticsViewProps> = ({ squad }) => {
         >
           <Zap className="w-4 h-4" />
           <span>5-Phase Bowling Spells & Overs ({totalAllocatedOvers}/{targetFormatOvers} ov)</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('pitch')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            activeTab === 'pitch'
+              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
+              : 'text-slate-300 hover:text-white hover:bg-[#0c2b23]'
+          }`}
+        >
+          <Swords className="w-4 h-4" />
+          <span>22-Yard Pitch Strip & Surface Intel</span>
         </button>
       </div>
 
@@ -828,6 +907,154 @@ export const TacticsView: React.FC<TacticsViewProps> = ({ squad }) => {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* VIEW 4: 22-YARD PITCH STRIP & SURFACE CONDITIONS INTEL */}
+      {activeTab === 'pitch' && (
+        <div className="space-y-6">
+          <div className="scoreboard-panel p-6 rounded-2xl border-2 border-emerald-500/50 shadow-2xl space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-emerald-700/50">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
+                  <span className="w-3 h-3 rounded-full cricket-ball"></span>
+                  <span>Prabhas Coastal Oval &bull; 22-Yard Pitch Command</span>
+                </div>
+                <h3 className="text-2xl font-black text-white mt-1 flex items-center gap-2">
+                  <span>{pitchProfiles[pitch].name}</span>
+                  <span className="text-lg">🏏</span>
+                </h3>
+                <p className="text-xs text-slate-300 mt-1 max-w-xl">
+                  Inspect the physical surface dynamics, bounce multipliers, spin coefficients, and tactical toss directives for this pitch.
+                </p>
+              </div>
+
+              {/* Pitch Selector Buttons */}
+              <div className="flex flex-wrap gap-2">
+                {(['Hard', 'Green', 'Dusty', 'Slow', 'Flat', 'Uneven'] as BattrickPitch[]).map(pType => (
+                  <button
+                    key={pType}
+                    onClick={() => setPitch(pType)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+                      pitch === pType
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black border-amber-300 shadow-lg'
+                        : 'bg-[#041a14] text-slate-300 border-emerald-800/60 hover:text-white hover:bg-emerald-950'
+                    }`}
+                  >
+                    {pType}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Pitch Visual Strip & Surface Metrics */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              {/* Graphical 22-Yard Pitch Strip */}
+              <div className="lg:col-span-5 flex flex-col items-center justify-center p-6 rounded-2xl bg-[#03150f] border border-emerald-700/60 shadow-inner">
+                <span className="text-[10px] font-black uppercase text-amber-400 tracking-wider mb-3">
+                  22-Yard Turf Surface Strip (20.12m)
+                </span>
+
+                <div className={`w-40 h-80 rounded-xl shadow-2xl flex flex-col justify-between p-3 relative border-4 border-[#3d2714]/80 ${
+                  pitch === 'Green' ? 'cricket-pitch-green' : pitch === 'Dusty' ? 'cricket-pitch-dusty' : pitch === 'Uneven' ? 'cricket-pitch-uneven' : 'cricket-pitch-strip'
+                }`}>
+                  {/* Top Bowling Crease & Stumps (North End) */}
+                  <div className="w-full flex flex-col items-center border-b-2 border-white/90 pb-2">
+                    <div className="flex items-end gap-1.5 h-6">
+                      <span className="w-1.5 h-5 bg-amber-200 rounded-xs shadow"></span>
+                      <span className="w-1.5 h-5 bg-amber-200 rounded-xs shadow"></span>
+                      <span className="w-1.5 h-5 bg-amber-200 rounded-xs shadow"></span>
+                    </div>
+                    <span className="text-[9px] font-mono text-white/80 font-bold mt-0.5">Bowling Crease</span>
+                  </div>
+
+                  {/* Pitch Center Surface Intel */}
+                  <div className="text-center bg-black/60 backdrop-blur-xs p-2 rounded-lg border border-white/20">
+                    <div className="text-xs font-black text-amber-300 uppercase tracking-wider">{pitch} Track</div>
+                    <div className="text-[10px] text-white/90 font-mono mt-0.5">{pitchProfiles[pitch].paceModifier}</div>
+                    <div className="text-[10px] text-teal-300 font-mono">{pitchProfiles[pitch].spinModifier}</div>
+                  </div>
+
+                  {/* Bottom Batting Crease & Stumps (Striker End) */}
+                  <div className="w-full flex flex-col items-center border-t-2 border-white/90 pt-2">
+                    <span className="text-[9px] font-mono text-white/80 font-bold mb-0.5">Popping Crease</span>
+                    <div className="flex items-end gap-1.5 h-6">
+                      <span className="w-1.5 h-5 bg-amber-200 rounded-xs shadow"></span>
+                      <span className="w-1.5 h-5 bg-amber-200 rounded-xs shadow"></span>
+                      <span className="w-1.5 h-5 bg-amber-200 rounded-xs shadow"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 mt-4 text-[11px] text-slate-300 font-mono">
+                  <span>Width: 3.05m</span>
+                  <span>&bull;</span>
+                  <span className="text-emerald-400 font-bold">Standard Turf Match Pitch</span>
+                </div>
+              </div>
+
+              {/* Tactical Analysis & Recommendations */}
+              <div className="lg:col-span-7 space-y-4">
+                {/* 3 Metric Gauges */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="p-3 rounded-xl bg-[#03150f] border border-emerald-700/60 text-center">
+                    <span className="text-[10px] uppercase font-black text-slate-400 block">Pace & Bounce</span>
+                    <strong className="text-base font-black text-emerald-300 font-mono mt-1 block">
+                      {pitchProfiles[pitch].paceModifier}
+                    </strong>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#03150f] border border-emerald-700/60 text-center">
+                    <span className="text-[10px] uppercase font-black text-slate-400 block">Seam Movement</span>
+                    <strong className="text-base font-black text-teal-300 font-mono mt-1 block">
+                      {pitchProfiles[pitch].seamModifier}
+                    </strong>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#03150f] border border-emerald-700/60 text-center">
+                    <span className="text-[10px] uppercase font-black text-slate-400 block">Spin Bite</span>
+                    <strong className="text-base font-black text-amber-300 font-mono mt-1 block">
+                      {pitchProfiles[pitch].spinModifier}
+                    </strong>
+                  </div>
+                </div>
+
+                {/* Toss Strategy Card */}
+                <div className="p-4 rounded-xl bg-gradient-to-r from-[#06241b] to-[#0a382a] border border-emerald-500/60 shadow-md">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-black uppercase text-amber-300 flex items-center gap-1.5">
+                      <span>🪙</span> Toss Directive
+                    </span>
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-400/60 font-black">
+                      Recommended: {pitchProfiles[pitch].tossRecommendation}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-200 leading-relaxed mt-1">
+                    {pitchProfiles[pitch].battingConditions}
+                  </p>
+                </div>
+
+                {/* Recommended Bowlers */}
+                <div className="p-4 rounded-xl bg-[#03150f] border border-emerald-700/60">
+                  <span className="text-xs font-black uppercase text-teal-300 flex items-center gap-1.5 mb-1">
+                    <span>⚡</span> Prime Bowler Arsenal
+                  </span>
+                  <div className="text-sm font-black text-white mt-1">
+                    {pitchProfiles[pitch].recommendedBowlers}
+                  </div>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    {pitchProfiles[pitch].tacticsTip}
+                  </p>
+                </div>
+
+                {/* Quick Auto-Lineup Action */}
+                <button
+                  onClick={() => autoOptimizeForFormat(matchFormat)}
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-xs transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Dices className="w-4 h-4" />
+                  <span>Auto-Align Best XI to {pitch} Surface ({matchFormat}) &rarr;</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
