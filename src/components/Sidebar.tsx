@@ -13,7 +13,8 @@ import {
   CalendarDays, 
   Briefcase, 
   Medal, 
-  Database 
+  Database,
+  Upload 
 } from 'lucide-react';
 
 export type TabType = 
@@ -30,7 +31,8 @@ export type TabType =
   | 'calendar' 
   | 'staff' 
   | 'records' 
-  | 'database';
+  | 'database'
+  | 'import';
 
 interface SidebarProps {
   currentTab: TabType;
@@ -56,6 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const operationsItems = [
+    { id: 'import' as TabType, label: 'Import Battrick', icon: Upload, badge: '⚡ SYNC' },
     { id: 'finances' as TabType, label: 'Finances', icon: CircleDollarSign },
     { id: 'stadium' as TabType, label: 'Stadium Arena', icon: Building2, badge: '10,000' },
     { id: 'fixtures' as TabType, label: 'Fixtures', icon: Trophy },

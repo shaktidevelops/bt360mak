@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Club } from '../types/database';
-import { Clock, ShieldCheck, Database, Award } from 'lucide-react';
+import { Clock, ShieldCheck, Database, Award, Upload } from 'lucide-react';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { ClubLogo } from './ClubLogo';
 
 interface HeaderProps {
   club: Club;
+  onOpenImport?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ club }) => {
+export const Header: React.FC<HeaderProps> = ({ club, onOpenImport }) => {
   const [time, setTime] = useState<{ utc: string; ist: string }>({ utc: '', ist: '' });
 
   useEffect(() => {
@@ -89,6 +90,19 @@ export const Header: React.FC<HeaderProps> = ({ club }) => {
             </div>
           </div>
         </div>
+
+        {/* Import from Battrick Action Button */}
+        {onOpenImport && (
+          <button
+            onClick={onOpenImport}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-[#091e17] font-black text-xs shadow-lg hover:shadow-amber-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer border border-amber-300/60"
+            title="Import Club Roster, Tactics, Finances, or Grounds from Battrick"
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-red-600 shadow-[0_0_8px_#ef4444] animate-pulse"></span>
+            <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span className="tracking-tight">Import Battrick</span>
+          </button>
+        )}
 
         {/* Database Status */}
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-700/40 bg-[#051411] text-xs font-semibold">

@@ -15,6 +15,7 @@ import { CalendarView } from './components/CalendarView';
 import { StaffView } from './components/StaffView';
 import { RecordsView } from './components/RecordsView';
 import { SettingsView } from './components/SettingsView';
+import { ImportView } from './components/ImportView';
 import { 
   fallbackClub, 
   fallbackSquad, 
@@ -121,7 +122,7 @@ export function App() {
   return (
     <div className="min-h-screen flex flex-col bg-[#061713] text-slate-100">
       {/* Immersive Cricket Sport Header */}
-      <Header club={club} />
+      <Header club={club} onOpenImport={() => setCurrentTab('import')} />
 
       {/* Main Workspace: Navigation Sidebar + Console Stage */}
       <div className="flex flex-1">
@@ -132,7 +133,7 @@ export function App() {
           popsCount={trainingLogs.length}
         />
 
-        <main className="flex-1 p-6 max-w-7xl overflow-y-auto">
+        <main className="flex-1 p-6 w-full min-w-0 overflow-y-auto">
           {currentTab === 'overview' && (
             <DashboardView 
               club={club} 
@@ -149,6 +150,7 @@ export function App() {
                 setSelectedPlayerId(pid);
                 setCurrentTab('player-dossier');
               }}
+              onNavigateToImport={() => setCurrentTab('import')}
             />
           )}
 
@@ -207,6 +209,25 @@ export function App() {
 
           {currentTab === 'database' && (
             <SettingsView />
+          )}
+
+          {currentTab === 'import' && (
+            <ImportView 
+              club={club} 
+              squad={squad} 
+              onImportSquad={(newSquad) => {
+                setSquad(newSquad);
+                setCurrentTab('squad');
+              }}
+              onImportClub={(newClub) => {
+                setClub(newClub);
+                setCurrentTab('overview');
+              }}
+              onImportFinances={(newFinances) => {
+                setFinances(newFinances);
+                setCurrentTab('finances');
+              }}
+            />
           )}
         </main>
       </div>

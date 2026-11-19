@@ -8,33 +8,105 @@
 
   body {
     font-family: var(--font-sans);
-    /* Authentic Mountain Cricket Ground Atmosphere: Lush turf, grandstand floodlights, mountain horizon */
-    background-color: #071714;
+    /* Authentic Cricket Stadium & Mountain Arena Atmosphere:
+       - Alternating lush grass turf mowed stripes
+       - Dual stadium floodlight beams from top left & right
+       - Deep emerald grandstand atmosphere
+    */
+    background-color: #051612;
     background-image: 
-      radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.18) 0%, transparent 60%),
-      radial-gradient(ellipse at 15% 100%, rgba(245, 158, 11, 0.09) 0%, transparent 45%),
-      radial-gradient(ellipse at 85% 100%, rgba(20, 184, 166, 0.08) 0%, transparent 45%),
-      linear-gradient(180deg, #051411 0%, #081e18 50%, #051310 100%);
+      /* Left Floodlight Tower Beam */
+      radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.15) 0%, rgba(16, 185, 129, 0.12) 30%, transparent 65%),
+      /* Right Floodlight Tower Beam */
+      radial-gradient(circle at 90% 0%, rgba(255, 255, 255, 0.15) 0%, rgba(20, 184, 166, 0.12) 30%, transparent 65%),
+      /* Central Pitch Floodlight Intensity */
+      radial-gradient(ellipse at 50% 15%, rgba(16, 185, 129, 0.16) 0%, transparent 70%),
+      /* Mountain Stadium Horizon Gradient */
+      radial-gradient(ellipse at 50% 100%, rgba(245, 158, 11, 0.08) 0%, transparent 60%),
+      /* Mowed Cricket Outfield Turf Alternating Grass Stripes */
+      repeating-linear-gradient(
+        90deg,
+        #071c17 0px,
+        #071c17 120px,
+        #0a241e 120px,
+        #0a241e 240px
+      );
     background-attachment: fixed;
-    color: #f1f5f9;
+    color: #f8fafc;
     min-height: 100vh;
   }
 }
 
-/* Custom scrollbars */
+/* Custom Cricket Ground Scrollbars */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 9px;
+  height: 9px;
 }
 ::-webkit-scrollbar-track {
-  background: #051310;
+  background: #04120e;
 }
 ::-webkit-scrollbar-thumb {
-  background: #0d4a3c;
-  border-radius: 4px;
+  background: #114234;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #10b981;
+}
+
+/* Authentic Cricket Cherry Leather Ball Badge */
+.cricket-ball {
+  background: radial-gradient(circle at 35% 35%, #ef4444 0%, #b91c1c 45%, #7f1d1d 85%, #450a0a 100%);
+  box-shadow: 0 4px 12px rgba(185, 28, 28, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  position: relative;
+}
+.cricket-ball::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #ffffff 0px, #ffffff 3px, transparent 3px, transparent 6px);
+  transform: translateY(-50%) rotate(-25deg);
+  opacity: 0.85;
+}
+
+/* English Willow Golden Bat Accent */
+.willow-accent {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #92400e 100%);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+}
+
+/* Cricket Scoreboard LED Digital Panel */
+.scoreboard-panel {
+  background: linear-gradient(180deg, #020b08 0%, #061712 100%);
+  border: 1px solid #144e3e;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Visual Cricket Pitch Surface (22-Yard Strip) */
+.cricket-pitch-strip {
+  background: linear-gradient(180deg, #997352 0%, #b38b68 25%, #8f6949 50%, #b38b68 75%, #997352 100%);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4), 0 8px 25px rgba(0, 0, 0, 0.6);
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+}
+
+.cricket-pitch-green {
+  background: linear-gradient(180deg, #235438 0%, #2f6b49 50%, #235438 100%);
+}
+
+.cricket-pitch-dusty {
+  background: linear-gradient(180deg, #a88456 0%, #be9b6b 50%, #a88456 100%);
+}
+
+.cricket-pitch-uneven {
+  background: linear-gradient(180deg, #7c5c43 0%, #997556 30%, #6d4e37 70%, #8c6748 100%);
+}
+
+/* Stadium Floodlight Radial Beams */
+.floodlight-beam {
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(52, 211, 153, 0.12) 40%, transparent 75%);
 }
 
 /* Lively Micro-Interactions & Glow Animations */
@@ -54,23 +126,29 @@
 
 @keyframes subtlePulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.02); }
+  50% { opacity: 0.9; transform: scale(1.015); }
 }
 
 .animate-subtle-pulse {
   animation: subtlePulse 2.5s infinite ease-in-out;
 }
 
-/* Sovereign Turf Glassmorphism */
+/* Sovereign Turf Glassmorphic Cricket Cards */
 .sovereign-card {
-  background: rgba(14, 44, 36, 0.85);
+  background: linear-gradient(145deg, rgba(14, 46, 38, 0.92) 0%, rgba(9, 29, 24, 0.94) 100%);
   backdrop-filter: blur(14px);
   border: 1px solid rgba(16, 185, 129, 0.35);
   box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 20px -3px rgba(16, 185, 129, 0.12);
 }
 
 .sovereign-card-gold {
-  background: linear-gradient(135deg, rgba(20, 52, 44, 0.95) 0%, rgba(13, 35, 30, 0.95) 100%);
-  border: 1px solid rgba(245, 158, 11, 0.45);
-  box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.65), 0 0 25px -3px rgba(245, 158, 11, 0.18);
+  background: linear-gradient(145deg, rgba(22, 58, 48, 0.95) 0%, rgba(13, 36, 30, 0.97) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.65), 0 0 25px -3px rgba(245, 158, 11, 0.2);
+}
+
+.cricket-turf-card {
+  background: linear-gradient(180deg, #0c2b23 0%, #081d17 100%);
+  border: 1px solid #165241;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
