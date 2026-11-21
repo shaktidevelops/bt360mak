@@ -6,66 +6,127 @@
 }
 
 /* =====================================================================
-   AUTHENTIC CRICKET SPORT THEME - TURF, MOUNTAINS, STADIUM & FLOODLIGHTS
+   WORLD-CLASS PREMIER CRICKET STADIUM THEME (MIDNIGHT TURF & FLOODLIGHTS)
    ===================================================================== */
 
 html, body {
   font-family: var(--font-sans);
   margin: 0;
   padding: 0;
-  background-color: #08241b;
-  color: #f1f5f9;
+  background-color: #070d12;
+  color: #f8fafc;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Master Cricket Stadium Arena Canvas */
+/* Master Stadium Night Canvas: Deep Midnight Sky with Floodlights & Subtle Pitch Lawn */
 .cricket-stadium-canvas {
-  background-color: #08241b;
+  background-color: #070d12;
   background-image: 
-    /* Stadium Floodlight Cones (Top-Left & Top-Right) */
-    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(34, 197, 94, 0.16) 28%, transparent 60%),
-    radial-gradient(circle at 88% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(20, 184, 166, 0.16) 28%, transparent 60%),
-    /* Central Pitch Light Beam */
-    radial-gradient(ellipse at 50% 12%, rgba(74, 222, 128, 0.18) 0%, transparent 65%),
-    /* Distant Mountain Stadium Range Silhouette at the Horizon */
-    linear-gradient(to top, rgba(5, 18, 14, 0.95) 0%, rgba(8, 36, 27, 0.6) 25%, transparent 60%),
-    /* Alternating Mowed Cricket Outfield Grass Stripes (Lush English Lawn) */
-    repeating-linear-gradient(
-      90deg,
-      #0a2f23 0px,
-      #0a2f23 100px,
-      #0e3c2c 100px,
-      #0e3c2c 200px
-    );
+    /* Stadium Top Floodlight Beams */
+    radial-gradient(circle at 18% 0%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 182, 212, 0.08) 35%, transparent 65%),
+    radial-gradient(circle at 82% 0%, rgba(245, 158, 11, 0.14) 0%, rgba(16, 185, 129, 0.08) 35%, transparent 65%),
+    /* Central Pitch Illumination */
+    radial-gradient(ellipse at 50% 15%, rgba(52, 211, 153, 0.12) 0%, transparent 60%),
+    /* Subtle Stadium Horizon Gradient */
+    linear-gradient(to top, #04080c 0%, rgba(7, 13, 18, 0.92) 40%, rgba(10, 20, 26, 0.6) 100%);
   background-attachment: fixed;
   min-height: 100vh;
 }
 
-/* Custom Cricket Ground Scrollbars */
+/* Custom Sports Glassmorphic Scrollbars */
 ::-webkit-scrollbar {
-  width: 9px;
-  height: 9px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #04140f;
+  background: #04090d;
 }
 ::-webkit-scrollbar-thumb {
-  background: #145941;
-  border-radius: 6px;
-  border: 1px solid rgba(34, 197, 94, 0.4);
+  background: #10b98140;
+  border-radius: 9999px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #22c55e;
+  background: #10b98190;
 }
 
 /* =====================================================================
-   CRICKET SPORT EQUIPMENT & VISUAL TEXTURES
+   HIGH-END SPORTS GLASSMORPHIC CARDS (CLEAN, HIGH-CONTRAST, EYE-CATCHING)
    ===================================================================== */
 
-/* 1. Cherry Red Leather Cricket Ball with Real Stitched White Seam */
+/* 1. Premier Sovereign Card (High-Contrast Obsidian & Emerald) */
+.sovereign-card {
+  background: linear-gradient(145deg, rgba(13, 23, 28, 0.88) 0%, rgba(8, 15, 20, 0.94) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  box-shadow: 0 12px 35px -8px rgba(0, 0, 0, 0.75), 0 0 20px -3px rgba(16, 185, 129, 0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sovereign-card:hover {
+  border-color: rgba(52, 211, 153, 0.55);
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.85), 0 0 25px -2px rgba(16, 185, 129, 0.16);
+}
+
+/* 2. Golden Willow Card (For Batting MVP, Wonderkids, Finances) */
+.sovereign-card-gold {
+  background: linear-gradient(145deg, rgba(28, 22, 12, 0.90) 0%, rgba(15, 12, 7, 0.95) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  box-shadow: 0 12px 35px -8px rgba(0, 0, 0, 0.75), 0 0 22px -3px rgba(245, 158, 11, 0.18);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sovereign-card-gold:hover {
+  border-color: rgba(251, 191, 36, 0.75);
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.85), 0 0 28px -2px rgba(245, 158, 11, 0.28);
+}
+
+/* 3. Strike Cyan Card (For Bowling Aces, Tacticians, Match Radar) */
+.sovereign-card-cyan {
+  background: linear-gradient(145deg, rgba(10, 24, 30, 0.90) 0%, rgba(6, 15, 20, 0.95) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(6, 182, 212, 0.40);
+  box-shadow: 0 12px 35px -8px rgba(0, 0, 0, 0.75), 0 0 22px -3px rgba(6, 182, 212, 0.16);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sovereign-card-cyan:hover {
+  border-color: rgba(56, 189, 248, 0.70);
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.85), 0 0 28px -2px rgba(6, 182, 212, 0.25);
+}
+
+/* 4. Stadium Turf Panel */
+.cricket-turf-card {
+  background: linear-gradient(180deg, rgba(12, 28, 22, 0.85) 0%, rgba(7, 18, 14, 0.92) 100%);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.7);
+}
+
+/* 5. Stadium Scoreboard Panel (Authentic LED Digital Ribbon) */
+.scoreboard-panel {
+  background: linear-gradient(180deg, #050a0e 0%, #0a141b 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.8), 0 8px 25px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+.scoreboard-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(52, 211, 153, 0.06) 1px, transparent 0);
+  background-size: 5px 5px;
+  pointer-events: none;
+}
+
+/* =====================================================================
+   CRICKET SPORTS EQUIPMENT & VISUAL WIDGETS
+   ===================================================================== */
+
+/* 3D Cherry Red Leather Cricket Ball with Real Stitched Center Seam */
 .cricket-ball {
-  background: radial-gradient(circle at 35% 30%, #f87171 0%, #dc2626 40%, #991b1b 80%, #450a0a 100%);
-  box-shadow: 0 4px 14px rgba(185, 28, 28, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.4);
+  background: radial-gradient(circle at 35% 30%, #f87171 0%, #dc2626 45%, #991b1b 80%, #450a0a 100%);
+  box-shadow: 0 3px 10px rgba(220, 38, 38, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.45);
   position: relative;
   overflow: hidden;
 }
@@ -73,28 +134,27 @@ html, body {
   content: '';
   position: absolute;
   top: 50%;
-  left: 5%;
-  right: 5%;
-  height: 3px;
-  background: repeating-linear-gradient(90deg, #ffffff 0px, #ffffff 4px, transparent 4px, transparent 8px);
-  transform: translateY(-50%) rotate(-28deg);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  left: 6%;
+  right: 6%;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #ffffff 0px, #ffffff 3px, transparent 3px, transparent 6px);
+  transform: translateY(-50%) rotate(-30deg);
   opacity: 0.95;
 }
 
-/* 2. English Willow Golden Timber Bat Gradient */
+/* English Willow Golden Wood Timber */
 .willow-accent, .willow-bat {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 45%, #b45309 85%, #78350f 100%);
-  box-shadow: 0 3px 12px rgba(217, 119, 6, 0.4);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 85%, #78350f 100%);
+  box-shadow: 0 3px 12px rgba(245, 158, 11, 0.35);
   border: 1px solid #fcd34d;
 }
 
-/* 3. Wooden Cricket Stumps & Bails Graphic */
+/* Wooden Cricket Stumps & Bails */
 .cricket-stumps {
   display: inline-flex;
-  gap: 4px;
+  gap: 3px;
   align-items: flex-end;
-  height: 24px;
+  height: 22px;
   position: relative;
 }
 .cricket-stumps::before {
@@ -106,77 +166,34 @@ html, body {
   height: 3px;
   background: #fef08a;
   border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 .cricket-stump-pole {
-  width: 4px;
-  height: 22px;
+  width: 3.5px;
+  height: 20px;
   background: linear-gradient(180deg, #d97706 0%, #92400e 100%);
   border-radius: 1px;
 }
 
-/* 4. Stadium Boundary Rope Marker */
-.boundary-rope {
-  border-top: 3px dashed #ffffff;
-  box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
-}
-
-/* 5. Cricket Scoreboard LED Digital Panel */
-.scoreboard-panel {
-  background: linear-gradient(180deg, #020806 0%, #061611 100%);
-  border: 2px solid #165b45;
-  box-shadow: inset 0 3px 15px rgba(0, 0, 0, 0.9), 0 6px 20px rgba(0, 0, 0, 0.6);
-  position: relative;
-}
-.scoreboard-panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 0);
-  background-size: 4px 4px;
-  pointer-events: none;
-}
-
-/* 6. 22-Yard Pitch Strip Textures */
+/* 22-Yard Pitch Strip Textures */
 .cricket-pitch-strip {
   background: linear-gradient(180deg, #997352 0%, #b38b68 25%, #8f6949 50%, #b38b68 75%, #997352 100%);
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5), 0 8px 25px rgba(0, 0, 0, 0.6);
-  border: 2px dashed rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6), 0 8px 25px rgba(0, 0, 0, 0.6);
+  border: 2px dashed rgba(255, 255, 255, 0.7);
 }
 .cricket-pitch-green {
   background: linear-gradient(180deg, #1b4d32 0%, #297049 50%, #1b4d32 100%);
+  border: 2px dashed rgba(255, 255, 255, 0.7);
 }
 .cricket-pitch-dusty {
   background: linear-gradient(180deg, #a88456 0%, #c49d6b 50%, #a88456 100%);
+  border: 2px dashed rgba(255, 255, 255, 0.7);
 }
 .cricket-pitch-uneven {
   background: linear-gradient(180deg, #7c5c43 0%, #997556 30%, #6d4e37 70%, #8c6748 100%);
+  border: 2px dashed rgba(255, 255, 255, 0.7);
 }
 
-/* =====================================================================
-   RICH GLASSMORPHIC CARDS WITH TURF & WILLOW TRIMS
-   ===================================================================== */
-
-.sovereign-card {
-  background: linear-gradient(145deg, rgba(13, 44, 34, 0.90) 0%, rgba(8, 28, 22, 0.94) 100%);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 20px -3px rgba(34, 197, 94, 0.12);
-}
-
-.sovereign-card-gold {
-  background: linear-gradient(145deg, rgba(22, 58, 45, 0.94) 0%, rgba(13, 36, 28, 0.97) 100%);
-  border: 1px solid rgba(245, 158, 11, 0.55);
-  box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.65), 0 0 25px -3px rgba(245, 158, 11, 0.25);
-}
-
-.cricket-turf-card {
-  background: linear-gradient(180deg, #0e372b 0%, #09231b 100%);
-  border: 1px solid #1a664e;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-/* Animated Shimmer and Pulses */
+/* Shimmer & Glow Keyframes */
 @keyframes goldShimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -189,13 +206,4 @@ html, body {
   -webkit-background-clip: text;
   background-clip: text;
   animation: goldShimmer 3s ease-in-out infinite;
-}
-
-@keyframes subtlePulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.92; transform: scale(1.015); }
-}
-
-.animate-subtle-pulse {
-  animation: subtlePulse 2.5s infinite ease-in-out;
 }

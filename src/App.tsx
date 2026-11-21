@@ -125,7 +125,7 @@ export function App() {
       <Header club={club} onOpenImport={() => setCurrentTab('import')} />
 
       {/* Main Workspace: Navigation Sidebar + Console Stage */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-h-[calc(100vh-58px)]">
         <Sidebar 
           currentTab={currentTab} 
           onSelectTab={setCurrentTab}
@@ -133,7 +133,7 @@ export function App() {
           popsCount={trainingLogs.length}
         />
 
-        <main className="flex-1 p-6 w-full min-w-0 overflow-y-auto">
+        <main className="flex-1 p-5 lg:p-7 w-full min-w-0 max-w-[1600px] mx-auto overflow-y-auto">
           {currentTab === 'overview' && (
             <DashboardView 
               club={club} 

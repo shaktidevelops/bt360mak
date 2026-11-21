@@ -427,7 +427,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
 
           <div className="flex flex-wrap items-center gap-3">
             {/* Format Toggle */}
-            <div className="flex bg-[#04120e] p-1 rounded-xl border border-emerald-800/60">
+            <div className="flex bg-[#071118] p-1 rounded-xl border border-emerald-500/30">
               {(['FC', 'OD', 'T20'] as const).map(fmt => (
                 <button
                   key={fmt}
@@ -444,24 +444,24 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
             </div>
 
             {/* Pitch Selector */}
-            <div className="bg-[#04120e] px-3 py-1.5 rounded-xl border border-emerald-800/60 text-xs">
+            <div className="bg-[#071118] px-3 py-1.5 rounded-xl border border-emerald-500/30 text-xs">
               <span className="text-slate-400 font-semibold mr-2">Surface:</span>
               <select
                 value={pitch}
                 onChange={(e) => setPitch(e.target.value as BattrickPitch)}
                 className="bg-transparent text-emerald-300 font-bold focus:outline-none cursor-pointer"
               >
-                <option value="Hard" className="bg-[#071c17]">Hard & Fast (+25% Pace)</option>
-                <option value="Green" className="bg-[#071c17]">Green Seamer (+35% Seam)</option>
-                <option value="Dusty" className="bg-[#071c17]">Dry & Dusty (+40% Spin)</option>
-                <option value="Slow" className="bg-[#071c17]">Slow & Low Track</option>
-                <option value="Flat" className="bg-[#071c17]">Flat Highway Track</option>
-                <option value="Uneven" className="bg-[#071c17]">Uneven Surface</option>
+                <option value="Hard" className="bg-[#0a1722]">Hard & Fast (+25% Pace)</option>
+                <option value="Green" className="bg-[#0a1722]">Green Seamer (+35% Seam)</option>
+                <option value="Dusty" className="bg-[#0a1722]">Dry & Dusty (+40% Spin)</option>
+                <option value="Slow" className="bg-[#0a1722]">Slow & Low Track</option>
+                <option value="Flat" className="bg-[#0a1722]">Flat Highway Track</option>
+                <option value="Uneven" className="bg-[#0a1722]">Uneven Surface</option>
               </select>
             </div>
 
             {/* 3 Dedicated Format Auto-Optimize Buttons */}
-            <div className="flex items-center gap-1.5 bg-[#03150f] p-1 rounded-xl border border-emerald-700/60 shadow-inner">
+            <div className="flex items-center gap-1.5 bg-[#071118] p-1 rounded-xl border border-emerald-500/30 shadow-inner">
               <button
                 onClick={() => autoOptimizeForFormat('FC')}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-xs transition-all cursor-pointer shadow"
@@ -491,9 +491,9 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
         </div>
 
         {/* Tactical Badges Strip: Captain, Keeper, Toss Strategy */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5 pt-4 border-t border-emerald-800/40 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5 pt-4 border-t border-emerald-500/20 text-xs">
           {/* Captaincy */}
-          <div className="p-3 rounded-xl bg-[#061814] border border-amber-600/40 flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-[#0a1722] border border-amber-600/40 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center">
                 <Crown className="w-4 h-4" />
@@ -509,7 +509,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
           </div>
 
           {/* Wicketkeeper */}
-          <div className="p-3 rounded-xl bg-[#061814] border border-teal-600/40 flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-[#0a1722] border border-teal-600/40 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 border border-teal-500/40 flex items-center justify-center">
                 <Shield className="w-4 h-4" />
@@ -525,7 +525,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
           </div>
 
           {/* Toss Recommendation */}
-          <div className="p-3 rounded-xl bg-[#061814] border border-emerald-600/40 flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-[#0a1722] border border-emerald-500/40 flex items-center justify-between">
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-400">Toss Strategy Recommendation</span>
               <div className="font-black text-emerald-300 flex items-center gap-2 mt-0.5">
@@ -536,7 +536,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
             <select
               value={tossDecision}
               onChange={(e) => setTossDecision(e.target.value as any)}
-              className="bg-[#04120e] text-xs font-bold text-white border border-emerald-800 rounded-lg px-2 py-1 focus:outline-none"
+              className="bg-[#071118] text-xs font-bold text-white border border-emerald-500/30 rounded-lg px-2 py-1 focus:outline-none"
             >
               <option value="Bat First">Bat First</option>
               <option value="Bowl First">Bowl First</option>
@@ -546,13 +546,13 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
       </div>
 
       {/* Navigation Sub-Tabs: Lineup vs 2D Field Formation vs Bowling Spells */}
-      <div className="flex items-center gap-2 border-b border-emerald-800/40 pb-2">
+      <div className="flex items-center gap-2 border-b border-emerald-500/20 pb-2">
         <button
           onClick={() => setActiveTab('lineup')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeTab === 'lineup'
               ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
-              : 'text-slate-300 hover:text-white hover:bg-[#0c2b23]'
+              : 'text-slate-300 hover:text-white hover:bg-[#0e2230]'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -564,7 +564,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeTab === 'field'
               ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
-              : 'text-slate-300 hover:text-white hover:bg-[#0c2b23]'
+              : 'text-slate-300 hover:text-white hover:bg-[#0e2230]'
           }`}
         >
           <Target className="w-4 h-4" />
@@ -576,7 +576,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeTab === 'bowling'
               ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
-              : 'text-slate-300 hover:text-white hover:bg-[#0c2b23]'
+              : 'text-slate-300 hover:text-white hover:bg-[#0e2230]'
           }`}
         >
           <Zap className="w-4 h-4" />
@@ -588,7 +588,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeTab === 'pitch'
               ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
-              : 'text-slate-300 hover:text-white hover:bg-[#0c2b23]'
+              : 'text-slate-300 hover:text-white hover:bg-[#0e2230]'
           }`}
         >
           <Swords className="w-4 h-4" />
@@ -599,8 +599,8 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
       {/* VIEW 1: INTERACTIVE 1 TO 11 BATTING LINEUP */}
       {activeTab === 'lineup' && (
         <div className="space-y-4">
-          <div className="sovereign-card p-5 rounded-2xl border-emerald-600/30 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-emerald-800/40 text-xs">
+          <div className="sovereign-card p-5 rounded-2xl shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-emerald-500/20 text-xs">
               <span className="font-black uppercase text-emerald-400">
                 Somnath Super Devs Starting XI Tactical Lineup
               </span>
@@ -609,7 +609,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
               </span>
             </div>
 
-            <div className="divide-y divide-emerald-950/60 mt-2">
+            <div className="divide-y divide-emerald-950/40 mt-2">
               {active11Players.map((player, idx) => {
                 const pId = cleanId(player.id);
                 const isC = pId === captainId;
@@ -619,7 +619,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                 return (
                   <div 
                     key={pId} 
-                    className="py-3 px-2 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-[#12382e]/60 rounded-xl transition-all"
+                    className="py-3 px-2 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-[#0d2232] rounded-xl transition-all"
                   >
                     {/* Left: Position Number & Move Buttons */}
                     <div className="flex items-center gap-3 shrink-0">
@@ -627,7 +627,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                         <button
                           onClick={() => movePlayer(idx, idx - 1)}
                           disabled={idx === 0}
-                          className="p-1 rounded bg-[#061814] hover:bg-emerald-900/60 text-slate-300 hover:text-white disabled:opacity-20 cursor-pointer text-[10px]"
+                          className="p-1 rounded bg-[#0a1722] hover:bg-emerald-900/60 text-slate-300 hover:text-white disabled:opacity-20 cursor-pointer text-[10px]"
                           title="Move Up"
                         >
                           <ArrowUp className="w-3 h-3" />
@@ -635,7 +635,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                         <button
                           onClick={() => movePlayer(idx, idx + 1)}
                           disabled={idx === 10}
-                          className="p-1 rounded bg-[#061814] hover:bg-emerald-900/60 text-slate-300 hover:text-white disabled:opacity-20 cursor-pointer text-[10px]"
+                          className="p-1 rounded bg-[#0a1722] hover:bg-emerald-900/60 text-slate-300 hover:text-white disabled:opacity-20 cursor-pointer text-[10px]"
                           title="Move Down"
                         >
                           <ArrowDown className="w-3 h-3" />
@@ -651,10 +651,10 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                         <select
                           value={pId}
                           onChange={(e) => handlePlayerChange(idx, e.target.value)}
-                          className="w-full bg-[#04120e] text-white font-bold text-xs p-2 rounded-xl border border-emerald-800/60 focus:outline-none focus:border-emerald-400 cursor-pointer"
+                          className="w-full bg-[#071118] text-white font-bold text-xs p-2 rounded-xl border border-emerald-500/30 focus:outline-none focus:border-emerald-400 cursor-pointer"
                         >
                           {squad.map(p => (
-                            <option key={p.id} value={cleanId(p.id)} className="bg-[#071c17]">
+                            <option key={p.id} value={cleanId(p.id)} className="bg-[#0a1722]">
                               {p.name} ({p.age}yo) - {p.tactical_role}
                             </option>
                           ))}
@@ -672,7 +672,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                         className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
                           isC
                             ? 'bg-amber-500 text-black shadow-lg font-black'
-                            : 'bg-[#061814] text-slate-400 hover:text-amber-300 border border-slate-700/60'
+                            : 'bg-[#0a1722] text-slate-400 hover:text-amber-300 border border-slate-700/60'
                         }`}
                         title="Assign as Captain"
                       >
@@ -685,7 +685,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                         className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
                           isWK
                             ? 'bg-teal-500 text-black shadow-lg font-black'
-                            : 'bg-[#061814] text-slate-400 hover:text-teal-300 border border-slate-700/60'
+                            : 'bg-[#0a1722] text-slate-400 hover:text-teal-300 border border-slate-700/60'
                         }`}
                         title="Assign as Wicketkeeper"
                       >
@@ -693,7 +693,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                         <span>(WK)</span>
                       </button>
 
-                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#061814] text-slate-300 border border-emerald-800/40 hidden sm:inline">
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#0a1722] text-slate-300 border border-emerald-500/20 hidden sm:inline">
                         {player.batting_hand}
                       </span>
                     </div>
@@ -709,14 +709,14 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                             ? 'bg-amber-950/80 text-amber-300 border-amber-600/60'
                             : aggression === 'Very Defensive' || aggression === 'Defensive'
                             ? 'bg-slate-900 text-slate-300 border-slate-700'
-                            : 'bg-[#061814] text-emerald-300 border-emerald-700/60'
+                            : 'bg-[#0a1722] text-emerald-300 border-emerald-500/30'
                         }`}
                       >
-                        <option value="Very Defensive" className="bg-[#071c17]">Very Defensive</option>
-                        <option value="Defensive" className="bg-[#071c17]">Defensive</option>
-                        <option value="Moderate" className="bg-[#071c17]">Moderate</option>
-                        <option value="Attacking" className="bg-[#071c17]">Attacking</option>
-                        <option value="Very Attacking" className="bg-[#071c17]">Very Attacking</option>
+                        <option value="Very Defensive" className="bg-[#0a1722]">Very Defensive</option>
+                        <option value="Defensive" className="bg-[#0a1722]">Defensive</option>
+                        <option value="Moderate" className="bg-[#0a1722]">Moderate</option>
+                        <option value="Attacking" className="bg-[#0a1722]">Attacking</option>
+                        <option value="Very Attacking" className="bg-[#0a1722]">Very Attacking</option>
                       </select>
                     </div>
                   </div>
@@ -841,7 +841,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                 </p>
               </div>
 
-              <div className="bg-[#04120e] px-4 py-2 rounded-xl border border-emerald-700/60 text-right">
+              <div className="bg-[#071118] px-4 py-2 rounded-xl border border-emerald-500/30 text-right">
                 <span className="text-[10px] uppercase font-bold text-slate-400">Total Overs Allocated</span>
                 <div className={`text-base font-black font-mono ${totalAllocatedOvers === targetFormatOvers ? 'text-emerald-400' : 'text-amber-400'}`}>
                   {totalAllocatedOvers} / {targetFormatOvers} Overs
@@ -858,7 +858,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                                   bIdx === 3 ? 'Middle Spin Controller' : 'Fifth Option / All-Rounder';
 
                 return (
-                  <div key={bowler.id} className="p-4 rounded-xl bg-[#061814] border border-emerald-800/50 space-y-3">
+                  <div key={bowler.id} className="p-4 rounded-xl bg-[#0a1722] border border-emerald-500/20 space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
                         <span className="text-[10px] uppercase font-black text-amber-400 tracking-wider">
@@ -867,17 +867,17 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                         <h4 className="text-base font-black text-white mt-0.5">{bowler.name}</h4>
                         <div className="text-[11px] text-slate-300">{bowler.bowling_type}</div>
                       </div>
-                      <div className="w-7 h-7 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-600/60 flex items-center justify-center font-mono font-black text-xs">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-mono font-black text-xs">
                         #{bIdx + 1}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-center text-xs pt-2 border-t border-emerald-900/60 font-mono">
-                      <div className="p-1.5 rounded bg-[#04120e]">
+                    <div className="grid grid-cols-2 gap-2 text-center text-xs pt-2 border-t border-emerald-950/40 font-mono">
+                      <div className="p-1.5 rounded bg-[#071118]">
                         <span className="text-[10px] text-slate-400 block">Bowling</span>
                         <strong className="text-teal-300 capitalize">{bowler.bowling}</strong>
                       </div>
-                      <div className="p-1.5 rounded bg-[#04120e]">
+                      <div className="p-1.5 rounded bg-[#071118]">
                         <span className="text-[10px] text-slate-400 block">Stamina</span>
                         <strong className="text-emerald-300 capitalize">{bowler.stamina}</strong>
                       </div>
@@ -939,7 +939,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                     className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
                       pitch === pType
                         ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black border-amber-300 shadow-lg'
-                        : 'bg-[#041a14] text-slate-300 border-emerald-800/60 hover:text-white hover:bg-emerald-950'
+                        : 'bg-[#071118] text-slate-300 border-emerald-500/30 hover:text-white hover:bg-emerald-950'
                     }`}
                   >
                     {pType}
@@ -951,7 +951,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
             {/* Pitch Visual Strip & Surface Metrics */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
               {/* Graphical 22-Yard Pitch Strip */}
-              <div className="lg:col-span-5 flex flex-col items-center justify-center p-6 rounded-2xl bg-[#03150f] border border-emerald-700/60 shadow-inner">
+              <div className="lg:col-span-5 flex flex-col items-center justify-center p-6 rounded-2xl bg-[#071118] border border-emerald-500/30 shadow-inner">
                 <span className="text-[10px] font-black uppercase text-amber-400 tracking-wider mb-3">
                   22-Yard Turf Surface Strip (20.12m)
                 </span>
@@ -998,19 +998,19 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
               <div className="lg:col-span-7 space-y-4">
                 {/* 3 Metric Gauges */}
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3 rounded-xl bg-[#03150f] border border-emerald-700/60 text-center">
+                  <div className="p-3 rounded-xl bg-[#0a1722] border border-emerald-500/20 text-center">
                     <span className="text-[10px] uppercase font-black text-slate-400 block">Pace & Bounce</span>
                     <strong className="text-base font-black text-emerald-300 font-mono mt-1 block">
                       {pitchProfiles[pitch].paceModifier}
                     </strong>
                   </div>
-                  <div className="p-3 rounded-xl bg-[#03150f] border border-emerald-700/60 text-center">
+                  <div className="p-3 rounded-xl bg-[#0a1722] border border-emerald-500/20 text-center">
                     <span className="text-[10px] uppercase font-black text-slate-400 block">Seam Movement</span>
                     <strong className="text-base font-black text-teal-300 font-mono mt-1 block">
                       {pitchProfiles[pitch].seamModifier}
                     </strong>
                   </div>
-                  <div className="p-3 rounded-xl bg-[#03150f] border border-emerald-700/60 text-center">
+                  <div className="p-3 rounded-xl bg-[#0a1722] border border-emerald-500/20 text-center">
                     <span className="text-[10px] uppercase font-black text-slate-400 block">Spin Bite</span>
                     <strong className="text-base font-black text-amber-300 font-mono mt-1 block">
                       {pitchProfiles[pitch].spinModifier}
@@ -1019,7 +1019,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                 </div>
 
                 {/* Toss Strategy Card */}
-                <div className="p-4 rounded-xl bg-gradient-to-r from-[#06241b] to-[#0a382a] border border-emerald-500/60 shadow-md">
+                <div className="p-4 rounded-xl sovereign-card border border-emerald-500/40 shadow-md">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-black uppercase text-amber-300 flex items-center gap-1.5">
                       <span>🪙</span> Toss Directive
@@ -1034,7 +1034,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                 </div>
 
                 {/* Recommended Bowlers */}
-                <div className="p-4 rounded-xl bg-[#03150f] border border-emerald-700/60">
+                <div className="p-4 rounded-xl bg-[#0a1722] border border-emerald-500/20">
                   <span className="text-xs font-black uppercase text-teal-300 flex items-center gap-1.5 mb-1">
                     <span>⚡</span> Prime Bowler Arsenal
                   </span>

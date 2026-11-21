@@ -21,11 +21,13 @@ function getScore(skill?: string): number {
 
 function getSkillBadge(skillName?: string) {
   const score = getScore(skillName);
-  let color = 'bg-[#04120e] text-slate-400 border-slate-700/60';
-  if (score >= 11) color = 'bg-emerald-950 text-emerald-300 border-emerald-500 font-extrabold shadow-sm';
-  else if (score >= 9) color = 'bg-teal-950 text-teal-300 border-teal-500 font-bold';
-  else if (score >= 7) color = 'bg-cyan-950 text-cyan-300 border-cyan-500/70 font-semibold';
-  else if (score >= 5) color = 'bg-amber-950/80 text-amber-300 border-amber-600/60';
+  let color = 'bg-slate-900/90 text-slate-400 border-slate-700/60';
+  if (score >= 13) color = 'bg-purple-950/90 text-purple-200 border-purple-400 font-bold shadow-xs';
+  else if (score >= 11) color = 'bg-emerald-950/90 text-emerald-200 border-emerald-400 font-bold shadow-xs';
+  else if (score >= 9) color = 'bg-teal-950/90 text-teal-200 border-teal-400 font-semibold';
+  else if (score >= 7) color = 'bg-cyan-950/90 text-cyan-200 border-cyan-400/80 font-semibold';
+  else if (score >= 5) color = 'bg-amber-950/90 text-amber-200 border-amber-500/70';
+  else if (score >= 3) color = 'bg-orange-950/90 text-orange-200 border-orange-500/60';
 
   return (
     <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-mono capitalize border ${color} whitespace-nowrap min-w-[72px] text-center`}>
@@ -95,7 +97,7 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
 
         <div className="flex flex-wrap items-center gap-2.5">
           {/* View Toggle */}
-          <div className="flex items-center gap-1 bg-[#04120e] p-1 rounded-xl border border-emerald-800/60 text-xs">
+          <div className="flex items-center gap-1 bg-[#071118] p-1 rounded-xl border border-emerald-500/30 text-xs">
             <button
               onClick={() => setViewMode('matrix')}
               className={`p-1.5 rounded-lg transition-all ${
@@ -124,20 +126,20 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
               placeholder="Search player, role, ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-3 py-1.5 rounded-xl bg-[#04120e] border border-emerald-800/60 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400 w-48 sm:w-60"
+              className="pl-9 pr-3 py-1.5 rounded-xl bg-[#071118] border border-emerald-500/30 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400 w-48 sm:w-60"
             />
           </div>
 
           {/* Role Filters */}
-          <div className="flex items-center gap-1 bg-[#04120e] p-1 rounded-xl border border-emerald-800/60 text-xs">
+          <div className="flex items-center gap-1 bg-[#071118] p-1 rounded-xl border border-emerald-500/30 text-xs">
             {['ALL', 'WONDERKID', 'BATTER', 'BOWLER', 'KEEPER'].map((role) => (
               <button
                 key={role}
                 onClick={() => setRoleFilter(role)}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                   roleFilter === role
-                    ? 'bg-emerald-600 text-white shadow font-black'
-                    : 'text-slate-300 hover:text-white'
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow font-bold'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 {role}
@@ -161,12 +163,12 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
 
       {/* MATRIX VIEW: ULTRA-WIDE, SPACIOUS 11-SKILLS DATA TABLE */}
       {viewMode === 'matrix' ? (
-        <div className="w-full overflow-x-auto rounded-2xl border-2 border-emerald-500/50 bg-[#051c16] shadow-2xl">
+        <div className="w-full overflow-x-auto rounded-2xl border border-emerald-500/30 bg-[#071118]/95 shadow-2xl">
           <table className="w-full min-w-[1780px] text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-gradient-to-r from-[#02130e] via-[#062c21] to-[#02130e] text-slate-200 font-black border-b-2 border-emerald-500/60 uppercase tracking-wider text-[11px] sticky top-0 z-10 shadow-md">
+              <tr className="bg-gradient-to-r from-[#09151f] via-[#0d1e2b] to-[#09151f] text-slate-200 font-bold border-b border-emerald-500/40 uppercase tracking-wider text-[11px] sticky top-0 z-10 shadow-md">
                 <th className="py-4 px-3.5 w-32">
-                  <span className="flex items-center gap-1 text-emerald-300">
+                  <span className="flex items-center gap-1 text-emerald-400 font-bold">
                     <span>#</span>
                     <span>Player ID</span>
                   </span>
@@ -216,7 +218,7 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                 <th className="py-4 px-3.5 w-28 text-center">Dossier</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-emerald-900/60 font-mono">
+            <tbody className="divide-y divide-emerald-950/40 font-mono">
               {filteredSquad.map((player) => {
                 const isKeeper = player.tactical_role?.includes('Keeper') || getScore(player.keeping) >= 7;
                 const isBowler = player.tactical_role?.includes('Bowler') || player.tactical_role?.includes('Spinner') || getScore(player.bowling) >= 7;
@@ -224,7 +226,7 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                 const roleIcon = isKeeper ? '🧤' : isBowler ? '🔴' : isBatter ? '🏏' : '⚡';
 
                 return (
-                  <tr key={player.id} className="hover:bg-[#0c352a]/80 transition-colors">
+                  <tr key={player.id} className="odd:bg-[#071118]/90 even:bg-[#091621]/90 hover:bg-[#0d2232] transition-colors">
                     {/* Clean Numeric ID */}
                     <td className="py-4 px-3.5 font-mono text-xs text-emerald-400 font-extrabold whitespace-nowrap">
                       #{String(player.id).replace(/^BT-/, '')}
@@ -293,7 +295,7 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-black ${
                         player.active_net && player.active_net !== 'Unassigned' && player.active_net !== 'None'
                           ? 'bg-amber-950 text-amber-300 border border-amber-500/80 font-mono shadow-sm' 
-                          : 'text-slate-400 bg-[#03150f] border border-emerald-900/60'
+                          : 'text-slate-400 bg-[#071118] border border-slate-700/60'
                       }`}>
                         {player.active_net || 'Unassigned'}
                       </span>
@@ -322,10 +324,10 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
           {filteredSquad.map((player) => (
             <div 
               key={player.id} 
-              className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+              className={`p-5 rounded-2xl transition-all flex flex-col justify-between ${
                 player.is_wonderkid 
-                  ? 'bg-gradient-to-br from-[#12382e] via-[#0e2c24] to-[#071d18] border-amber-500/60 shadow-xl' 
-                  : 'sovereign-card border-emerald-600/30 shadow-lg'
+                  ? 'sovereign-card-gold' 
+                  : 'sovereign-card'
               }`}
             >
               <div>
@@ -338,16 +340,16 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                 <h4 className="text-lg font-black text-white mt-1">{player.name}</h4>
                 <div className="text-xs text-slate-300 mt-0.5">{player.tactical_role}</div>
 
-                <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-emerald-800/40 text-center text-xs font-mono">
-                  <div className="p-2 rounded-lg bg-[#04120e]">
+                <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-emerald-500/20 text-center text-xs font-mono">
+                  <div className="p-2 rounded-lg bg-[#071118] border border-emerald-500/20">
                     <span className="text-[10px] text-slate-400 block font-sans">BTI</span>
                     <strong className="text-emerald-300">{player.bti?.toLocaleString()}</strong>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#04120e]">
+                  <div className="p-2 rounded-lg bg-[#071118] border border-emerald-500/20">
                     <span className="text-[10px] text-slate-400 block font-sans">Wage</span>
                     <strong className="text-slate-200">£{player.wage?.toLocaleString()}</strong>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#04120e]">
+                  <div className="p-2 rounded-lg bg-[#071118] border border-emerald-500/20">
                     <span className="text-[10px] text-slate-400 block font-sans">Subskill</span>
                     <strong className="text-amber-300">{player.subskill}</strong>
                   </div>
