@@ -176,8 +176,16 @@ export function App() {
           setNets(cleanNets);
         }
 
-        const { data: matchesData } = await supabase.from('matches').select('*').eq('club_id', '13108');
-        if (matchesData && matchesData.length > 0) setMatches(matchesData);
+        // Only load matches from Supabase if the user has not established their local storage state,
+        // and filter out empty seed rows lacking scorecardData.
+        const localMatches = localStorage.getItem('bt360_matches');
+        if (localMatches === null) {
+          const { data: matchesData } = await supabase.from('matches').select('*').eq('club_id', '13108');
+          if (matchesData && matchesData.length > 0) {
+            const valid = matchesData.filter(m => m.scorecardData);
+            if (valid.length > 0) setMatches(valid);
+          }
+        }
 
         const { data: tiersData } = await supabase.from('stadium_tiers').select('*').eq('club_id', '13108');
         if (tiersData && tiersData.length > 0) setStadiumTiers(tiersData);
@@ -311,30 +319,24 @@ export function App() {
               records={records}
               onImportSquad={(newSquad) => {
                 setSquad(newSquad);
-                setCurrentTab('squad');
               }}
               onImportClub={(newClub) => {
                 setClub(newClub);
-                setCurrentTab('overview');
               }}
               onImportFinances={(newFinances) => {
                 setFinances(newFinances);
-                setCurrentTab('finances');
               }}
               onImportMatches={(newMatches) => {
                 setMatches(newMatches);
-                setCurrentTab('fixtures');
               }}
               onImportRecords={(newRecords) => {
                 setRecords(newRecords);
               }}
               onImportStadium={(newTiers) => {
                 setStadiumTiers(newTiers);
-                setCurrentTab('stadium');
               }}
               onImportNets={(newNets) => {
                 setNets(newNets);
-                setCurrentTab('training');
               }}
             />
           )}

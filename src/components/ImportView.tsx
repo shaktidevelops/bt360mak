@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Club, 
   Player, 
@@ -23,10 +23,32 @@ import {
   DollarSign, 
   Building, 
   Users, 
-  Trophy 
+  Trophy,
+  Calendar,
+  Clock,
+  History,
+  Trash2
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { parseBattrickScorecard, recalculateStatsFromMatches } from '../lib/matchStatsEngine';
+import { 
+  parseBattrickScorecard, 
+  recalculateStatsFromMatches,
+  parseBattrickFixtures,
+  EMPTY_STATS
+} from '../lib/matchStatsEngine';
+
+export interface ImportHistoryEntry {
+  id: string;
+  timestamp: string;
+  type: 'scorecard' | 'squad' | 'finances' | 'ground' | 'nets' | 'fixtures' | 'general';
+  title: string;
+  originalDate?: string;
+  matchId?: string;
+  details: string;
+  badgeText: string;
+  statsCalculated?: string;
+  status: 'success' | 'info';
+}
 
 interface ImportViewProps {
   club: Club;
@@ -59,6 +81,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
 }) => {
   const [activeImportTab, setActiveImportTab] = useState<'paste' | 'domains' | 'sheet' | 'json'>('paste');
   const [selectedDomain, setSelectedDomain] = useState<'squad' | 'finances' | 'ground' | 'fixtures' | 'nets' | 'office' | 'diary'>('squad');
+  const [formatOverride, setFormatOverride] = useState<'auto' | 'First Class' | 'One Day' | 'BT20'>('auto');
+  const [matchesFilter, setMatchesFilter] = useState<string>('ALL');
   const [rawText, setRawText] = useState('');
   const [parseResult, setParseResult] = useState<{
     type: 'squad' | 'office' | 'finances' | 'ground' | 'fixtures' | 'nets' | 'diary' | 'unknown';
@@ -77,22 +101,170 @@ export const ImportView: React.FC<ImportViewProps> = ({
   const [isSyncing, setIsSyncing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
+  // Sorting helper for match date (DD/MM/YYYY or YYYY-MM-DD)
+  const parseMatchDateSortKey = (dateStr: string): number => {
+    if (!dateStr) return 0;
+    if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(dateStr)) {
+      const parts = dateStr.split(/[\/\-]/);
+      const day = parseInt(parts[0]);
+      const month = parseInt(parts[1]) - 1;
+      const year = parseInt(parts[2].slice(0, 4));
+      return new Date(year, month, day).getTime() || 0;
+    }
+    return new Date(dateStr).getTime() || 0;
+  };
+
+  // Format statistics counts
+  const fcCount = matches.filter(m => m.match_type === 'First Class' || m.match_type === 'FC').length;
+  const odCount = matches.filter(m => m.match_type === 'One Day' || m.match_type === 'OD').length;
+  const t20Count = matches.filter(m => m.match_type === 'BT20' || m.match_type === 'T20').length;
+
+  const filteredImportedMatches = useMemo(() => {
+    return [...matches]
+      .filter(m => {
+        if (matchesFilter === 'ALL') return true;
+        if (matchesFilter === 'First Class') return m.match_type === 'First Class' || m.match_type === 'FC';
+        if (matchesFilter === 'One Day') return m.match_type === 'One Day' || m.match_type === 'OD';
+        if (matchesFilter === 'BT20') return m.match_type === 'BT20' || m.match_type === 'T20';
+        return true;
+      })
+      .sort((a, b) => parseMatchDateSortKey(b.match_date) - parseMatchDateSortKey(a.match_date));
+  }, [matches, matchesFilter]);
+
+  // Ingestion History state (persisted in localStorage)
+  const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>(() => {
+    try {
+      const saved = localStorage.getItem('bt360_recent_imports');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to parse recent imports from localStorage', e);
+    }
+    // If empty but matches exist, populate initial history from matches
+    if (matches && matches.length > 0) {
+      return matches.slice(-5).reverse().map(m => ({
+        id: `init-${m.id}`,
+        timestamp: 'Existing Match',
+        type: 'scorecard',
+        title: `${m.match_type} vs ${m.opponent_club}`,
+        originalDate: m.match_date,
+        matchId: m.id,
+        details: m.result || 'Match Completed',
+        badgeText: m.match_type,
+        status: 'success'
+      }));
+    }
+    return [];
+  });
+
+  // Delete all imported matches and reset player career stats to zero
+  const handleDeleteAllMatchesAndStats = async () => {
+    if (!window.confirm("⚠️ Are you sure you want to delete ALL imported matches and reset all player career stats (First Class, One Day, BT20) and clubhouse milestones back to 0? This action cannot be undone.")) {
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      const resetSquad: Player[] = squad.map(p => ({
+        ...p,
+        statsFC: { ...EMPTY_STATS },
+        statsOD: { ...EMPTY_STATS },
+        statsT20: { ...EMPTY_STATS }
+      }));
+
+      if (onImportMatches) onImportMatches([]);
+      onImportSquad(resetSquad);
+      if (onImportRecords) onImportRecords([]);
+
+      localStorage.setItem('bt360_matches', '[]');
+      localStorage.setItem('bt360_records', '[]');
+      localStorage.setItem('bt360_squad', JSON.stringify(resetSquad));
+      localStorage.removeItem('bt360_recent_imports');
+      setImportHistory([]);
+
+      if (isSupabaseConfigured) {
+        try {
+          await supabase.from('matches').delete().eq('club_id', club.id);
+          await supabase.from('players').upsert(resetSquad);
+        } catch (sErr) {
+          console.warn('Supabase reset note:', sErr);
+        }
+      }
+
+      setStatusMessage({
+        text: '🗑️ All imported matches have been completely deleted! Player career stats (FC, OD, T20) and clubhouse records have been reset to zero.',
+        type: 'success'
+      });
+    } catch (err: any) {
+      setStatusMessage({ text: `Error deleting matches: ${err.message}`, type: 'error' });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Delete a single match and dynamically recalculate stats
+  const handleDeleteSingleMatch = async (matchId: string) => {
+    if (!window.confirm(`Delete match scorecard #${matchId}? Career stats and records will be recalculated automatically.`)) {
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      const remainingMatches = matches.filter(m => m.id !== matchId);
+      const { updatedSquad, updatedRecords } = recalculateStatsFromMatches(remainingMatches, squad);
+
+      if (onImportMatches) onImportMatches(remainingMatches);
+      onImportSquad(updatedSquad);
+      if (onImportRecords) onImportRecords(updatedRecords);
+
+      localStorage.setItem('bt360_matches', JSON.stringify(remainingMatches));
+      localStorage.setItem('bt360_records', JSON.stringify(updatedRecords));
+      localStorage.setItem('bt360_squad', JSON.stringify(updatedSquad));
+
+      setStatusMessage({
+        text: `Match #${matchId} deleted. Player stats and records recalculated across ${remainingMatches.length} remaining matches.`,
+        type: 'info'
+      });
+    } catch (err: any) {
+      setStatusMessage({ text: `Error deleting match: ${err.message}`, type: 'error' });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   // Smart Universal Parser for Battrick raw copied text or HTML across all domains
-  const parseBattrickData = (input: string) => {
+  const parseBattrickData = (input: string, overrideFormat?: 'auto' | 'First Class' | 'One Day' | 'BT20') => {
     if (!input.trim()) {
       setParseResult(null);
       return;
     }
 
-    // 1. MATCH SCORECARD / FIXTURES DOMAIN (matchinfofc.asp / matchinfo.asp / fixtures.asp)
+    const currentFmt = overrideFormat !== undefined ? overrideFormat : formatOverride;
+    const formatArg = currentFmt === 'auto' ? undefined : currentFmt;
+
+    // 1A. MULTI-FIXTURES DOMAIN (fixtures.asp)
+    if (input.includes('fixtures.asp') || (input.includes('Previous Matches') && input.includes('matchID='))) {
+      const fixturesList = parseBattrickFixtures(input, club.id);
+      if (fixturesList.length > 0) {
+        setParseResult({
+          type: 'fixtures',
+          count: fixturesList.length,
+          title: `Battrick Schedule Detected: ${fixturesList.length} Authenticated Matches`,
+          matches: fixturesList
+        });
+        return;
+      }
+    }
+
+    // 1B. MATCH SCORECARD DOMAIN (matchinfofc.asp / matchinfo.asp / scorecards)
     const isScorecard = input.includes('matchinfofc.asp') || 
                         input.includes('matchinfo.asp') || 
                         input.includes('Fall of wickets') || 
                         input.includes("Reporter's Summary") ||
-                        (input.includes('Somnath Super Devs') && input.includes('overs'));
+                        input.includes('First Innings of:') ||
+                        input.includes('Second Innings of:') ||
+                        /Total\s*\([^)]*overs/i.test(input) ||
+                        (/Somnath Super Devs/i.test(input) && (input.includes('overs') || input.includes('Date:') || input.includes('runs') || input.includes('wickets')));
 
     if (isScorecard) {
-      const scorecard = parseBattrickScorecard(input);
+      const scorecard = parseBattrickScorecard(input, formatArg);
       if (scorecard) {
         const newMatch: MatchRecord = {
           id: scorecard.matchId,
@@ -114,7 +286,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
         setParseResult({
           type: 'fixtures',
           count: 1,
-          title: `Match Scorecard Detected: ${scorecard.format} vs ${scorecard.opponent}`,
+          title: `Match Scorecard Detected: ${scorecard.format} vs ${scorecard.opponent} (Match Date: ${scorecard.rawMatchDate || scorecard.matchDate})`,
           matches: [newMatch]
         });
         return;
@@ -392,12 +564,13 @@ export const ImportView: React.FC<ImportViewProps> = ({
     try {
       if (parseResult.type === 'fixtures' && parseResult.matches) {
         // Append or replace matches
-        const existingIds = new Set(matches.map(m => m.id));
         const newMatches = [...matches];
         for (const m of parseResult.matches) {
-          if (!existingIds.has(m.id)) {
+          const idx = newMatches.findIndex(ex => ex.id === m.id);
+          if (idx >= 0) {
+            newMatches[idx] = m;
+          } else {
             newMatches.push(m);
-            existingIds.add(m.id);
           }
         }
 
@@ -418,10 +591,45 @@ export const ImportView: React.FC<ImportViewProps> = ({
           await supabase.from('players').upsert(updatedSquad);
         }
 
+        // Add to Ingestion Activity Log (Last 5 imports)
+        const newEntries: ImportHistoryEntry[] = parseResult.matches.map(m => ({
+          id: `imp-${m.id}-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          type: 'scorecard',
+          title: `${m.match_type} vs ${m.opponent_club}`,
+          originalDate: m.match_date,
+          matchId: m.id,
+          details: `${m.result || 'Match Completed'}${m.scoreSummary ? ` • ${m.scoreSummary}` : ''}`,
+          badgeText: m.match_type,
+          statsCalculated: m.topPerformer || 'Player Career Stats & Club Records Recomputed',
+          status: 'success'
+        }));
+
+        setImportHistory(prev => {
+          const combined = [...newEntries, ...prev];
+          const seen = new Set<string>();
+          const deduped: ImportHistoryEntry[] = [];
+          for (const item of combined) {
+            const key = item.matchId || item.id;
+            if (!seen.has(key)) {
+              seen.add(key);
+              deduped.push(item);
+            }
+          }
+          const sliced = deduped.slice(0, 5);
+          localStorage.setItem('bt360_recent_imports', JSON.stringify(sliced));
+          return sliced;
+        });
+
+        const firstMatch = parseResult.matches[0];
         setStatusMessage({
-          text: `✅ Match scorecard successfully ingested! Player career stats and clubhouse records recomputed.`,
+          text: `✅ Match #${firstMatch.id} (${firstMatch.match_type} vs ${firstMatch.opponent_club}) successfully ingested! Authentic Match Date: ${firstMatch.match_date} • Player stats & club records dynamically recomputed. Box cleared and ready for your next match!`,
           type: 'success'
         });
+
+        // Reset paste box so user is immediately ready for next match upload
+        setRawText('');
+        setParseResult(null);
       } else if (parseResult.type === 'squad' && parseResult.players && parseResult.players.length > 0) {
         const formatted: Player[] = parseResult.players.map((p, idx) => ({
           id: p.id || String(6099450 + idx),
@@ -462,10 +670,28 @@ export const ImportView: React.FC<ImportViewProps> = ({
           if (error) console.warn('Supabase upsert note:', error.message);
         }
 
+        const newEntry: ImportHistoryEntry = {
+          id: `imp-squad-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          type: 'squad',
+          title: `Squad Roster Ingestion (${formatted.length} Players)`,
+          details: 'Official 14-man squad roster registered with authentic skills & BTI',
+          badgeText: 'Squad Roster',
+          statsCalculated: 'All 14 Player Dossiers Synced',
+          status: 'success'
+        };
+        setImportHistory(prev => {
+          const updated = [newEntry, ...prev].slice(0, 5);
+          localStorage.setItem('bt360_recent_imports', JSON.stringify(updated));
+          return updated;
+        });
+
         setStatusMessage({
-          text: `✅ Successfully imported ${formatted.length} Battrick players into live squad & database!`,
+          text: `✅ Successfully imported ${formatted.length} Battrick players into live squad & database! Box cleared and ready for next import!`,
           type: 'success'
         });
+        setRawText('');
+        setParseResult(null);
       } else if (parseResult.type === 'finances' && parseResult.finances) {
         if (onImportFinances) onImportFinances(parseResult.finances);
         if (parseResult.clubUpdates) onImportClub({ ...club, ...parseResult.clubUpdates });
@@ -475,10 +701,28 @@ export const ImportView: React.FC<ImportViewProps> = ({
           await supabase.from('financial_ledger').upsert(parseResult.finances);
           if (parseResult.clubUpdates) await supabase.from('clubs').upsert({ ...club, ...parseResult.clubUpdates });
         }
+
+        const newEntry: ImportHistoryEntry = {
+          id: `imp-fin-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          type: 'finances',
+          title: `Club Financial Ledger Updated`,
+          details: `Closing Balance: £${parseResult.clubUpdates?.bank_balance?.toLocaleString()} • 4 Weeks Inflow/Outflow`,
+          badgeText: 'Finances',
+          status: 'success'
+        };
+        setImportHistory(prev => {
+          const updated = [newEntry, ...prev].slice(0, 5);
+          localStorage.setItem('bt360_recent_imports', JSON.stringify(updated));
+          return updated;
+        });
+
         setStatusMessage({
           text: `✅ Successfully updated club finances & closing balance to £${parseResult.clubUpdates?.bank_balance?.toLocaleString()}!`,
           type: 'success'
         });
+        setRawText('');
+        setParseResult(null);
       } else if (parseResult.type === 'ground' && parseResult.stadiumTiers) {
         if (onImportStadium) onImportStadium(parseResult.stadiumTiers);
         if (parseResult.clubUpdates) onImportClub({ ...club, ...parseResult.clubUpdates });
@@ -487,25 +731,79 @@ export const ImportView: React.FC<ImportViewProps> = ({
         if (isSupabaseConfigured) {
           await supabase.from('stadium_tiers').upsert(parseResult.stadiumTiers);
         }
+
+        const newEntry: ImportHistoryEntry = {
+          id: `imp-ground-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          type: 'ground',
+          title: `Prabhas Coastal Oval Stadium Tiers`,
+          details: `10,000 Capacity Seating Matrix Synchronized`,
+          badgeText: 'Ground',
+          status: 'success'
+        };
+        setImportHistory(prev => {
+          const updated = [newEntry, ...prev].slice(0, 5);
+          localStorage.setItem('bt360_recent_imports', JSON.stringify(updated));
+          return updated;
+        });
+
         setStatusMessage({
           text: `✅ Prabhas Coastal Oval seating tiers & 10,000 capacity synchronized!`,
           type: 'success'
         });
+        setRawText('');
+        setParseResult(null);
       } else if (parseResult.type === 'nets' && parseResult.nets) {
         if (onImportNets) onImportNets(parseResult.nets);
         localStorage.setItem('bt360_nets', JSON.stringify(parseResult.nets));
+
+        const newEntry: ImportHistoryEntry = {
+          id: `imp-nets-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          type: 'nets',
+          title: `Training 10-Net Facility Matrix`,
+          details: `Net slots and stamina distribution updated`,
+          badgeText: 'Training',
+          status: 'success'
+        };
+        setImportHistory(prev => {
+          const updated = [newEntry, ...prev].slice(0, 5);
+          localStorage.setItem('bt360_recent_imports', JSON.stringify(updated));
+          return updated;
+        });
+
         setStatusMessage({
           text: `✅ Training nets matrix successfully updated!`,
           type: 'success'
         });
+        setRawText('');
+        setParseResult(null);
       } else if (parseResult.type === 'office' && parseResult.clubUpdates) {
         const updatedClub: Club = { ...club, ...parseResult.clubUpdates };
         onImportClub(updatedClub);
         localStorage.setItem('bt360_club', JSON.stringify(updatedClub));
+
+        const newEntry: ImportHistoryEntry = {
+          id: `imp-off-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          type: 'general',
+          title: `Club Standings & ITS Bank`,
+          details: `70 ITS & Level 20 Academy Status Synced`,
+          badgeText: 'Office',
+          status: 'success'
+        };
+        setImportHistory(prev => {
+          const updated = [newEntry, ...prev].slice(0, 5);
+          localStorage.setItem('bt360_recent_imports', JSON.stringify(updated));
+          return updated;
+        });
+
         setStatusMessage({
           text: `✅ Club standings and ITS bank updated!`,
           type: 'success'
         });
+        setRawText('');
+        setParseResult(null);
       }
     } catch (err: any) {
       setStatusMessage({
@@ -719,6 +1017,89 @@ Coach Quality: Competent`;
       {/* TAB 1: Smart Text / HTML Paste */}
       {activeImportTab === 'paste' && (
         <div className="space-y-4">
+          {/* RECENT INGESTION ACTIVITY (LAST 5 IMPORTS) */}
+          <div className="sovereign-card p-5 rounded-2xl border-emerald-500/30 shadow-md space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <History className="w-4 h-4 text-emerald-600" />
+                <h3 className="text-sm font-black text-slate-900">
+                  Recent Ingestion Activity (Last 5 Imports)
+                </h3>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">
+                  {importHistory.length} Logged
+                </span>
+              </div>
+
+              {importHistory.length > 0 && (
+                <button
+                  onClick={() => {
+                    setImportHistory([]);
+                    localStorage.removeItem('bt360_recent_imports');
+                  }}
+                  className="text-[11px] text-slate-500 hover:text-rose-600 flex items-center gap-1 font-bold transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Clear Ingestion History</span>
+                </button>
+              )}
+            </div>
+
+            {importHistory.length === 0 ? (
+              <div className="py-6 text-center text-slate-500 text-xs">
+                <p className="font-bold text-slate-700">No imports recorded yet in this session.</p>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Paste any Battrick match scorecard or squad HTML in the box below and click "Apply & Synchronize" to view your live history here.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-2.5">
+                {importHistory.map((item, idx) => (
+                  <div 
+                    key={item.id || idx}
+                    className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-emerald-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs"
+                  >
+                    <div className="flex items-start sm:items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-100/80 border border-emerald-200 flex items-center justify-center text-base shrink-0 shadow-xs">
+                        {item.type === 'scorecard' ? '🏏' : item.type === 'squad' ? '👥' : item.type === 'finances' ? '💰' : item.type === 'ground' ? '🏟️' : '🎯'}
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-black text-slate-900 text-xs">{item.title}</span>
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-black">
+                            {item.badgeText}
+                          </span>
+                          {item.matchId && (
+                            <span className="font-mono text-[10px] text-slate-500 font-bold">#{item.matchId}</span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-1">{item.details}</p>
+                        {item.statsCalculated && (
+                          <p className="text-[10px] text-emerald-700 font-bold mt-0.5 flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
+                            <span>{item.statsCalculated}</span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between shrink-0 text-right gap-1 pt-2 sm:pt-0 border-t sm:border-0 border-slate-200">
+                      {item.originalDate && (
+                        <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-900 px-2.5 py-0.5 rounded-lg text-[10px] font-black shadow-xs">
+                          <Calendar className="w-3 h-3 text-amber-600" />
+                          <span>Original Date: {item.originalDate}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1 text-[10px] text-slate-400 font-mono">
+                        <Clock className="w-3 h-3" />
+                        <span>{item.timestamp}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="sovereign-card p-5 rounded-2xl border-slate-200 shadow-md space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
@@ -727,11 +1108,31 @@ Coach Quality: Competent`;
                   <span>Paste Raw Battrick Web Page Text or HTML</span>
                 </h3>
                 <p className="text-xs text-slate-600 mt-0.5">
-                  Open any Battrick page (<code className="text-emerald-700 font-mono">matchinfofc.asp</code>, <code className="text-emerald-700 font-mono">squad.asp</code>, <code className="text-emerald-700 font-mono">finances.asp</code>), press <kbd className="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-300 text-[10px]">Ctrl+A</kbd> then <kbd className="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-300 text-[10px]">Ctrl+C</kbd>, and paste here:
+                  Open any Battrick page (<code className="text-emerald-700 font-mono">matchinfofc.asp</code>, <code className="text-emerald-700 font-mono">matchinfo.asp</code>, <code className="text-emerald-700 font-mono">squad.asp</code>, <code className="text-emerald-700 font-mono">finances.asp</code>), press <kbd className="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-300 text-[10px]">Ctrl+A</kbd> then <kbd className="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-300 text-[10px]">Ctrl+C</kbd>, and paste here:
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl border border-slate-300 text-xs shadow-xs">
+                  <span className="text-[11px] font-bold text-slate-600">Match Format:</span>
+                  <select
+                    value={formatOverride}
+                    onChange={(e) => {
+                      const val = e.target.value as 'auto' | 'First Class' | 'One Day' | 'BT20';
+                      setFormatOverride(val);
+                      if (rawText.trim()) {
+                        parseBattrickData(rawText, val);
+                      }
+                    }}
+                    className="text-xs font-black text-slate-900 bg-transparent focus:outline-none cursor-pointer"
+                  >
+                    <option value="auto">Auto-Detect Format (Smart)</option>
+                    <option value="First Class">Force First Class (FC)</option>
+                    <option value="One Day">Force One Day (OD)</option>
+                    <option value="BT20">Force BT20 (T20)</option>
+                  </select>
+                </div>
+
                 <button
                   onClick={() => { setRawText(''); setParseResult(null); }}
                   className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-300 text-[11px] font-bold transition-all cursor-pointer"
@@ -816,13 +1217,20 @@ The engine automatically detects whether you pasted a Match Scorecard, Squad, Fi
               {parseResult.matches && parseResult.matches.length > 0 && (
                 <div className="space-y-2 font-mono text-xs">
                   {parseResult.matches.map(m => (
-                    <div key={m.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900">{m.match_type} vs {m.opponent_club}</span>
-                        <span className="text-emerald-700 font-bold">{m.match_date}</span>
+                    <div key={m.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <span className="font-bold text-slate-900 text-sm">{m.match_type} vs {m.opponent_club}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="bg-amber-100 border border-amber-300 text-amber-900 px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1.5 shadow-xs">
+                            <Calendar className="w-3.5 h-3.5 text-amber-700" />
+                            <span>Authentic Match Date: {m.match_date}</span>
+                          </span>
+                          <span className="text-slate-500 font-bold">#{m.id}</span>
+                        </div>
                       </div>
-                      <p className="text-slate-600 mt-1">{m.result}</p>
-                      {m.scoreSummary && <p className="text-slate-500 text-[11px] mt-0.5">{m.scoreSummary}</p>}
+                      <p className="text-emerald-800 font-bold text-xs">{m.result}</p>
+                      {m.scoreSummary && <p className="text-slate-600 text-[11px]">{m.scoreSummary}</p>}
+                      {m.topPerformer && <p className="text-emerald-700 text-[11px] font-bold">⭐ Top Performer: {m.topPerformer}</p>}
                     </div>
                   ))}
                 </div>
@@ -851,6 +1259,128 @@ The engine automatically detects whether you pasted a Match Scorecard, Squad, Fi
               )}
             </div>
           )}
+
+          {/* LATEST IMPORTED MATCHES & MATCHDAY ARCHIVE */}
+          <div className="sovereign-card p-6 rounded-2xl border-emerald-500/30 shadow-md space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
+                  <Trophy className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900">
+                    Latest Imported Matches & Matchday Archive ({matches.length})
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    First Class: <span className="font-bold text-amber-800">{fcCount}</span> | One Day: <span className="font-bold text-blue-800">{odCount}</span> | BT20: <span className="font-bold text-emerald-800">{t20Count}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Format Filter */}
+                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+                  {['ALL', 'First Class', 'One Day', 'BT20'].map((fmt) => (
+                    <button
+                      key={fmt}
+                      onClick={() => setMatchesFilter(fmt)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        matchesFilter === fmt
+                          ? 'bg-emerald-600 text-white shadow-xs font-black'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {fmt === 'ALL' ? 'All Formats' : fmt}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Delete All Matches Button */}
+                {matches.length > 0 && (
+                  <button
+                    onClick={handleDeleteAllMatchesAndStats}
+                    disabled={isSyncing}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                    title="Delete all imported matches and reset career statistics back to zero"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete All Matches & Reset Stats</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {filteredImportedMatches.length === 0 ? (
+              <div className="py-8 text-center text-slate-500 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <Calendar className="w-8 h-8 text-slate-400 mx-auto" />
+                <div className="text-sm font-bold text-slate-700">No matches currently imported in this view</div>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  Paste your Battrick match scorecard or schedule HTML above to automatically record genuine matches and recalculate player career statistics.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {filteredImportedMatches.map((m) => {
+                  const badgeColor = 
+                    (m.match_type === 'First Class' || m.match_type === 'FC')
+                      ? 'bg-amber-100 text-amber-900 border-amber-300'
+                      : (m.match_type === 'One Day' || m.match_type === 'OD')
+                      ? 'bg-blue-100 text-blue-900 border-blue-300'
+                      : 'bg-emerald-100 text-emerald-900 border-emerald-300';
+
+                  return (
+                    <div 
+                      key={m.id}
+                      className="p-4 bg-white hover:bg-slate-50/80 rounded-xl border border-slate-200 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`px-2.5 py-0.5 rounded-lg text-xs font-black border uppercase tracking-wider ${badgeColor}`}>
+                            {m.match_type}
+                          </span>
+                          <span className="font-bold text-slate-900 text-sm">
+                            vs {m.opponent_club}
+                          </span>
+                          <span className="bg-amber-50 border border-amber-200 text-amber-900 px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-amber-700" />
+                            <span>{m.match_date}</span>
+                          </span>
+                          <span className="text-slate-500 text-xs font-mono">
+                            #{m.id}
+                          </span>
+                          <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            {m.venue}
+                          </span>
+                        </div>
+
+                        <div className="text-xs text-slate-700 font-medium">
+                          {m.result || 'Match Completed'}
+                          {m.scoreSummary && <span className="text-slate-500 ml-2">({m.scoreSummary})</span>}
+                        </div>
+
+                        {m.topPerformer && (
+                          <div className="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-amber-500" />
+                            <span>Top Performer: {m.topPerformer}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end sm:self-center">
+                        <button
+                          onClick={() => handleDeleteSingleMatch(m.id)}
+                          className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
+                          title="Delete this match scorecard"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

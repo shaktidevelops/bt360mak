@@ -44,6 +44,7 @@ export interface ParsedPlayerBowling {
 export interface ParsedScorecard {
   matchId: string;
   matchDate: string;
+  rawMatchDate?: string;
   format: 'First Class' | 'One Day' | 'BT20';
   opponent: string;
   venue: string;
@@ -61,71 +62,101 @@ export interface ParsedScorecard {
 }
 
 /**
+ * Normalizes any date string (DD/MM/YYYY, DD-MM-YYYY, or YYYY-MM-DD) to ISO format YYYY-MM-DD
+ */
+export function normalizeToIsoDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const clean = dateStr.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) return clean;
+  const parts = clean.split(/[\/\-.]/);
+  if (parts.length >= 3) {
+    const day = parts[0].padStart(2, '0');
+    const month = parts[1].padStart(2, '0');
+    let year = parts[2].trim().slice(0, 4);
+    if (year.length === 2) year = '20' + year;
+    return `${year}-${month}-${day}`;
+  }
+  return clean;
+}
+
+/**
+ * Robust extraction of authentic original match date from uploaded Battrick HTML or plain text.
+ * Strictly extracts the true match date from the code/text rather than falling back to today.
+ */
+export function extractBattrickDate(input: string): { isoDate: string; rawDate: string } {
+  if (!input) return { isoDate: '', rawDate: '' };
+
+  // 1. Table cell pattern with HTML tags: <td><b>Date:</b></td> <td>13/11/2026 04:30</td> or <td class="fieldcol">Date:</td> <td>10/11/2026</td>
+  const tdMatch = input.match(/<td[^>]*>(?:<[^>]+>)*\s*Date:?\s*(?:<\/[^>]+>)*<\/td>\s*<td[^>]*>(?:<[^>]+>)*\s*([0-3]?\d[\/\-.][0-1]?\d[\/\-.]20\d{2}(?:\s+\d{1,2}:\d{2})?)/i);
+  if (tdMatch) {
+    const raw = tdMatch[1].trim();
+    return { isoDate: normalizeToIsoDate(raw), rawDate: raw };
+  }
+
+  // 2. Generic Date: label in text or markup
+  const textMatch = input.match(/Date[:\s]+(?:<[^>]+>)*\s*([0-3]?\d[\/\-.][0-1]?\d[\/\-.]20\d{2}(?:\s+\d{1,2}:\d{2})?)/i);
+  if (textMatch) {
+    const raw = textMatch[1].trim();
+    return { isoDate: normalizeToIsoDate(raw), rawDate: raw };
+  }
+
+  // 3. Altcol spans from fixtures: <span class="altcol" title="Tuesday">10/11/2026 04:30
+  const spanMatch = input.match(/<span[^>]*class=["']altcol["'][^>]*>\s*([0-3]?\d[\/\-.][0-1]?\d[\/\-.]20\d{2}(?:\s+\d{1,2}:\d{2})?)/i);
+  if (spanMatch) {
+    const raw = spanMatch[1].trim();
+    return { isoDate: normalizeToIsoDate(raw), rawDate: raw };
+  }
+
+  // 4. ISO Date: 2026-11-10
+  const isoMatch = input.match(/\b(20\d{2}-[0-1]\d-[0-3]\d)\b/);
+  if (isoMatch) {
+    const raw = isoMatch[1].trim();
+    return { isoDate: raw, rawDate: raw };
+  }
+
+  // 5. Standalone date DD/MM/YYYY in the header portion (first 3000 chars)
+  const headerSlice = input.slice(0, 3000);
+  const standaloneMatch = headerSlice.match(/\b([0-3]?\d\/[0-1]?\d\/20\d{2})\b/);
+  if (standaloneMatch) {
+    const raw = standaloneMatch[1].trim();
+    return { isoDate: normalizeToIsoDate(raw), rawDate: raw };
+  }
+
+  return { isoDate: '', rawDate: '' };
+}
+
+/**
  * Intelligent Battrick Match Scorecard / Summary Parser
  * Parses both raw HTML (matchinfofc.asp / matchinfo.asp) and plain-text copy-paste.
  */
-export function parseBattrickScorecard(input: string): ParsedScorecard | null {
+export function parseBattrickScorecard(
+  input: string,
+  formatOverride?: 'First Class' | 'One Day' | 'BT20'
+): ParsedScorecard | null {
   if (!input || input.length < 50) return null;
 
+  // Strip top navigation menubar which contains all three leagues: "FC: VIII.17", "OD: V.62", "BT20: VII.241"
+  const cleanContent = input
+    .replace(/<ul\s+id=["']topmenu["'][\s\S]*?<\/ul>/gi, '')
+    .replace(/<div\s+id=["']menubarwrapper["'][\s\S]*?<\/div>\s*<\/div>/gi, '')
+    .replace(/<div\s+id=["']menubar["'][\s\S]*?<\/div>/gi, '');
+
   // 1. Match ID
-  const idMatch = input.match(/matchID=(\d+)/i) || 
-                  input.match(/v\s+[A-Za-z0-9\s]+\((\d{6,9})\)/i) || 
-                  input.match(/Match\s*#?(\d{6,9})/i);
+  const idMatch = cleanContent.match(/matchID=(\d+)/i) || 
+                  cleanContent.match(/v\s+[A-Za-z0-9\s]+\((\d{6,9})\)/i) || 
+                  cleanContent.match(/Match\s*#?(\d{6,9})/i);
   const matchId = idMatch ? idMatch[1] : `M-${Date.now().toString().slice(-6)}`;
 
-  // 2. Format
-  let format: 'First Class' | 'One Day' | 'BT20' = 'First Class';
-  if (/BT20|T20|Twenty20/i.test(input)) {
-    format = 'BT20';
-  } else if (/One Day|OD\s|50\s*over/i.test(input)) {
-    format = 'One Day';
-  } else if (/First Class|FC\s|3\s*day|three day/i.test(input)) {
-    format = 'First Class';
-  }
-
-  // 3. Opponent & Venue
-  let opponent = 'Opposition XI';
-  const oppMatch = input.match(/Somnath Super Devs\s+v(?:s)?\s+([A-Za-z0-9\s]+?)(?:[<(]|\s+Date)/i) || 
-                   input.match(/v\s+([A-Za-z0-9\s]+?)\s+\(/i);
-  if (oppMatch) {
-    opponent = oppMatch[1].trim();
-  }
-
-  const isHome = /Home|Prabhas Coastal Oval/i.test(input);
-  const venue = isHome ? 'Home (Prabhas Coastal Oval)' : 'Away Grounds';
-
-  // 4. Pitch
-  let pitchType = 'Hard & Fast';
-  if (/green/i.test(input)) pitchType = 'Green Seamer';
-  else if (/dusty/i.test(input)) pitchType = 'Dry & Dusty';
-  else if (/slow/i.test(input)) pitchType = 'Slow & Low';
-  else if (/flat/i.test(input)) pitchType = 'Flat Highway';
-  else if (/uneven/i.test(input)) pitchType = 'Uneven';
-
-  // 5. Date
-  const dateM = input.match(/Date[:\s]*<\/td>\s*<td[^>]*>(\d{1,2}\/\d{1,2}\/\d{4})/i) || 
-                input.match(/(\d{4}-\d{2}-\d{2})/);
-  const matchDate = dateM ? dateM[1] : new Date().toISOString().split('T')[0];
-
-  // 6. Result
-  let result = 'Match Concluded';
-  const resM = input.match(/<strong>(Somnath Super Devs won[^<]+)<\/strong>/i) ||
-               input.match(/<strong>([^<]+won by[^<]+)<\/strong>/i) ||
-               input.match(/(Somnath Super Devs won by [^\n\.]+)/i);
-  if (resM) {
-    result = resM[1].replace(/&#187;/g, '').trim();
-  }
-
-  // 7. Batting Card Parsing
+  // 2. Batting Card Parsing
   const battingPerformances: ParsedPlayerBatting[] = [];
-  const batRegex = /<a href="playerdetails\.asp\?playerID=(\d+)"[^>]*>([^<]+)<\/a><\/td>\s*<td[^>]*>([^<]*)<\/td>\s*<td[^>]*>([^<]*)<\/td>\s*<td[^>]*>(\d+)<\/td>\s*<td[^>]*>(\d+)<\/td>\s*<td[^>]*>(\d+)<\/td>\s*<td[^>]*>(\d+)<\/td>/gi;
+  const batRegex = /<tr>\s*<td[^>]*>\s*<a href="playerdetails\.asp\?playerID=(\d+)"[^>]*>\s*([^<]+)\s*<\/a>(?:\s*<\/a>)?\s*<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>/gi;
   let batMatch;
-  while ((batMatch = batRegex.exec(input)) !== null) {
+  while ((batMatch = batRegex.exec(cleanContent)) !== null) {
     const isNotOut = /not\s*out/i.test(batMatch[3] + batMatch[4]);
     battingPerformances.push({
       playerId: batMatch[1],
       playerName: batMatch[2].trim(),
-      dismissal: (batMatch[3] + ' ' + batMatch[4]).trim(),
+      dismissal: (batMatch[3] + ' ' + batMatch[4]).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
       runs: parseInt(batMatch[5]),
       balls: parseInt(batMatch[6]),
       fours: parseInt(batMatch[7]),
@@ -136,7 +167,7 @@ export function parseBattrickScorecard(input: string): ParsedScorecard | null {
 
   // Fallback plain-text batting parser (e.g. "I. Baboor b. Bowler 166 (182b 16x4 2x6)")
   if (battingPerformances.length === 0) {
-    const lines = input.split('\n');
+    const lines = cleanContent.split('\n');
     for (const line of lines) {
       const lineM = line.match(/^([A-Za-z\.\s]+)\s+(not out|c\s+.*?|b\s+.*?|lbw\s+.*?|run out.*?)\s+(\d+)\s+(?:balls:?\s*(\d+)|\((\d+)b\s*(\d+)x4\s*(\d+)x6\))/i);
       if (lineM) {
@@ -154,11 +185,11 @@ export function parseBattrickScorecard(input: string): ParsedScorecard | null {
     }
   }
 
-  // 8. Bowling Card Parsing
+  // 3. Bowling Card Parsing
   const bowlingPerformances: ParsedPlayerBowling[] = [];
-  const bowlRegex = /<a href="playerdetails\.asp\?playerID=(\d+)"[^>]*>([^<]+)<\/a>\s*<\/td>\s*<td>(\d+(?:\.\d+)?)<\/td>\s*<td[^>]*>(\d+)<\/td>\s*<td[^>]*>(\d+)<\/td>\s*<td[^>]*>(\d+)<\/td>/gi;
+  const bowlRegex = /<tr>\s*<td[^>]*>\s*<a href="playerdetails\.asp\?playerID=(\d+)"[^>]*>\s*([^<]+)\s*<\/a>(?:\s*<\/a>)?\s*<\/td>\s*<td[^>]*>\s*(\d+(?:\.\d+)?)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>/gi;
   let bowlMatch;
-  while ((bowlMatch = bowlRegex.exec(input)) !== null) {
+  while ((bowlMatch = bowlRegex.exec(cleanContent)) !== null) {
     bowlingPerformances.push({
       playerId: bowlMatch[1],
       playerName: bowlMatch[2].trim(),
@@ -171,7 +202,7 @@ export function parseBattrickScorecard(input: string): ParsedScorecard | null {
 
   // Fallback plain-text bowling parser (e.g. "P. Rishi 10-2-35-3")
   if (bowlingPerformances.length === 0) {
-    const lines = input.split('\n');
+    const lines = cleanContent.split('\n');
     for (const line of lines) {
       const bowlLineM = line.match(/^([A-Za-z\.\s]+)\s+(\d+(?:\.\d+)?)-(\d+)-(\d+)-(\d+)/);
       if (bowlLineM) {
@@ -186,19 +217,124 @@ export function parseBattrickScorecard(input: string): ParsedScorecard | null {
     }
   }
 
+  // 4. Match Format Detection (FC, OD, or BT20)
+  let format: 'First Class' | 'One Day' | 'BT20' = 'First Class';
+
+  if (formatOverride && ['First Class', 'One Day', 'BT20'].includes(formatOverride)) {
+    format = formatOverride;
+  } else {
+    // Check First Class first
+    const isFC = cleanContent.includes('matchinfofc.asp') ||
+      /<body\s+id=["']matchinfofc["']/i.test(cleanContent) ||
+      /FC\s*Match/i.test(cleanContent) ||
+      /First\s*Class/i.test(cleanContent) ||
+      /data-class=["']FC["']/i.test(cleanContent) ||
+      /Second\s+Innings\s+of:/i.test(cleanContent) ||
+      /matchcommsfc\.asp/i.test(cleanContent) ||
+      /\b3-day\b|\bthree[- ]day\b/i.test(cleanContent) ||
+      /Day\s+[123]\s+Commentary/i.test(cleanContent);
+
+    if (isFC) {
+      format = 'First Class';
+    } else {
+      // Check for bowler overs > 4.0 or innings overs > 20.0
+      // In BT20, bowlers cannot bowl > 4 overs, and innings cannot exceed 20 overs.
+      const hasBowlerOverFour = bowlingPerformances.some(b => b.overs > 4.0);
+      const hasInningsOverTwenty = /Total\s*\((?:2[1-9]|[3-5][0-9])\.\d+\s*overs/i.test(cleanContent) || /50(?:\.0)?\s*overs/i.test(cleanContent);
+      const isODExplicit = /data-class=["']OD(?:\s+Fr)?["']/i.test(cleanContent) ||
+        /title=["'](?:OD\s+League|OD\s+Friendly)["']/i.test(cleanContent) ||
+        /\bOD\s*Friendly\b/i.test(cleanContent) ||
+        /\bOD\s*League\b/i.test(cleanContent) ||
+        /\bOne\s*Day\b/i.test(cleanContent);
+
+      const isBT20Explicit = /data-class=["']BT20["']/i.test(cleanContent) ||
+        /title=["']BT20["']/i.test(cleanContent) ||
+        /\bBT20\s*League\b/i.test(cleanContent) ||
+        /\bBT20\s*Cup\b/i.test(cleanContent) ||
+        /\bBT20\s*Friendly\b/i.test(cleanContent) ||
+        /\bBT20\b/i.test(cleanContent) ||
+        /\bTwenty20\b/i.test(cleanContent) ||
+        /\bT20\b/i.test(cleanContent);
+
+      if (hasBowlerOverFour || hasInningsOverTwenty || isODExplicit) {
+        format = 'One Day';
+      } else if (isBT20Explicit) {
+        format = 'BT20';
+      } else {
+        // Default to One Day if overs > 20, else BT20
+        format = 'One Day';
+      }
+    }
+  }
+
+  // 5. Opponent & Venue (Proper Home / Away recognition)
+  let opponent = 'Opposition XI';
+  let isHome = false;
+
+  const titleVsMatch = 
+    cleanContent.match(/<h2[^>]*>([A-Za-z0-9\s\.\-_]+?)\s+v(?:s)?\s+([A-Za-z0-9\s\.\-_]+?)(?:\s*\(\d+\))?<\/h2>/i) ||
+    cleanContent.match(/<div id="pagetitle">([^<]+?)\s+v(?:s)?\s+([^<]+?)(?:&#187;|<|\s+FC|\s+OD|\s+BT20)/i) ||
+    cleanContent.match(/<title>Battrick\s*-\s*([A-Za-z0-9\s\.\-_]+?)\s+v(?:s)?\s+([A-Za-z0-9\s\.\-_]+?)<\/title>/i) ||
+    cleanContent.match(/^([A-Za-z0-9\s\.\-_]+?)\s+v(?:s)?\s+([A-Za-z0-9\s\.\-_]+?)(?:\s*\(\d+\)|\s+Date)/im);
+
+  if (titleVsMatch) {
+    const t1 = titleVsMatch[1].replace(/Battrick\s*&#187;\s*/i, '').trim();
+    const t2 = titleVsMatch[2].replace(/\(\d+\)/, '').trim();
+    if (/Somnath Super Devs/i.test(t1)) {
+      opponent = t2;
+      isHome = true;
+    } else if (/Somnath Super Devs/i.test(t2)) {
+      opponent = t1;
+      isHome = false;
+    } else {
+      opponent = t2;
+    }
+  }
+
+  const groundMatch = 
+    cleanContent.match(/Ground[:\s]*(?:<\/b>)?\s*<\/td>\s*<td[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i) ||
+    cleanContent.match(/Ground[:\s]*(?:<\/b>)?\s*<\/td>\s*<td[^>]*>([^<]+)<\/td>/i) ||
+    cleanContent.match(/Ground[:\s]+([^\n\r<]+)/i);
+  let groundName = groundMatch ? groundMatch[1].trim() : '';
+  if (/Prabhas Coastal Oval/i.test(groundName) || /Prabhas Coastal Oval/i.test(cleanContent)) {
+    isHome = true;
+  }
+  const venue = isHome ? `Home (${groundName || 'Prabhas Coastal Oval'})` : `Away (${groundName || 'Away Grounds'})`;
+
+  // 6. Pitch
+  let pitchType = 'Hard & Fast';
+  if (/green/i.test(cleanContent)) pitchType = 'Green Seamer';
+  else if (/dusty/i.test(cleanContent)) pitchType = 'Dry & Dusty';
+  else if (/slow/i.test(cleanContent)) pitchType = 'Slow & Low';
+  else if (/flat/i.test(cleanContent)) pitchType = 'Flat Highway';
+  else if (/uneven/i.test(cleanContent)) pitchType = 'Uneven';
+
+  // 7. Date - Authentic original date extracted strictly from uploaded code
+  const { isoDate, rawDate } = extractBattrickDate(cleanContent);
+  const matchDate = rawDate || isoDate || new Date().toISOString().split('T')[0];
+
+  // 8. Result
+  let result = 'Match Concluded';
+  const resM = cleanContent.match(/<strong>(Somnath Super Devs won[^<]+)<\/strong>/i) ||
+               cleanContent.match(/<strong>([^<]+won by[^<]+)<\/strong>/i) ||
+               cleanContent.match(/(Somnath Super Devs won by [^\n\.]+)/i);
+  if (resM) {
+    result = resM[1].replace(/&#187;/g, '').trim();
+  }
+
   // 9. Match Attendance & Gate Receipts
-  const attM = input.match(/Crowd[:\s]*<\/td>\s*<td[^>]*>([0-9,]+)/i) || 
-               input.match(/Attendance[:\s]*([0-9,]+)/i);
+  const attM = cleanContent.match(/Crowd[:\s]*<\/td>\s*<td[^>]*>([0-9,]+)/i) || 
+               cleanContent.match(/Attendance[:\s]*([0-9,]+)/i);
   const attendance = attM ? parseInt(attM[1].replace(/,/g, '')) : undefined;
 
-  const gateM = input.match(/Gate[:\s]*[£$]?([0-9,]+)/i) || 
-                input.match(/Receipts[:\s]*[£$]?([0-9,]+)/i);
+  const gateM = cleanContent.match(/Gate[:\s]*[£$]?([0-9,]+)/i) || 
+                cleanContent.match(/Receipts[:\s]*[£$]?([0-9,]+)/i);
   const gateReceipts = gateM ? parseInt(gateM[1].replace(/,/g, '')) : undefined;
 
   // 10. Team Score
-  const totalM = input.match(/Total\s*\(([^)]+)\)<\/td>\s*<td[^>]*>(\d+)<\/td>/i) ||
-                 input.match(/Somnath Super Devs\s+(\d+)\/(\d+)/i) ||
-                 input.match(/(\d+)\/(\d+)\s+dec/i);
+  const totalM = cleanContent.match(/Total\s*\(([^)]+)\)<\/td>\s*<td[^>]*>(\d+)<\/td>/i) ||
+                 cleanContent.match(/Somnath Super Devs\s+(\d+)\/(\d+)/i) ||
+                 cleanContent.match(/(\d+)\/(\d+)\s+dec/i);
   let somnathRuns: number | undefined;
   if (totalM) {
     somnathRuns = parseInt(totalM[2] || totalM[1]);
@@ -207,6 +343,7 @@ export function parseBattrickScorecard(input: string): ParsedScorecard | null {
   return {
     matchId,
     matchDate,
+    rawMatchDate: rawDate,
     format,
     opponent,
     venue,
@@ -218,6 +355,74 @@ export function parseBattrickScorecard(input: string): ParsedScorecard | null {
     battingPerformances,
     bowlingPerformances
   };
+}
+
+/**
+ * Parses full fixtures list from battrick.org/nl/fixtures.asp
+ */
+export function parseBattrickFixtures(input: string, clubId: string = '13108'): MatchRecord[] {
+  const matches: MatchRecord[] = [];
+  if (!input.includes('fixtures') && !input.includes('Previous Matches') && !input.includes('Upcoming Matches')) {
+    return matches;
+  }
+
+  const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+  let match;
+  while ((match = liRegex.exec(input)) !== null) {
+    const liContent = match[1];
+    const idM = liContent.match(/matchID=(\d+)/i);
+    if (!idM) continue;
+    const matchId = idM[1];
+
+    const dateM = liContent.match(/<span[^>]*class=["']altcol["'][^>]*>\s*([0-3]?\d[\/\-.][0-1]?\d[\/\-.]20\d{2})/i);
+    const originalDate = dateM ? dateM[1].trim() : '';
+    const isoDate = normalizeToIsoDate(originalDate) || new Date().toISOString().split('T')[0];
+
+    let matchType = 'First Class';
+    if (/data-class=["']BT20["']|title=["']BT20["']/i.test(liContent)) {
+      matchType = 'BT20';
+    } else if (/data-class=["']OD(?:\s+Fr)?["']|title=["']OD/i.test(liContent)) {
+      matchType = 'One Day';
+    } else if (/data-class=["']FC["']|title=["']First Class["']/i.test(liContent)) {
+      matchType = 'First Class';
+    } else if (/BT20/i.test(liContent)) {
+      matchType = 'BT20';
+    } else if (/OD/i.test(liContent)) {
+      matchType = 'One Day';
+    }
+
+    let opponent = 'Opposition XI';
+    const teamsText = liContent.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    const vsM = teamsText.match(/Somnath Super Devs\s+v(?:s)?\s+([A-Za-z0-9\s]+?)(?:\s+Won|\s+Lost|\s+Reporter|\s+Match|\s*$)/i) ||
+                teamsText.match(/([A-Za-z0-9\s]+?)\s+v(?:s)?\s+Somnath Super Devs/i);
+    if (vsM) {
+      opponent = vsM[1].trim();
+    }
+
+    let result = 'Match Concluded';
+    if (liContent.includes('class="won"')) result = 'Somnath Super Devs Won';
+    else if (liContent.includes('class="lost"')) result = `${opponent} Won`;
+    else if (liContent.includes('class="draw"')) result = 'Match Drawn';
+    else if (liContent.includes('class="tied"')) result = 'Match Tied';
+
+    const isHome = teamsText.includes('Somnath Super Devs v');
+
+    matches.push({
+      id: matchId,
+      club_id: clubId,
+      match_date: isoDate,
+      match_type: matchType,
+      opponent_club: opponent,
+      venue: isHome ? 'Home (Prabhas Coastal Oval)' : 'Away Grounds',
+      pitch_type: 'Standard',
+      result,
+      status: 'completed',
+      scoreSummary: `${matchType} fixture`,
+      topPerformer: undefined
+    });
+  }
+
+  return matches;
 }
 
 /**
@@ -319,8 +524,8 @@ export function recalculateStatsFromMatches(
   // Process all matches
   for (const match of matches) {
     const formatKey: 'FC' | 'OD' | 'T20' = 
-      match.match_type === 'One Day' ? 'OD' : 
-      match.match_type === 'BT20' ? 'T20' : 'FC';
+      (match.match_type === 'One Day' || match.match_type === 'OD') ? 'OD' : 
+      (match.match_type === 'BT20' || match.match_type === 'T20') ? 'T20' : 'FC';
 
     // Parse team total if summary present
     const totalMatch = match.scoreSummary?.match(/(\d+)\/(\d+)/) || match.scoreSummary?.match(/(\d+)\s+runs/i);
@@ -427,7 +632,11 @@ export function recalculateStatsFromMatches(
     const strikeRate = acc.balls > 0 ? parseFloat(((acc.runs / acc.balls) * 100).toFixed(2)) : 0;
     const bestBowling = acc.bestBowlingWkts > 0 ? `${acc.bestBowlingWkts}/${acc.bestBowlingRuns}` : '-';
     const bowlingAvg = acc.wickets > 0 ? parseFloat((acc.runsConceded / acc.wickets).toFixed(2)) : 0;
-    const economy = acc.oversBowled > 0 ? parseFloat((acc.runsConceded / acc.oversBowled).toFixed(2)) : 0;
+    const wholeOvers = Math.floor(acc.oversBowled);
+    const partialBalls = Math.round((acc.oversBowled - wholeOvers) * 10);
+    const totalBalls = wholeOvers * 6 + partialBalls;
+    const actualOvers = totalBalls > 0 ? totalBalls / 6 : 0;
+    const economy = actualOvers > 0 ? parseFloat((acc.runsConceded / actualOvers).toFixed(2)) : 0;
 
     return {
       matches: matchesCount,
