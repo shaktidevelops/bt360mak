@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Player } from '../types/database';
 import { Search, Sparkles, Users, UserSquare2, LayoutGrid, Table, ArrowUpDown, Upload } from 'lucide-react';
+import { formatBowlingType, getBowlingTypeFullName, formatBattingHand, getBattingHandFullName } from '../lib/cricketFormatters';
 
 interface SquadViewProps {
   squad: Player[];
@@ -246,9 +247,11 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                       <div className="text-[11px] text-emerald-200/90 mt-1 flex items-center gap-2 font-sans">
                         <span className="text-emerald-300 font-bold">{player.tactical_role}</span>
                         <span className="text-slate-500">&bull;</span>
-                        <span className="font-mono text-slate-300">{player.batting_hand}</span>
+                        <span className="font-mono text-slate-300" title={getBattingHandFullName(player.batting_hand)}>{formatBattingHand(player.batting_hand)}</span>
                         <span className="text-slate-500">&bull;</span>
-                        <span className="text-slate-300">{player.bowling_type}</span>
+                        <span className="font-mono px-1.5 py-0.5 rounded text-[10px] bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 font-bold" title={getBowlingTypeFullName(player.bowling_type)}>
+                          {formatBowlingType(player.bowling_type)}
+                        </span>
                       </div>
                     </td>
 
@@ -338,7 +341,15 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                   <span className="text-xs font-bold text-slate-300">Age {player.age}</span>
                 </div>
                 <h4 className="text-lg font-black text-white mt-1">{player.name}</h4>
-                <div className="text-xs text-slate-300 mt-0.5">{player.tactical_role}</div>
+                <div className="text-xs text-slate-300 mt-1 flex items-center gap-1.5 flex-wrap">
+                  <span className="text-emerald-300 font-bold">{player.tactical_role}</span>
+                  <span className="text-slate-500">&bull;</span>
+                  <span className="font-mono text-slate-300" title={getBattingHandFullName(player.batting_hand)}>{formatBattingHand(player.batting_hand)}</span>
+                  <span className="text-slate-500">&bull;</span>
+                  <span className="font-mono px-1.5 py-0.5 rounded text-[10px] bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 font-bold" title={getBowlingTypeFullName(player.bowling_type)}>
+                    {formatBowlingType(player.bowling_type)}
+                  </span>
+                </div>
 
                 <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-emerald-500/20 text-center text-xs font-mono">
                   <div className="p-2 rounded-lg bg-[#071118] border border-emerald-500/20">

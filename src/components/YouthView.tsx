@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Player } from '../types/database';
 import { Sparkles, Dices, Award, CheckCircle2, Sliders, UserPlus } from 'lucide-react';
+import { formatBowlingType, formatBattingHand } from '../lib/cricketFormatters';
 
 interface YouthViewProps {
   squad: Player[];
@@ -452,7 +453,7 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
             <div className="text-slate-200">
               <span>Role: <strong className="text-white font-bold">{simulatedPull.tactical_role}</strong></span>
               <span className="mx-2">&bull;</span>
-              <span>Style: <strong className="text-white font-mono">{simulatedPull.batting_hand} | {simulatedPull.bowling_type}</strong></span>
+              <span>Style: <strong className="text-white font-mono">{formatBattingHand(simulatedPull.batting_hand)} | {formatBowlingType(simulatedPull.bowling_type)}</strong> <span className="text-slate-400 font-sans">({simulatedPull.bowling_type})</span></span>
               <span className="mx-2">&bull;</span>
               <span>Wage: <strong className="text-white font-mono">£{simulatedPull.wage}/wk</strong></span>
             </div>

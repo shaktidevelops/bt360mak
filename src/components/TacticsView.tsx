@@ -11,6 +11,7 @@ import {
   Dices,
   Users
 } from 'lucide-react';
+import { formatBowlingType, getBowlingTypeFullName, formatBattingHand, getBattingHandFullName } from '../lib/cricketFormatters';
 
 interface TacticsViewProps {
   squad: Player[];
@@ -659,8 +660,16 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                             </option>
                           ))}
                         </select>
-                        <div className="text-[11px] text-slate-400 mt-0.5 font-mono">
-                          ID: {pId} &bull; Bat: <strong className="text-emerald-300 capitalize">{player.batting}</strong> &bull; Bowl: <strong className="text-teal-300 capitalize">{player.bowling}</strong>
+                        <div className="text-[11px] text-slate-400 mt-0.5 font-mono flex items-center gap-1.5 flex-wrap">
+                          <span>ID: {pId}</span>
+                          <span>&bull;</span>
+                          <span>Bat: <strong className="text-emerald-300 capitalize">{player.batting}</strong></span>
+                          <span>&bull;</span>
+                          <span>Bowl: <strong className="text-teal-300 capitalize">{player.bowling}</strong></span>
+                          <span>&bull;</span>
+                          <span className="text-cyan-300 font-semibold cursor-help" title={getBowlingTypeFullName(player.bowling_type)}>
+                            [{formatBowlingType(player.bowling_type)}]
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -693,8 +702,8 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                         <span>(WK)</span>
                       </button>
 
-                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#0a1722] text-slate-300 border border-emerald-500/20 hidden sm:inline">
-                        {player.batting_hand}
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#0a1722] text-slate-300 border border-emerald-500/20 hidden sm:inline font-mono cursor-help" title={getBattingHandFullName(player.batting_hand)}>
+                        {formatBattingHand(player.batting_hand)}
                       </span>
                     </div>
 
@@ -865,7 +874,12 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                           {spellRole}
                         </span>
                         <h4 className="text-base font-black text-white mt-0.5">{bowler.name}</h4>
-                        <div className="text-[11px] text-slate-300">{bowler.bowling_type}</div>
+                        <div className="text-[11px] text-slate-300 flex items-center gap-1.5 mt-0.5">
+                          <span className="font-mono px-1.5 py-0.5 rounded text-[10px] bg-emerald-950 text-cyan-300 border border-cyan-500/40 font-bold" title={getBowlingTypeFullName(bowler.bowling_type)}>
+                            {formatBowlingType(bowler.bowling_type)}
+                          </span>
+                          <span className="text-slate-400">({getBowlingTypeFullName(bowler.bowling_type)})</span>
+                        </div>
                       </div>
                       <div className="w-7 h-7 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-mono font-black text-xs">
                         #{bIdx + 1}

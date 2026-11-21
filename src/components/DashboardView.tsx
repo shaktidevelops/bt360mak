@@ -13,6 +13,7 @@ import {
   Users
 } from 'lucide-react';
 import { TabType } from './Sidebar';
+import { formatBowlingType, getBowlingTypeFullName } from '../lib/cricketFormatters';
 
 interface DashboardViewProps {
   club: Club;
@@ -287,7 +288,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
               <div>
                 <h4 className="text-base font-bold text-white">{topWicketTaker.name}</h4>
-                <div className="text-xs text-cyan-200/90 font-medium">{topWicketTaker.tactical_role} &bull; {topWicketTaker.bowling_type}</div>
+                <div className="text-xs text-cyan-200/90 font-medium flex items-center gap-1.5 mt-0.5">
+                  <span>{topWicketTaker.tactical_role}</span>
+                  <span className="text-cyan-400/60">&bull;</span>
+                  <span className="font-mono px-1.5 py-0.5 rounded text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-500/40 font-bold" title={getBowlingTypeFullName(topWicketTaker.bowling_type)}>
+                    {formatBowlingType(topWicketTaker.bowling_type)}
+                  </span>
+                </div>
               </div>
             </div>
 

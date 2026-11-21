@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Player } from '../types/database';
 import { Award, Sparkles, TrendingUp, BarChart3, UserCheck, Search, ChevronDown, Check } from 'lucide-react';
+import { formatBowlingType, getBowlingTypeFullName, formatBattingHand, getBattingHandFullName } from '../lib/cricketFormatters';
 
 interface PlayerProfileViewProps {
   squad: Player[];
@@ -403,9 +404,9 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
               <div className="text-sm font-semibold text-slate-300 mt-0.5 flex items-center gap-2 flex-wrap">
                 <span className="text-emerald-300">{player.tactical_role}</span>
                 <span>&bull;</span>
-                <span>Batting: <strong className="text-white font-mono">{player.batting_hand}</strong></span>
+                <span>Batting: <strong className="text-white font-mono">{formatBattingHand(player.batting_hand)}</strong> <span className="text-xs text-slate-400">({getBattingHandFullName(player.batting_hand)})</span></span>
                 <span>&bull;</span>
-                <span>Bowling: <strong className="text-white">{player.bowling_type}</strong></span>
+                <span>Bowling: <strong className="text-cyan-300 font-mono px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-500/40 text-xs">{formatBowlingType(player.bowling_type)}</strong> <span className="text-xs text-slate-400">({getBowlingTypeFullName(player.bowling_type)})</span></span>
               </div>
             </div>
           </div>

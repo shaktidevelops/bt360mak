@@ -223,6 +223,18 @@ export const ImportView: React.FC<ImportViewProps> = ({
             return m ? m[1].trim().toLowerCase() : 'competent';
           };
 
+          const bathandM = block.match(/class="player_bathand">\s*([LR])<\/span>/i);
+          const battingHand = bathandM ? (bathandM[1].toUpperCase() === 'L' ? 'LHB' : 'RHB') : 'RHB';
+
+          const bowlhandM = block.match(/class="player_bowlhand">\s*([LR])<\/span>/i);
+          const bowltypeM = block.match(/class="player_bowltype">\s*([^<]+)<\/span>/i);
+          let bowlingType = 'None';
+          if (bowlhandM && bowltypeM) {
+            const arm = bowlhandM[1].trim().toUpperCase() === 'L' ? 'Left-arm' : 'Right-arm';
+            const rawType = bowltypeM[1].replace(/^[Hh]\s*/, '').trim();
+            bowlingType = `${arm} ${rawType}`;
+          }
+
           extractedPlayers.push({
             id: pId,
             club_id: club.id,
@@ -230,6 +242,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
             age,
             wage,
             bti,
+            batting_hand: battingHand,
+            bowling_type: bowlingType,
             batting: extractSkill('player_batting'),
             bowling: extractSkill('player_bowling'),
             keeping: extractSkill('player_keeping'),
