@@ -7,49 +7,49 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ club }) => {
   return (
-    <footer className="mt-auto border-t-2 border-emerald-600/50 bg-gradient-to-r from-[#02130e] via-[#06291e] to-[#02130e] text-slate-300 py-6 px-6 text-xs shadow-2xl">
+    <footer className="mt-auto border-t border-slate-200 bg-white text-slate-700 py-6 px-6 text-xs shadow-sm">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Club Status Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-800 flex items-center justify-center text-xl font-black text-white shadow-lg border border-emerald-400/40">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center text-xl font-black text-white shadow-sm border border-emerald-400">
             🏏
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-black text-white text-sm">{club.name}</span>
-              <span className="font-mono text-[10px] text-emerald-300 font-black bg-[#041a14] px-2 py-0.5 rounded border border-emerald-600/70 shadow-sm">
+              <span className="font-black text-slate-900 text-sm">{club.name}</span>
+              <span className="font-mono text-[10px] text-emerald-800 font-black bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 shadow-xs">
                 #{club.id}
               </span>
-              <span className="text-[11px] text-emerald-200 font-bold hidden sm:inline">&bull; 🏟️ Prabhas Coastal Oval 🏔️</span>
+              <span className="text-[11px] text-slate-600 font-bold hidden sm:inline">&bull; 🏟️ Prabhas Coastal Oval 🏔️</span>
             </div>
-            <div className="text-[11px] text-slate-300 mt-1 flex items-center gap-2 flex-wrap font-mono">
-              <span className="px-1.5 py-0.5 rounded bg-[#031812] border border-emerald-700/60">FC: <strong className="text-emerald-300">{club.division_fc}</strong></span>
+            <div className="text-[11px] text-slate-600 mt-1 flex items-center gap-2 flex-wrap font-mono">
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">FC: <strong className="text-emerald-700">{club.division_fc}</strong></span>
               <span>&bull;</span>
-              <span className="px-1.5 py-0.5 rounded bg-[#031812] border border-teal-700/60">OD: <strong className="text-teal-300">{club.division_od}</strong></span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">OD: <strong className="text-teal-700">{club.division_od}</strong></span>
               <span>&bull;</span>
-              <span className="px-1.5 py-0.5 rounded bg-[#031812] border border-amber-700/60">T20: <strong className="text-amber-300">{club.division_t20}</strong></span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">T20: <strong className="text-amber-700">{club.division_t20}</strong></span>
             </div>
           </div>
         </div>
 
         {/* Live Engine Synchronizer */}
         <div className="flex items-center gap-4 text-center">
-          <div className="flex items-center gap-2 bg-[#041a14] px-3.5 py-1.5 rounded-xl border border-emerald-600/60 shadow-inner">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow" />
-            <span className="text-[11px] font-black text-emerald-300">Battrick S69 Real Engine Active</span>
+          <div className="flex items-center gap-2 bg-emerald-50 px-3.5 py-1.5 rounded-xl border border-emerald-200 shadow-xs">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-xs" />
+            <span className="text-[11px] font-black text-emerald-800">Battrick S69 Real Engine Active</span>
           </div>
-          <div className="hidden sm:block text-[11px] text-slate-300">
-            Next Cycle: <span className="text-amber-300 font-mono font-black">Friday Training Pops (05:00 UTC)</span>
+          <div className="hidden sm:block text-[11px] text-slate-600">
+            Next Cycle: <span className="text-amber-700 font-mono font-black">Friday Training Pops (05:00 UTC)</span>
           </div>
         </div>
 
         {/* Version & Sovereign Tag */}
         <div className="flex items-center gap-3 text-right">
           <div>
-            <div className="font-mono text-[11px] font-black text-white">
-              BT360MAK <span className="text-emerald-300 font-mono">v2.5 Sovereign Stadium Edition</span>
+            <div className="font-mono text-[11px] font-black text-slate-900">
+              BT360MAK <span className="text-emerald-700 font-mono">v3.0 Daylight Sovereign</span>
             </div>
-            <div className="text-[10px] text-emerald-300/80">
+            <div className="text-[10px] text-slate-500">
               React 19 &bull; Vite 6 &bull; Supabase Live &bull; 12 Battrick Domains
             </div>
           </div>
@@ -57,7 +57,7 @@ export const Footer: React.FC<FooterProps> = ({ club }) => {
             href="https://github.com/shaktidevelops/bt360mak"
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 rounded-xl bg-[#09221b] hover:bg-emerald-900/60 text-slate-300 hover:text-white transition-all border border-emerald-800/40"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-all border border-slate-200 shadow-xs"
             title="GitHub Repository"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">

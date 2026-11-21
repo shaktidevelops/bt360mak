@@ -14,44 +14,44 @@ export const SettingsView: React.FC = () => {
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Cloud & Database Header */}
-      <div className="bg-[#0e2c24] p-6 rounded-2xl border border-emerald-600/30 shadow-xl">
-        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-400">
-          <Database className="w-4 h-4 text-emerald-400" />
+      <div className="sovereign-card p-6 rounded-2xl border-emerald-500/40 shadow-xl">
+        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-700">
+          <Database className="w-4 h-4 text-emerald-600" />
           <span>Cloud Infrastructure & Persistence Control</span>
         </div>
-        <h2 className="text-2xl font-black text-white mt-1">
+        <h2 className="text-2xl font-black text-slate-900 mt-1">
           Supabase PostgreSQL & Cloud State Center
         </h2>
-        <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+        <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
           High-performance relational persistence with subscriber isolation, live telemetry, and real-time synchronization.
         </p>
       </div>
 
       {/* Connection Status Card */}
-      <div className="p-5 rounded-2xl border bg-[#0e2c24] border-emerald-600/40 shadow-xl">
+      <div className="p-5 rounded-2xl border sovereign-card border-slate-200 shadow-md">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-              <ShieldCheck className="w-6 h-6 text-emerald-400" />
+            <div className="p-3 rounded-2xl bg-emerald-100 text-emerald-800 border border-emerald-300">
+              <ShieldCheck className="w-6 h-6 text-emerald-600" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-extrabold text-white">
+                <h3 className="text-base font-extrabold text-slate-900">
                   {isSupabaseConfigured ? 'Supabase Project Connected' : 'Local Verified State Active'}
                 </h3>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-600/60 font-bold font-mono">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold font-mono">
                   100% OPERATIONAL
                 </span>
               </div>
-              <p className="text-xs text-slate-300 mt-1">
-                Project URL: <code className="font-mono text-emerald-300 bg-[#061713] px-2 py-0.5 rounded border border-emerald-800/40">https://xyvezmzsbmoqxepwblfq.supabase.co</code>
+              <p className="text-xs text-slate-600 mt-1">
+                Project URL: <code className="font-mono text-emerald-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">https://xyvezmzsbmoqxepwblfq.supabase.co</code>
               </p>
             </div>
           </div>
 
-          <div className="bg-[#061713] px-4 py-2 rounded-xl border border-emerald-800/40 text-center self-start sm:self-auto">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Access Mode</span>
-            <div className="text-xs font-bold text-emerald-300 mt-0.5 font-mono">
+          <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center self-start sm:self-auto shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Access Mode</span>
+            <div className="text-xs font-bold text-emerald-700 mt-0.5 font-mono">
               Live State Sync
             </div>
           </div>
@@ -59,41 +59,41 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Database Schema Status & Setup Information */}
-      <div className="bg-[#0e2c24] p-6 rounded-2xl border border-emerald-600/30 space-y-4 shadow-xl">
-        <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-          <Terminal className="w-4 h-4 text-emerald-400" />
+      <div className="sovereign-card p-6 rounded-2xl border-slate-200 space-y-4 shadow-md">
+        <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+          <Terminal className="w-4 h-4 text-emerald-600" />
           <span>Automated Database Architecture & Tables</span>
         </h3>
 
-        <p className="text-xs text-slate-300 leading-relaxed">
+        <p className="text-xs text-slate-600 leading-relaxed">
           The BT360MAK platform operates seamlessly. It uses a high-speed in-memory database with verified Somnath Super Devs club records, and automatically syncs with Supabase PostgreSQL when tables are initialized.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
-          <div className="p-3.5 rounded-xl bg-[#061713] border border-emerald-800/40">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Database Engine</span>
-            <div className="font-bold text-white mt-0.5">PostgreSQL 15 / Supabase</div>
-            <div className="text-[11px] text-emerald-400 mt-0.5 font-semibold">Row Level Security (RLS) Active</div>
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Database Engine</span>
+            <div className="font-bold text-slate-900 mt-0.5">PostgreSQL 15 / Supabase</div>
+            <div className="text-[11px] text-emerald-700 mt-0.5 font-semibold">Row Level Security (RLS) Active</div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-[#061713] border border-emerald-800/40">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Frontend Hosting</span>
-            <div className="font-bold text-white mt-0.5">GitHub Pages & Edge CDN</div>
-            <div className="text-[11px] text-teal-300 mt-0.5 font-semibold">Zero-latency static edge delivery</div>
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Frontend Hosting</span>
+            <div className="font-bold text-slate-900 mt-0.5">GitHub Pages & Edge CDN</div>
+            <div className="text-[11px] text-teal-700 mt-0.5 font-semibold">Zero-latency static edge delivery</div>
           </div>
         </div>
 
-        <div className="pt-3 border-t border-emerald-800/40">
+        <div className="pt-3 border-t border-slate-200">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <div className="text-xs font-bold text-white">Consolidated 1-Click Database Setup Script</div>
-              <div className="text-[11px] text-slate-400 mt-0.5">
+              <div className="text-xs font-bold text-slate-900">Consolidated 1-Click Database Setup Script</div>
+              <div className="text-[11px] text-slate-500 mt-0.5">
                 Contains all 9 relational tables, performance indexes, and initial Somnath Super Devs seed.
               </div>
             </div>
             <button
               onClick={copySetupPath}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#061713] border border-emerald-700/50 text-xs font-bold text-emerald-300 hover:text-white transition-all cursor-pointer shadow self-start sm:self-auto"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-bold text-slate-800 transition-all cursor-pointer shadow-xs self-start sm:self-auto"
             >
               <Copy className="w-3.5 h-3.5" />
               <span>{copied ? 'Copied Path!' : 'Copy Script Path'}</span>

@@ -63,68 +63,68 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
   return (
     <div className="space-y-6">
       {/* Financial Operations Header */}
-      <div className="bg-[#0e2c24] p-6 rounded-2xl border border-emerald-600/30 shadow-xl">
+      <div className="sovereign-card p-6 rounded-2xl border-emerald-500/40 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-400">
-              <CircleDollarSign className="w-4 h-4 text-emerald-400" />
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-700">
+              <CircleDollarSign className="w-4 h-4 text-emerald-600" />
               <span>Commercial Intelligence & Financial Treasury</span>
             </div>
-            <h2 className="text-2xl font-black text-white mt-1">
+            <h2 className="text-2xl font-black text-slate-900 mt-1">
               Somnath Super Devs Financial Control Center
             </h2>
-            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
               52-week cashflow audit, wage cap compliance, Prabhas Oval gate receipts, and revenue stream distribution for active domestic campaigns.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-[#061713] px-4 py-2.5 rounded-xl border border-emerald-800/40">
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+          <div className="flex items-center gap-2 bg-emerald-50 px-4 py-2.5 rounded-xl border border-emerald-200 shadow-xs">
+            <ShieldCheck className="w-5 h-5 text-emerald-600" />
             <div>
-              <div className="text-[10px] uppercase font-bold text-slate-400">Financial Rating</div>
-              <div className="text-sm font-extrabold text-emerald-300">AAA Sovereign Grade</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500">Financial Rating</div>
+              <div className="text-sm font-extrabold text-emerald-800">AAA Sovereign Grade</div>
             </div>
           </div>
         </div>
 
         {/* 4 Core Financial KPI Meters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5 pt-4 border-t border-emerald-800/40">
-          <div className="p-4 rounded-xl bg-[#061713] border border-emerald-800/40">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Liquid Treasury</span>
-            <div className="text-2xl font-black font-mono text-emerald-300 mt-0.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5 pt-4 border-t border-slate-200">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Liquid Treasury</span>
+            <div className="text-2xl font-black font-mono text-emerald-700 mt-0.5">
               £{latestRecord.cumulative_bank_balance.toLocaleString()}
             </div>
-            <div className="text-[11px] text-emerald-400/90 mt-1 flex items-center gap-1 font-semibold">
+            <div className="text-[11px] text-emerald-700 mt-1 flex items-center gap-1 font-semibold">
               <TrendingUp className="w-3 h-3" /> Fully solvent capital buffer
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#061713] border border-emerald-800/40">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Latest Weekly Net P&L</span>
-            <div className={`text-2xl font-black font-mono mt-0.5 ${latestRecord.net_weekly_pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Latest Weekly Net P&L</span>
+            <div className={`text-2xl font-black font-mono mt-0.5 ${latestRecord.net_weekly_pnl >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
               {latestRecord.net_weekly_pnl >= 0 ? '+' : ''}£{latestRecord.net_weekly_pnl.toLocaleString()}
             </div>
-            <div className="text-[11px] text-slate-300 mt-1">
+            <div className="text-[11px] text-slate-500 mt-1">
               Inflow £{latestRecord.total_inflow.toLocaleString()} | Out £{latestRecord.total_outflow.toLocaleString()}
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#061713] border border-emerald-800/40">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Wage-to-Turnover Ratio</span>
-            <div className="text-2xl font-black font-mono text-amber-300 mt-0.5">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Wage-to-Turnover Ratio</span>
+            <div className="text-2xl font-black font-mono text-amber-700 mt-0.5">
               {((latestRecord.player_wages / latestRecord.total_inflow) * 100).toFixed(1)}%
             </div>
-            <div className="text-[11px] text-emerald-400 mt-1 font-semibold">
+            <div className="text-[11px] text-emerald-700 mt-1 font-semibold">
               Benchmark &lt; 30% (Optimal)
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#061713] border border-emerald-800/40">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Season-End Projection</span>
-            <div className="text-2xl font-black font-mono text-white mt-0.5">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Season-End Projection</span>
+            <div className="text-2xl font-black font-mono text-slate-900 mt-0.5">
               £{projectedAnnualSurplus.toLocaleString()}
             </div>
-            <div className="text-[11px] text-slate-300 mt-1">
+            <div className="text-[11px] text-slate-500 mt-1">
               16-week regular season runway
             </div>
           </div>
@@ -132,25 +132,25 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
       </div>
 
       {/* FILTER & AUDIT TOOLBAR */}
-      <div className="bg-[#0e2c24] p-4 rounded-2xl border border-emerald-600/30 shadow-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="sovereign-card p-4 rounded-2xl border-slate-200 shadow-md flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-emerald-400" />
-          <span className="text-xs font-black uppercase text-white">Ledger Filters:</span>
+          <Filter className="w-4 h-4 text-emerald-600" />
+          <span className="text-xs font-black uppercase text-slate-900">Ledger Filters:</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           {/* Week Selector */}
-          <div className="flex items-center gap-2 bg-[#061713] px-3 py-1.5 rounded-xl border border-emerald-800/40 text-xs">
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs shadow-xs">
             <Calendar className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-slate-400 font-semibold">Week:</span>
+            <span className="text-slate-500 font-semibold">Week:</span>
             <select
               value={selectedWeek}
               onChange={(e) => setSelectedWeek(e.target.value)}
-              className="bg-transparent text-emerald-300 font-bold focus:outline-none cursor-pointer"
+              className="bg-transparent text-emerald-700 font-bold focus:outline-none cursor-pointer"
             >
-              <option value="ALL" className="bg-[#0c241e]">All Weeks ({finances.length})</option>
+              <option value="ALL">All Weeks ({finances.length})</option>
               {finances.map(f => (
-                <option key={f.id} value={f.week_number.toString()} className="bg-[#0c241e]">
+                <option key={f.id} value={f.week_number.toString()}>
                   Week {f.week_number} ({f.record_date})
                 </option>
               ))}
@@ -158,27 +158,27 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
           </div>
 
           {/* Category Filter */}
-          <div className="flex items-center gap-2 bg-[#061713] px-3 py-1.5 rounded-xl border border-emerald-800/40 text-xs">
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs shadow-xs">
             <Layers className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-slate-400 font-semibold">Category:</span>
+            <span className="text-slate-500 font-semibold">Category:</span>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="bg-transparent text-emerald-300 font-bold focus:outline-none cursor-pointer"
+              className="bg-transparent text-emerald-700 font-bold focus:outline-none cursor-pointer"
             >
-              <option value="ALL" className="bg-[#0c241e]">All Categories</option>
-              <option value="Home Match Week" className="bg-[#0c241e]">Home Match Week (Gate Inflow)</option>
-              <option value="Away Match Week" className="bg-[#0c241e]">Away Match Week</option>
+              <option value="ALL">All Categories</option>
+              <option value="Home Match Week">Home Match Week (Gate Inflow)</option>
+              <option value="Away Match Week">Away Match Week</option>
             </select>
           </div>
 
           {/* Filter summary badge */}
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-300 bg-[#061713] px-3 py-1.5 rounded-xl border border-emerald-800/40">
-            <span>In: <strong className="text-emerald-300">£{totalFilteredInflow.toLocaleString()}</strong></span>
-            <span className="text-emerald-800">|</span>
-            <span>Out: <strong className="text-rose-300">£{totalFilteredOutflow.toLocaleString()}</strong></span>
-            <span className="text-emerald-800">|</span>
-            <span>Net: <strong className={totalFilteredNet >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-700 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs">
+            <span>In: <strong className="text-emerald-700">£{totalFilteredInflow.toLocaleString()}</strong></span>
+            <span className="text-slate-300">|</span>
+            <span>Out: <strong className="text-rose-600">£{totalFilteredOutflow.toLocaleString()}</strong></span>
+            <span className="text-slate-300">|</span>
+            <span>Net: <strong className={totalFilteredNet >= 0 ? 'text-emerald-700' : 'text-rose-600'}>
               {totalFilteredNet >= 0 ? '+' : ''}£{totalFilteredNet.toLocaleString()}
             </strong></span>
           </div>
@@ -186,20 +186,20 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
       </div>
 
       {/* HISTORICAL FINANCIAL LEDGER TABLE */}
-      <div className="overflow-x-auto rounded-2xl border border-emerald-600/30 bg-[#0e2c24] shadow-2xl">
-        <div className="p-4 bg-[#071d18] border-b border-emerald-800/40 flex items-center justify-between">
-          <h3 className="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-md">
+        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <h3 className="text-xs font-black uppercase text-emerald-700 flex items-center gap-2">
             <CircleDollarSign className="w-4 h-4" />
             <span>52-Week Comprehensive Financial Ledger & P&L Statement</span>
           </h3>
-          <span className="text-[11px] font-mono text-slate-300">
+          <span className="text-[11px] font-mono text-slate-500">
             Showing {filteredFinances.length} of {finances.length} Records
           </span>
         </div>
 
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="bg-[#061713] text-slate-300 font-bold border-b border-emerald-800/40 uppercase tracking-wider text-[10px]">
+            <tr className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 uppercase tracking-wider text-[10px]">
               <th className="py-3 px-3 text-center">Wk</th>
               <th className="py-3 px-3">Date</th>
               <th className="py-3 px-3">Category</th>
@@ -207,70 +207,70 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
               <th className="py-3 px-3 text-right">Sponsors (£)</th>
               <th className="py-3 px-3 text-right">Merch (£)</th>
               <th className="py-3 px-3 text-right">Prize (£)</th>
-              <th className="py-3 px-3 text-right text-emerald-300 font-black">Total In (£)</th>
+              <th className="py-3 px-3 text-right text-emerald-700 font-black">Total In (£)</th>
               <th className="py-3 px-3 text-right">Player Wages</th>
               <th className="py-3 px-3 text-right">Staff Wages</th>
               <th className="py-3 px-3 text-right">Upkeep</th>
               <th className="py-3 px-3 text-right">Academy</th>
-              <th className="py-3 px-3 text-right text-rose-300 font-black">Total Out (£)</th>
+              <th className="py-3 px-3 text-right text-rose-600 font-black">Total Out (£)</th>
               <th className="py-3 px-3 text-right font-black">Net P&L (£)</th>
               <th className="py-3 px-4 text-right font-black">Treasury (£)</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-emerald-950/60 font-mono">
+          <tbody className="divide-y divide-slate-100 font-mono">
             {filteredFinances.map((rec) => {
               const isProfit = rec.net_weekly_pnl >= 0;
               return (
-                <tr key={rec.id} className="hover:bg-[#12362b]/70 transition-colors">
-                  <td className="py-3 px-3 text-center font-bold text-white">
+                <tr key={rec.id} className="hover:bg-emerald-50/50 transition-colors">
+                  <td className="py-3 px-3 text-center font-bold text-slate-900">
                     {rec.week_number}
                   </td>
-                  <td className="py-3 px-3 font-sans text-slate-300 whitespace-nowrap">
+                  <td className="py-3 px-3 font-sans text-slate-600 whitespace-nowrap">
                     {rec.record_date}
                   </td>
                   <td className="py-3 px-3 font-sans whitespace-nowrap">
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                       rec.category === 'Home Match Week'
-                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-600/60'
-                        : 'bg-[#061713] text-slate-400 border border-emerald-800/40'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'bg-slate-100 text-slate-600 border border-slate-200'
                     }`}>
                       {rec.category}
                     </span>
                   </td>
-                  <td className="py-3 px-3 text-right text-slate-200">
+                  <td className="py-3 px-3 text-right text-slate-800">
                     £{rec.gate_receipts.toLocaleString()}
                   </td>
-                  <td className="py-3 px-3 text-right text-slate-300">
+                  <td className="py-3 px-3 text-right text-slate-600">
                     £{rec.sponsors.toLocaleString()}
                   </td>
-                  <td className="py-3 px-3 text-right text-slate-300">
+                  <td className="py-3 px-3 text-right text-slate-600">
                     £{rec.merchandise.toLocaleString()}
                   </td>
-                  <td className="py-3 px-3 text-right text-amber-300">
+                  <td className="py-3 px-3 text-right text-amber-700">
                     £{rec.prize_money.toLocaleString()}
                   </td>
-                  <td className="py-3 px-3 text-right text-emerald-300 font-black">
+                  <td className="py-3 px-3 text-right text-emerald-700 font-black">
                     £{rec.total_inflow.toLocaleString()}
                   </td>
-                  <td className="py-3 px-3 text-right text-slate-300">
+                  <td className="py-3 px-3 text-right text-slate-600">
                     £{rec.player_wages.toLocaleString()}
                   </td>
-                  <td className="py-3 px-3 text-right text-slate-300">
+                  <td className="py-3 px-3 text-right text-slate-600">
                     £{rec.staff_wages.toLocaleString()}
                   </td>
-                  <td className="py-3 px-3 text-right text-slate-300">
+                  <td className="py-3 px-3 text-right text-slate-600">
                     £{rec.stadium_upkeep.toLocaleString()}
                   </td>
-                  <td className="py-3 px-3 text-right text-slate-300">
+                  <td className="py-3 px-3 text-right text-slate-600">
                     £{rec.youth_academy.toLocaleString()}
                   </td>
-                  <td className="py-3 px-3 text-right text-rose-300 font-black">
+                  <td className="py-3 px-3 text-right text-rose-600 font-black">
                     £{rec.total_outflow.toLocaleString()}
                   </td>
-                  <td className={`py-3 px-3 text-right font-black ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <td className={`py-3 px-3 text-right font-black ${isProfit ? 'text-emerald-700' : 'text-rose-600'}`}>
                     {isProfit ? '+' : ''}£{rec.net_weekly_pnl.toLocaleString()}
                   </td>
-                  <td className="py-3 px-4 text-right text-white font-black whitespace-nowrap">
+                  <td className="py-3 px-4 text-right text-slate-900 font-black whitespace-nowrap">
                     £{rec.cumulative_bank_balance.toLocaleString()}
                   </td>
                 </tr>
@@ -283,56 +283,56 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
       {/* REVENUE VS EXPENDITURE BREAKDOWN & SENSITIVITY */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Inflow Streams */}
-        <div className="bg-[#0e2c24] p-5 rounded-2xl border border-emerald-600/30 shadow-xl">
+        <div className="sovereign-card p-5 rounded-2xl border-slate-200 shadow-md">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
+              <div className="p-2 rounded-lg bg-emerald-100 text-emerald-700">
                 <ArrowUpRight className="w-4 h-4" />
               </div>
-              <h3 className="text-sm font-extrabold text-white">Latest Matchday Inflow Distribution</h3>
+              <h3 className="text-sm font-extrabold text-slate-900">Latest Matchday Inflow Distribution</h3>
             </div>
-            <span className="text-sm font-black font-mono text-emerald-400">
+            <span className="text-sm font-black font-mono text-emerald-700">
               £{latestRecord.total_inflow.toLocaleString()}
             </span>
           </div>
 
           <div className="space-y-3 text-xs">
             <div>
-              <div className="flex justify-between font-semibold text-slate-200 mb-1">
+              <div className="flex justify-between font-semibold text-slate-700 mb-1">
                 <span>Gate Receipts (Prabhas Coastal Oval)</span>
                 <span className="font-mono">£{latestRecord.gate_receipts.toLocaleString()} ({gatePct}%)</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#061713]">
+              <div className="w-full h-2 rounded-full bg-slate-200">
                 <div className="h-full rounded-full bg-emerald-500" style={{ width: `${gatePct}%` }} />
               </div>
             </div>
 
             <div>
-              <div className="flex justify-between font-semibold text-slate-200 mb-1">
+              <div className="flex justify-between font-semibold text-slate-700 mb-1">
                 <span>League Sponsorship Grants</span>
                 <span className="font-mono">£{latestRecord.sponsors.toLocaleString()} ({sponsorPct}%)</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#061713]">
+              <div className="w-full h-2 rounded-full bg-slate-200">
                 <div className="h-full rounded-full bg-teal-500" style={{ width: `${sponsorPct}%` }} />
               </div>
             </div>
 
             <div>
-              <div className="flex justify-between font-semibold text-slate-200 mb-1">
+              <div className="flex justify-between font-semibold text-slate-700 mb-1">
                 <span>Prize Money & Match Bonuses</span>
                 <span className="font-mono">£{latestRecord.prize_money.toLocaleString()} ({prizePct}%)</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#061713]">
+              <div className="w-full h-2 rounded-full bg-slate-200">
                 <div className="h-full rounded-full bg-amber-500" style={{ width: `${prizePct}%` }} />
               </div>
             </div>
 
             <div>
-              <div className="flex justify-between font-semibold text-slate-200 mb-1">
+              <div className="flex justify-between font-semibold text-slate-700 mb-1">
                 <span>Club Merchandise & Fan Retail</span>
                 <span className="font-mono">£{latestRecord.merchandise.toLocaleString()} ({merchPct}%)</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#061713]">
+              <div className="w-full h-2 rounded-full bg-slate-200">
                 <div className="h-full rounded-full bg-cyan-500" style={{ width: `${merchPct}%` }} />
               </div>
             </div>
@@ -340,23 +340,23 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
         </div>
 
         {/* Tactical Wage & Outflow Simulator */}
-        <div className="bg-[#0e2c24] p-5 rounded-2xl border border-emerald-600/30 shadow-xl flex flex-col justify-between">
+        <div className="sovereign-card p-5 rounded-2xl border-slate-200 shadow-md flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400">
+              <div className="p-2 rounded-lg bg-amber-100 text-amber-700">
                 <DollarSign className="w-4 h-4" />
               </div>
-              <h3 className="text-sm font-extrabold text-white">Wage & Transfer Budget Stress-Test</h3>
+              <h3 className="text-sm font-extrabold text-slate-900">Wage & Transfer Budget Stress-Test</h3>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed mb-4">
+            <p className="text-xs text-slate-600 leading-relaxed mb-4">
               Simulate signing marquee players or expanding staff to forecast weekly treasury solvency impact.
             </p>
 
-            <div className="bg-[#061713] p-4 rounded-xl border border-emerald-800/40 space-y-3">
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
               <div>
-                <div className="flex justify-between text-xs font-bold text-slate-200 mb-1">
+                <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
                   <span>Additional Simulated Weekly Wages:</span>
-                  <span className="text-amber-400 font-mono">+£{wageAdjustment.toLocaleString()}</span>
+                  <span className="text-amber-700 font-mono">+£{wageAdjustment.toLocaleString()}</span>
                 </div>
                 <input
                   type="range"
@@ -365,22 +365,22 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
                   step="1000"
                   value={wageAdjustment}
                   onChange={(e) => setWageAdjustment(Number(e.target.value))}
-                  className="w-full accent-emerald-500 cursor-pointer"
+                  className="w-full accent-emerald-600 cursor-pointer"
                 />
               </div>
 
-              <div className="pt-2 border-t border-emerald-800/40 flex justify-between items-center text-xs">
-                <span className="text-slate-400 font-semibold">Simulated Net Profit / Wk:</span>
-                <span className={`text-base font-black font-mono ${projectedWeeklyProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-xs">
+                <span className="text-slate-500 font-semibold">Simulated Net Profit / Wk:</span>
+                <span className={`text-base font-black font-mono ${projectedWeeklyProfit >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
                   {projectedWeeklyProfit >= 0 ? '+' : ''}£{projectedWeeklyProfit.toLocaleString()}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-emerald-800/40 text-center">
-            <span className="text-[11px] text-slate-400">
-              Active Weekly Wage Cap: <strong className="text-white">£45,000</strong> &bull; Current Bill: <strong className="text-emerald-400">£{latestRecord.player_wages.toLocaleString()}</strong>
+          <div className="mt-4 pt-3 border-t border-slate-200 text-center">
+            <span className="text-[11px] text-slate-500">
+              Active Weekly Wage Cap: <strong className="text-slate-800">£45,000</strong> &bull; Current Bill: <strong className="text-emerald-700">£{latestRecord.player_wages.toLocaleString()}</strong>
             </span>
           </div>
         </div>

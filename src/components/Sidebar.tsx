@@ -67,13 +67,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   return (
-    <aside className="w-56 bg-[#070e14]/95 backdrop-blur-md border-r border-emerald-500/20 p-3 flex flex-col justify-between shrink-0 h-[calc(100vh-58px)] sticky top-[58px] self-start overflow-y-auto shadow-2xl">
+    <aside className="w-56 bg-white/95 backdrop-blur-md border-r border-slate-200 p-3 flex flex-col justify-between shrink-0 h-[calc(100vh-58px)] sticky top-[58px] self-start overflow-y-auto shadow-xs">
       <div className="space-y-4">
         {/* Cricket Operations Section */}
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-wider mb-1.5 px-2.5 text-emerald-400 flex items-center justify-between">
+          <div className="text-[10px] font-bold uppercase tracking-wider mb-1.5 px-2.5 text-emerald-700 flex items-center justify-between">
             <span>Cricket Operations</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-sm animate-pulse"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-xs animate-pulse"></span>
           </div>
           <nav className="space-y-0.5">
             {clubhouseItems.map((item) => {
@@ -85,11 +85,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => onSelectTab(item.id)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/60 border border-emerald-400/40 font-bold'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md border border-emerald-500 font-bold'
+                      : 'text-slate-700 hover:text-emerald-800 hover:bg-emerald-50/80 border border-transparent'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-emerald-400'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-emerald-600'}`} />
                   <span className="truncate">{item.label}</span>
                 </button>
               );
@@ -99,9 +99,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Club Administration Section */}
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-wider mb-1.5 px-2.5 text-amber-400 flex items-center justify-between">
+          <div className="text-[10px] font-bold uppercase tracking-wider mb-1.5 px-2.5 text-amber-700 flex items-center justify-between">
             <span>Club Administration</span>
-            <span className="text-[9px] text-amber-400/70 font-mono">MGMT</span>
+            <span className="text-[9px] text-amber-700/80 font-mono">MGMT</span>
           </div>
           <nav className="space-y-0.5">
             {operationsItems.map((item) => {
@@ -113,11 +113,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => onSelectTab(item.id)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-gradient-to-r from-amber-600 to-teal-700 text-white shadow-lg shadow-amber-950/60 border border-amber-400/50 font-bold'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent'
+                      ? 'bg-gradient-to-r from-amber-600 to-emerald-700 text-white shadow-md border border-amber-500 font-bold'
+                      : 'text-slate-700 hover:text-amber-800 hover:bg-amber-50/80 border border-transparent'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-amber-400'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-amber-600'}`} />
                   <span className="truncate">{item.label}</span>
                 </button>
               );
@@ -127,15 +127,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Stadium Ground Atmosphere Badge */}
-      <div className="p-3 rounded-xl bg-slate-900/90 border border-emerald-500/30 shadow-inner text-xs mt-3">
+      <div className="p-3 rounded-xl bg-slate-50 border border-emerald-200 shadow-xs text-xs mt-3">
         <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-1.5 font-bold text-emerald-300">
+          <div className="flex items-center gap-1.5 font-bold text-emerald-800">
             <span className="w-2 h-2 rounded-full cricket-ball shrink-0"></span>
             <span>Prabhas Oval</span>
           </div>
-          <span className="text-[10px] text-amber-300 font-mono font-bold">10,000 Cap</span>
+          <span className="text-[10px] text-amber-800 font-mono font-bold">10,000 Cap</span>
         </div>
-        <p className="text-[11px] text-slate-300 leading-tight">
+        <p className="text-[11px] text-slate-600 leading-tight">
           Hard Turf Strip &bull; 781 Members &bull; Superb Academy
         </p>
       </div>

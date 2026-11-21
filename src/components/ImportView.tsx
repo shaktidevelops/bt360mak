@@ -7,7 +7,8 @@ import {
   StadiumTier, 
   NetAllocation, 
   StaffMember, 
-  CalendarEvent 
+  CalendarEvent,
+  CricketRecord
 } from '../types/database';
 import { 
   Download, 
@@ -22,18 +23,21 @@ import {
   DollarSign, 
   Building, 
   Users, 
-  Trophy, 
-  Target 
+  Trophy 
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { parseBattrickScorecard, recalculateStatsFromMatches } from '../lib/matchStatsEngine';
 
 interface ImportViewProps {
   club: Club;
   squad: Player[];
+  matches?: MatchRecord[];
+  records?: CricketRecord[];
   onImportSquad: (newSquad: Player[]) => void;
   onImportClub: (newClub: Club) => void;
   onImportFinances?: (newFinances: FinancialRecord[]) => void;
   onImportMatches?: (newMatches: MatchRecord[]) => void;
+  onImportRecords?: (newRecords: CricketRecord[]) => void;
   onImportStadium?: (newTiers: StadiumTier[]) => void;
   onImportNets?: (newNets: NetAllocation[]) => void;
   onImportCalendar?: (newEvents: CalendarEvent[]) => void;
@@ -43,14 +47,15 @@ interface ImportViewProps {
 export const ImportView: React.FC<ImportViewProps> = ({
   club,
   squad,
+  matches = [],
+  records = [],
   onImportSquad,
   onImportClub,
   onImportFinances,
   onImportMatches,
+  onImportRecords,
   onImportStadium,
-  onImportNets,
-  onImportCalendar,
-  onImportStaff
+  onImportNets
 }) => {
   const [activeImportTab, setActiveImportTab] = useState<'paste' | 'domains' | 'sheet' | 'json'>('paste');
   const [selectedDomain, setSelectedDomain] = useState<'squad' | 'finances' | 'ground' | 'fixtures' | 'nets' | 'office' | 'diary'>('squad');
@@ -72,14 +77,51 @@ export const ImportView: React.FC<ImportViewProps> = ({
   const [isSyncing, setIsSyncing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
-  // Smart Universal Parser for Battrick raw copied text or HTML across all 12+ domains
+  // Smart Universal Parser for Battrick raw copied text or HTML across all domains
   const parseBattrickData = (input: string) => {
     if (!input.trim()) {
       setParseResult(null);
       return;
     }
 
-    // 1. FINANCES DOMAIN (finances.asp)
+    // 1. MATCH SCORECARD / FIXTURES DOMAIN (matchinfofc.asp / matchinfo.asp / fixtures.asp)
+    const isScorecard = input.includes('matchinfofc.asp') || 
+                        input.includes('matchinfo.asp') || 
+                        input.includes('Fall of wickets') || 
+                        input.includes("Reporter's Summary") ||
+                        (input.includes('Somnath Super Devs') && input.includes('overs'));
+
+    if (isScorecard) {
+      const scorecard = parseBattrickScorecard(input);
+      if (scorecard) {
+        const newMatch: MatchRecord = {
+          id: scorecard.matchId,
+          club_id: club.id,
+          match_date: scorecard.matchDate,
+          match_type: scorecard.format,
+          opponent_club: scorecard.opponent,
+          venue: scorecard.venue,
+          pitch_type: scorecard.pitchType,
+          result: scorecard.result,
+          status: 'completed',
+          scoreSummary: scorecard.somnathRuns ? `Somnath ${scorecard.somnathRuns} runs` : undefined,
+          topPerformer: scorecard.battingPerformances[0]?.playerName 
+            ? `${scorecard.battingPerformances[0].playerName} (${scorecard.battingPerformances[0].runs} runs)` 
+            : undefined,
+          scorecardData: scorecard
+        };
+
+        setParseResult({
+          type: 'fixtures',
+          count: 1,
+          title: `Match Scorecard Detected: ${scorecard.format} vs ${scorecard.opponent}`,
+          matches: [newMatch]
+        });
+        return;
+      }
+    }
+
+    // 2. FINANCES DOMAIN (finances.asp)
     if (input.includes('Account Summary') || input.includes('Current Balance') || input.includes('Paid Out') || input.includes('Gate Receipts')) {
       const balM = input.match(/Current Balance[:\s]*([0-9,]+)/i);
       const balance = balM ? parseInt(balM[1].replace(/,/g, '')) : 1325820;
@@ -101,7 +143,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
       return;
     }
 
-    // 2. GROUND & STADIUM DOMAIN (ground.asp)
+    // 3. GROUND & STADIUM DOMAIN (ground.asp)
     if (input.includes('Standing Room') || input.includes('Groundsman') || input.includes('Uncovered Seats') || input.includes('Prabhas Coastal Oval')) {
       const capM = input.match(/Capacity[:\s]*([0-9,]+)/i);
       const cap = capM ? parseInt(capM[1].replace(/,/g, '')) : 10000;
@@ -119,24 +161,6 @@ export const ImportView: React.FC<ImportViewProps> = ({
         title: 'Battrick Stadium & Seating Architecture Detected',
         stadiumTiers: tiers,
         clubUpdates: { stadium_capacity: cap, stadium_name: 'Prabhas Coastal Oval (13108)' }
-      });
-      return;
-    }
-
-    // 3. FIXTURES & MATCHES DOMAIN (fixtures.asp / matchinfofc.asp)
-    if (input.includes('Previous Matches') || input.includes('Upcoming Matches') || input.includes("Reporter's Summary") || input.includes('Whykickamoocows')) {
-      const matches: MatchRecord[] = [
-        { id: 'M-32232669', club_id: club.id, match_date: '2026-11-10', match_type: 'First Class', opponent_club: 'Whykickamoocows', venue: 'Home (Prabhas Coastal Oval)', pitch_type: 'Hard & Fast', result: 'WON by 9 Wickets (Somnath 406/2 dec beat Whykickamoocows 166 & 240)', status: 'completed', scoreSummary: 'I. Baboor 166, V. Malla 90*, N. Ramdhyani 86, A. Kharge 56*, P. Rishi 3/9', topPerformer: 'Nandakishor Ramdhyani (MOTM)' },
-        { id: 'M-32217484', club_id: club.id, match_date: '2026-11-13', match_type: 'One Day', opponent_club: 'Nagapatnam CC', venue: 'Away Grounds', pitch_type: 'Green', result: 'WON (OD League Division V.62)', status: 'completed', scoreSummary: 'Top Order Performance, 781 Members Celebrating', topPerformer: 'Achintya Kharge (Captain)' },
-        { id: 'M-32217482', club_id: club.id, match_date: '2026-11-06', match_type: 'One Day', opponent_club: 'madgaon CC', venue: 'Home (Prabhas Coastal Oval)', pitch_type: 'Hard & Fast', result: 'WON (£70,775 Gate Receipts)', status: 'completed', scoreSummary: 'Dominant Home Performance, Fan Mood: Over the Moon', topPerformer: 'Issa Baboor' },
-        { id: 'M-32510940', club_id: club.id, match_date: '2026-11-24', match_type: 'First Class Fr', opponent_club: 'Pitch Punishers', venue: 'Away Grounds', pitch_type: 'Hard & Fast', result: 'Upcoming Friendly Fixture', status: 'upcoming', scoreSummary: 'Orders Deadline: 20 mins prior to play', topPerformer: 'Opening Bowler: Purumitra Rishi' }
-      ];
-
-      setParseResult({
-        type: 'fixtures',
-        count: matches.length,
-        title: 'Battrick Fixtures & Full Match Scorecards Detected',
-        matches
       });
       return;
     }
@@ -262,10 +286,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
             is_wonderkid: age <= 18
           });
         }
-      }
-
-      // Regex 2: Plain Text copy-paste format from Battrick players page
-      if (extractedPlayers.length === 0) {
+      } else {
+        // Plain text fallback
         const lines = input.split('\n');
         let currentPlayer: Partial<Player> | null = null;
 
@@ -277,7 +299,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
               extractedPlayers.push(currentPlayer);
             }
             currentPlayer = {
-              id: nameIdIdClean(nameIdMatch[3]),
+              id: nameIdMatch[3].trim(),
               club_id: club.id,
               name: nameIdMatch[1].trim(),
               age: nameIdMatch[2] ? parseInt(nameIdMatch[2]) : 22,
@@ -358,21 +380,49 @@ export const ImportView: React.FC<ImportViewProps> = ({
       type: 'unknown',
       count: 0,
       title: 'Unrecognized Data Format',
-      message: 'Paste squad HTML/Text from battrick.org/nl/players.asp, finances.asp, ground.asp, or fixtures.asp.'
+      message: 'Paste squad HTML/Text from battrick.org/nl/players.asp, finances.asp, ground.asp, or matchinfofc.asp scorecards.'
     });
   };
 
-  function nameIdIdClean(idStr?: string): string {
-    return String(idStr || '').replace(/^BT-/, '').trim();
-  }
-
-  // Apply parsed data to live state across any domain
+  // Apply parsed data to live state and persist to localStorage
   const handleApplyImport = async () => {
     if (!parseResult) return;
     setIsSyncing(true);
 
     try {
-      if (parseResult.type === 'squad' && parseResult.players && parseResult.players.length > 0) {
+      if (parseResult.type === 'fixtures' && parseResult.matches) {
+        // Append or replace matches
+        const existingIds = new Set(matches.map(m => m.id));
+        const newMatches = [...matches];
+        for (const m of parseResult.matches) {
+          if (!existingIds.has(m.id)) {
+            newMatches.push(m);
+            existingIds.add(m.id);
+          }
+        }
+
+        // Recalculate squad stats & club records strictly from matches
+        const { updatedSquad, updatedRecords } = recalculateStatsFromMatches(newMatches, squad);
+
+        if (onImportMatches) onImportMatches(newMatches);
+        onImportSquad(updatedSquad);
+        if (onImportRecords) onImportRecords(updatedRecords);
+
+        // LocalStorage save
+        localStorage.setItem('bt360_matches', JSON.stringify(newMatches));
+        localStorage.setItem('bt360_squad', JSON.stringify(updatedSquad));
+        localStorage.setItem('bt360_records', JSON.stringify(updatedRecords));
+
+        if (isSupabaseConfigured) {
+          await supabase.from('matches').upsert(newMatches);
+          await supabase.from('players').upsert(updatedSquad);
+        }
+
+        setStatusMessage({
+          text: `✅ Match scorecard successfully ingested! Player career stats and clubhouse records recomputed.`,
+          type: 'success'
+        });
+      } else if (parseResult.type === 'squad' && parseResult.players && parseResult.players.length > 0) {
         const formatted: Player[] = parseResult.players.map((p, idx) => ({
           id: p.id || String(6099450 + idx),
           club_id: club.id,
@@ -398,13 +448,14 @@ export const ImportView: React.FC<ImportViewProps> = ({
           market_value: p.market_value || 450000,
           tactical_role: p.tactical_role || (p.age && p.age <= 18 ? 'Wonderkid Trainee' : 'Senior Player'),
           is_wonderkid: p.is_wonderkid || (p.age ? p.age <= 18 : false),
-          uniqueRecords: p.uniqueRecords || ['Imported from Battrick Club Roster'],
-          statsFC: p.statsFC || { matches: 0, innings: 0, runs: 0, highestScore: '0', average: 0, strikeRate: 0, centuries: 0, fifties: 0, fours: 0, sixes: 0, oversBowled: 0, wickets: 0, bestBowling: '0/0', bowlingAverage: 0, economy: 0, fiveWickets: 0, catches: 0, stumpings: 0 },
-          statsOD: p.statsOD || { matches: 0, innings: 0, runs: 0, highestScore: '0', average: 0, strikeRate: 0, centuries: 0, fifties: 0, fours: 0, sixes: 0, oversBowled: 0, wickets: 0, bestBowling: '0/0', bowlingAverage: 0, economy: 0, fiveWickets: 0, catches: 0, stumpings: 0 },
-          statsT20: p.statsT20 || { matches: 0, innings: 0, runs: 0, highestScore: '0', average: 0, strikeRate: 0, centuries: 0, fifties: 0, fours: 0, sixes: 0, oversBowled: 0, wickets: 0, bestBowling: '0/0', bowlingAverage: 0, economy: 0, fiveWickets: 0, catches: 0, stumpings: 0 }
+          uniqueRecords: p.uniqueRecords || ['Official Registered Squad Member'],
+          statsFC: { matches: 0, innings: 0, runs: 0, highestScore: '-', average: 0, strikeRate: 0, centuries: 0, fifties: 0, fours: 0, sixes: 0, oversBowled: 0, wickets: 0, bestBowling: '-', bowlingAverage: 0, economy: 0, fiveWickets: 0, catches: 0, stumpings: 0 },
+          statsOD: { matches: 0, innings: 0, runs: 0, highestScore: '-', average: 0, strikeRate: 0, centuries: 0, fifties: 0, fours: 0, sixes: 0, oversBowled: 0, wickets: 0, bestBowling: '-', bowlingAverage: 0, economy: 0, fiveWickets: 0, catches: 0, stumpings: 0 },
+          statsT20: { matches: 0, innings: 0, runs: 0, highestScore: '-', average: 0, strikeRate: 0, centuries: 0, fifties: 0, fours: 0, sixes: 0, oversBowled: 0, wickets: 0, bestBowling: '-', bowlingAverage: 0, economy: 0, fiveWickets: 0, catches: 0, stumpings: 0 }
         }));
 
         onImportSquad(formatted);
+        localStorage.setItem('bt360_squad', JSON.stringify(formatted));
 
         if (isSupabaseConfigured) {
           const { error } = await supabase.from('players').upsert(formatted);
@@ -418,6 +469,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
       } else if (parseResult.type === 'finances' && parseResult.finances) {
         if (onImportFinances) onImportFinances(parseResult.finances);
         if (parseResult.clubUpdates) onImportClub({ ...club, ...parseResult.clubUpdates });
+        localStorage.setItem('bt360_finances', JSON.stringify(parseResult.finances));
+
         if (isSupabaseConfigured) {
           await supabase.from('financial_ledger').upsert(parseResult.finances);
           if (parseResult.clubUpdates) await supabase.from('clubs').upsert({ ...club, ...parseResult.clubUpdates });
@@ -429,6 +482,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
       } else if (parseResult.type === 'ground' && parseResult.stadiumTiers) {
         if (onImportStadium) onImportStadium(parseResult.stadiumTiers);
         if (parseResult.clubUpdates) onImportClub({ ...club, ...parseResult.clubUpdates });
+        localStorage.setItem('bt360_stadiumTiers', JSON.stringify(parseResult.stadiumTiers));
+
         if (isSupabaseConfigured) {
           await supabase.from('stadium_tiers').upsert(parseResult.stadiumTiers);
         }
@@ -436,41 +491,19 @@ export const ImportView: React.FC<ImportViewProps> = ({
           text: `✅ Prabhas Coastal Oval seating tiers & 10,000 capacity synchronized!`,
           type: 'success'
         });
-      } else if (parseResult.type === 'fixtures' && parseResult.matches) {
-        if (onImportMatches) onImportMatches(parseResult.matches);
-        if (isSupabaseConfigured) {
-          await supabase.from('matches').upsert(parseResult.matches);
-        }
-        setStatusMessage({
-          text: `✅ ${parseResult.matches.length} Fixtures & match scorecards successfully imported!`,
-          type: 'success'
-        });
       } else if (parseResult.type === 'nets' && parseResult.nets) {
         if (onImportNets) onImportNets(parseResult.nets);
-        if (isSupabaseConfigured) {
-          await supabase.from('nets_matrix').upsert(parseResult.nets);
-        }
+        localStorage.setItem('bt360_nets', JSON.stringify(parseResult.nets));
         setStatusMessage({
           text: `✅ Training nets matrix successfully updated!`,
-          type: 'success'
-        });
-      } else if (parseResult.type === 'diary' && parseResult.calendarEvents) {
-        if (onImportCalendar) onImportCalendar(parseResult.calendarEvents);
-        setStatusMessage({
-          text: `✅ Diary events and club calendar successfully updated!`,
           type: 'success'
         });
       } else if (parseResult.type === 'office' && parseResult.clubUpdates) {
         const updatedClub: Club = { ...club, ...parseResult.clubUpdates };
         onImportClub(updatedClub);
-        if (onImportStaff) {
-          // Keep staff sync ready
-        }
-        if (isSupabaseConfigured) {
-          await supabase.from('clubs').upsert(updatedClub);
-        }
+        localStorage.setItem('bt360_club', JSON.stringify(updatedClub));
         setStatusMessage({
-          text: `✅ Club standings (#1 in FC VIII.17 & BT20 VII.241) and ITS bank updated!`,
+          text: `✅ Club standings and ITS bank updated!`,
           type: 'success'
         });
       }
@@ -484,7 +517,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
     }
   };
 
-  // Preset loaders for the 12 Battrick domains
+  // Preset loaders for the Battrick domains
   const loadDomainPreset = (domain: string) => {
     if (domain === 'squad') {
       const sample = `Bhadraksh Hemalatha - 17 yo, ID: 6099466 | Wage: £545 | BTI: 6,989 | RHB, Right-arm Finger Spin
@@ -493,11 +526,18 @@ Concentration: feeble | Consistency: competent | Stamina: competent | Form: supe
 
 Nandakishor Ramdhyani - 17 yo, ID: 6099471 | Wage: £559 | BTI: 6,360 | LHB, Left-arm Medium
 Batting: competent | Bowling: mediocre | Keeping: woeful | Fielding: woeful
-Concentration: competent | Consistency: feeble | Stamina: competent | Form: mediocre
-
-Achintya Kharge - 26 yo, ID: 6099475 | Wage: £553 | BTI: 8,436 | RHB, Right-arm Medium
-Batting: competent | Bowling: woeful | Keeping: woeful | Fielding: competent
-Concentration: competent | Consistency: woeful | Stamina: competent | Form: superb`;
+Concentration: competent | Consistency: feeble | Stamina: competent | Form: mediocre`;
+      setRawText(sample);
+      parseBattrickData(sample);
+    } else if (domain === 'fixtures') {
+      const sample = `Somnath Super Devs v Whykickamoocows (32232669)
+Date: 10/11/2026 Ground: Prabhas Coastal Oval
+Pitch: Hard & Fast Crowd: 10,000
+Somnath Super Devs won by 9 wickets.
+Somnath Super Devs 406/2 dec
+I. Baboor not out 166 (182b 16x4 2x6)
+V. Malla not out 90 (94b 8x4 1x6)
+P. Rishi 10-2-35-3`;
       setRawText(sample);
       parseBattrickData(sample);
     } else if (domain === 'finances') {
@@ -506,8 +546,7 @@ Current Balance: 1,325,820
 Showing transactions from Season 69
 Opening Balance: 75,000 | Payments In: 1,744,048 | Payments Out: 493,228 | Profit/Loss: 1,250,820
 18 Nov 2026: Gate Receipts £5,247
-14 Nov 2026: Backroom Staff Salaries -£12,250 | Player Salaries -£7,034 | Ground Maintenance -£14,702 | Interest Received £33,114 | Sponsorship Revenue £22,823
-10 Nov 2026: Gate Receipts £126,546 (FC vs Whykickamoocows Day 1)`;
+14 Nov 2026: Backroom Staff Salaries -£12,250 | Player Salaries -£7,034 | Ground Maintenance -£14,702`;
       setRawText(sample);
       parseBattrickData(sample);
     } else if (domain === 'ground') {
@@ -517,34 +556,14 @@ Capacity: 10000
 Standing Room: 5275
 Uncovered Seats: 3270
 Covered Seats: 1100
-Members Seats: 355
-Default Pitch Condition: hard & fast`;
-      setRawText(sample);
-      parseBattrickData(sample);
-    } else if (domain === 'fixtures') {
-      const sample = `Previous Matches
-10/11/2026 04:30 (FC): Somnath Super Devs v Whykickamoocows - Won by 9 Wickets (Somnath 406/2 dec beat Whykickamoocows 166 & 240)
-13/11/2026 04:30 (OD): Nagapatnam CC v Somnath Super Devs - Won
-Upcoming Matches
-24/11/2026 07:30 (FC Fr): Pitch Punishers v Somnath Super Devs - Orders due 20 mins prior`;
-      setRawText(sample);
-      parseBattrickData(sample);
-    } else if (domain === 'nets') {
-      const sample = `Training Sessions - Session 1
-Squad training: Fielding
-Arjun Ashraf, Issa Baboor, Kamadev Battasi, Bhadraksh Hemalatha, Kamal Hydrose, Lalit Kadam, Achintya Kharge, Vasant Malla, Ankur Palanisamy, Nandakishor Ramdhyani, Purumitra Rishi, Viplav Sinduvalli, Arvind Somal, Atulya Surya Teja
-Last Training Session: None of your players were trained last week.`;
+Members Seats: 355`;
       setRawText(sample);
       parseBattrickData(sample);
     } else if (domain === 'office') {
-      const sample = `Somnath Super Devs (13108)
-General Manager: Devs (137061)
-First Class League: #1 in VIII.17
-One Day League: #2 in V.62
-BT20: #1 in VII.241
-Youth Academy Condition: superb
+      const sample = `Youth Academy Condition: Masterful
 Intensive Training Sessions: 70
-Club Members: 781 (over the moon)`;
+Club Members: 781
+Coach Quality: Competent`;
       setRawText(sample);
       parseBattrickData(sample);
     }
@@ -555,7 +574,9 @@ Club Members: 781 (over the moon)`;
       exportDate: new Date().toISOString(),
       club,
       squad,
-      version: '2.4.0 Sovereign'
+      matches,
+      records,
+      version: '3.0.0 Sovereign Sports'
     };
     const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -569,22 +590,22 @@ Club Members: 781 (over the moon)`;
   return (
     <div className="space-y-6">
       {/* Importer Hub Header */}
-      <div className="sovereign-card p-6 rounded-2xl border-emerald-500/40 relative overflow-hidden">
+      <div className="sovereign-card p-6 rounded-2xl border-emerald-500/40 relative overflow-hidden shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-2xl cricket-ball flex items-center justify-center text-2xl text-white shadow-xl shrink-0">
+            <div className="w-14 h-14 rounded-2xl cricket-ball flex items-center justify-center text-2xl text-white shadow-md shrink-0">
               📥
             </div>
             <div>
-              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
-                <Sparkles className="w-4 h-4 text-amber-400" />
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-700">
+                <Sparkles className="w-4 h-4 text-emerald-600" />
                 <span>Universal Multi-Domain Battrick Ingestion Hub</span>
               </div>
-              <h2 className="text-2xl font-black text-white mt-1">
+              <h2 className="text-2xl font-black text-slate-900 mt-1">
                 Import from Battrick Club (#13108)
               </h2>
-              <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                Ingest real club data across all 12 domains: Squad, Players, Finances, Stadium, Fixtures, Scorecards, Nets, Staff, and Diary.
+              <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
+                Ingest real club data across all 12 domains: Squad, Scorecards, Finances, Stadium, Fixtures, Nets, Staff, and Diary. When you paste match scorecards, player statistics and clubhouse records compute dynamically.
               </p>
             </div>
           </div>
@@ -592,10 +613,10 @@ Club Members: 781 (over the moon)`;
           <div className="flex items-center gap-2">
             <button
               onClick={handleDownloadBackup}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#081d17] hover:bg-[#113a2e] text-emerald-300 border border-emerald-600/50 text-xs font-bold transition-all cursor-pointer shadow"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-bold transition-all cursor-pointer shadow-xs"
               title="Download full JSON backup"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4 text-emerald-600" />
               <span>Export Club Backup</span>
             </button>
           </div>
@@ -603,61 +624,61 @@ Club Members: 781 (over the moon)`;
 
         {/* Status Notification */}
         {statusMessage && (
-          <div className={`mt-4 p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between ${
+          <div className={`mt-4 p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between shadow-xs ${
             statusMessage.type === 'success'
-              ? 'bg-emerald-950/80 border-emerald-500 text-emerald-200'
-              : 'bg-rose-950/80 border-rose-500 text-rose-200'
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+              : 'bg-rose-50 border-rose-300 text-rose-800'
           }`}>
             <span>{statusMessage.text}</span>
-            <button onClick={() => setStatusMessage(null)} className="text-slate-400 hover:text-white ml-2">&times;</button>
+            <button onClick={() => setStatusMessage(null)} className="text-slate-400 hover:text-slate-800 ml-2">&times;</button>
           </div>
         )}
       </div>
 
       {/* Import Method Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-emerald-800/40 pb-2">
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
         <button
           onClick={() => setActiveImportTab('paste')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeImportTab === 'paste'
-              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
-              : 'text-slate-300 hover:text-white hover:bg-[#0c2b23]'
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>Smart Text / HTML Paste (All Domains)</span>
+          <span>Smart Text / HTML Paste (Scorecards & Squad)</span>
         </button>
 
         <button
           onClick={() => setActiveImportTab('domains')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeImportTab === 'domains'
-              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
-              : 'text-slate-300 hover:text-white hover:bg-[#0c2b23]'
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
           <FolderOpen className="w-4 h-4" />
-          <span>Domain Quick Presets (12 Modules)</span>
+          <span>Domain Quick Presets</span>
         </button>
 
         <button
           onClick={() => setActiveImportTab('sheet')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeImportTab === 'sheet'
-              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
-              : 'text-slate-300 hover:text-white hover:bg-[#0c2b23]'
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
           <Table className="w-4 h-4" />
-          <span>Google Sheet / Apps Script Sync</span>
+          <span>Google Sheet Cloud Connector</span>
         </button>
 
         <button
           onClick={() => setActiveImportTab('json')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeImportTab === 'json'
-              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
-              : 'text-slate-300 hover:text-white hover:bg-[#0c2b23]'
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
           <Upload className="w-4 h-4" />
@@ -666,17 +687,16 @@ Club Members: 781 (over the moon)`;
       </div>
 
       {/* DOMAIN QUICK SELECTOR BAR */}
-      <div className="flex flex-wrap items-center gap-2 p-3 bg-[#051612] rounded-xl border border-emerald-800/40 text-xs">
-        <span className="text-[10px] uppercase font-bold text-slate-400 mr-2 flex items-center gap-1">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>Domain Pre-fill:</span>
+      <div className="flex flex-wrap items-center gap-2 p-3 bg-white rounded-xl border border-slate-200 text-xs shadow-xs">
+        <span className="text-[10px] uppercase font-bold text-slate-500 mr-2 flex items-center gap-1">
+          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          <span>Quick Select:</span>
         </span>
         {[
-          { id: 'squad', label: '👥 Squad (players.asp)', icon: Users },
+          { id: 'squad', label: '👥 Squad (squad.asp)', icon: Users },
+          { id: 'fixtures', label: '🏏 Scorecard (matchinfofc.asp)', icon: Trophy },
           { id: 'finances', label: '💰 Finances (finances.asp)', icon: DollarSign },
           { id: 'ground', label: '🏟️ Ground (ground.asp)', icon: Building },
-          { id: 'fixtures', label: '🏆 Fixtures (fixtures.asp)', icon: Trophy },
-          { id: 'nets', label: '🎯 Nets (nets.asp)', icon: Target },
           { id: 'office', label: '🏢 Office (office.asp)', icon: Building }
         ].map(item => (
           <button
@@ -685,10 +705,10 @@ Club Members: 781 (over the moon)`;
               setSelectedDomain(item.id as any);
               loadDomainPreset(item.id);
             }}
-            className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer shadow-sm ${
+            className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer shadow-xs ${
               selectedDomain === item.id 
-                ? 'bg-emerald-600 text-white border-emerald-400 font-black shadow-md' 
-                : 'bg-[#071f19] hover:bg-emerald-900/60 text-slate-200 hover:text-white border-emerald-700/40'
+                ? 'bg-emerald-600 text-white border-emerald-600 font-black shadow-sm' 
+                : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
             }`}
           >
             {item.label}
@@ -699,22 +719,22 @@ Club Members: 781 (over the moon)`;
       {/* TAB 1: Smart Text / HTML Paste */}
       {activeImportTab === 'paste' && (
         <div className="space-y-4">
-          <div className="sovereign-card p-5 rounded-2xl border-emerald-600/30 shadow-xl space-y-3">
+          <div className="sovereign-card p-5 rounded-2xl border-slate-200 shadow-md space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-sm font-black text-white flex items-center gap-2">
-                  <Copy className="w-4 h-4 text-emerald-400" />
+                <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                  <Copy className="w-4 h-4 text-emerald-600" />
                   <span>Paste Raw Battrick Web Page Text or HTML</span>
                 </h3>
-                <p className="text-xs text-slate-300 mt-0.5">
-                  Open any Battrick page (<code className="text-emerald-300 font-mono">players.asp</code>, <code className="text-emerald-300 font-mono">finances.asp</code>, <code className="text-emerald-300 font-mono">ground.asp</code>, <code className="text-emerald-300 font-mono">fixtures.asp</code>, <code className="text-emerald-300 font-mono">nets.asp</code>), press <kbd className="px-1.5 py-0.5 bg-[#051310] rounded border border-emerald-700/50 text-[10px]">Ctrl+A</kbd> then <kbd className="px-1.5 py-0.5 bg-[#051310] rounded border border-emerald-700/50 text-[10px]">Ctrl+C</kbd>, and paste here:
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Open any Battrick page (<code className="text-emerald-700 font-mono">matchinfofc.asp</code>, <code className="text-emerald-700 font-mono">squad.asp</code>, <code className="text-emerald-700 font-mono">finances.asp</code>), press <kbd className="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-300 text-[10px]">Ctrl+A</kbd> then <kbd className="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-300 text-[10px]">Ctrl+C</kbd>, and paste here:
                 </p>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => { setRawText(''); setParseResult(null); }}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#061814] hover:bg-rose-950 text-slate-400 hover:text-rose-300 border border-slate-700/50 text-[11px] font-bold transition-all cursor-pointer"
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-300 text-[11px] font-bold transition-all cursor-pointer"
                 >
                   Clear Box
                 </button>
@@ -729,20 +749,20 @@ Club Members: 781 (over the moon)`;
                 parseBattrickData(e.target.value);
               }}
               placeholder="Paste raw text or HTML from ANY Battrick page here...
-The engine automatically detects whether you pasted Squad, Finances, Ground, Fixtures, Nets, or Office data!"
-              className="w-full p-4 rounded-xl bg-[#04120e] border border-emerald-800/60 font-mono text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400/50 leading-relaxed"
+The engine automatically detects whether you pasted a Match Scorecard, Squad, Finances, Ground, or Office data!"
+              className="w-full p-4 rounded-xl bg-slate-50 border border-slate-300 font-mono text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 leading-relaxed shadow-inner"
             />
           </div>
 
           {/* Real-time Parser Results Preview */}
           {parseResult && (
-            <div className="sovereign-card p-5 rounded-2xl border-emerald-600/40 shadow-xl space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-emerald-800/40">
+            <div className="sovereign-card p-5 rounded-2xl border-emerald-400 shadow-xl space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                   <div>
-                    <h4 className="text-base font-black text-white">{parseResult.title}</h4>
-                    <span className="text-xs text-emerald-300 font-mono font-bold">
+                    <h4 className="text-base font-black text-slate-900">{parseResult.title}</h4>
+                    <span className="text-xs text-emerald-700 font-mono font-bold">
                       Domain Recognized: {parseResult.type.toUpperCase()} ({parseResult.count} records)
                     </span>
                   </div>
@@ -751,19 +771,19 @@ The engine automatically detects whether you pasted Squad, Finances, Ground, Fix
                 <button
                   onClick={handleApplyImport}
                   disabled={isSyncing}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs shadow-xl transition-all cursor-pointer disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
                 >
                   <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                  <span>Apply & Synchronize Database &rarr;</span>
+                  <span>Apply & Synchronize Live Records &rarr;</span>
                 </button>
               </div>
 
               {/* SQUAD PREVIEW */}
               {parseResult.players && parseResult.players.length > 0 && (
-                <div className="overflow-x-auto rounded-xl border border-emerald-800/40 bg-[#04120e]">
+                <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
                   <table className="w-full text-left text-xs border-collapse font-mono">
                     <thead>
-                      <tr className="bg-[#071d17] text-slate-300 uppercase tracking-wider text-[10px] border-b border-emerald-800/40">
+                      <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] border-b border-slate-200">
                         <th className="py-2.5 px-3">Player ID</th>
                         <th className="py-2.5 px-3">Name</th>
                         <th className="py-2.5 px-3">Age</th>
@@ -774,17 +794,17 @@ The engine automatically detects whether you pasted Squad, Finances, Ground, Fix
                         <th className="py-2.5 px-3">Fielding</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-emerald-900/30">
+                    <tbody className="divide-y divide-slate-100">
                       {parseResult.players.slice(0, 10).map((p, idx) => (
-                        <tr key={p.id || idx} className="hover:bg-emerald-950/30">
-                          <td className="py-2 px-3 text-amber-400 font-bold">#{p.id}</td>
-                          <td className="py-2 px-3 text-white font-bold">{p.name}</td>
-                          <td className="py-2 px-3 text-slate-300">{p.age}yo</td>
-                          <td className="py-2 px-3 text-emerald-300">£{p.wage}</td>
-                          <td className="py-2 px-3 text-amber-300 font-bold">{p.bti?.toLocaleString()}</td>
-                          <td className="py-2 px-3 capitalize text-slate-300">{p.batting}</td>
-                          <td className="py-2 px-3 capitalize text-slate-300">{p.bowling}</td>
-                          <td className="py-2 px-3 capitalize text-slate-300">{p.fielding}</td>
+                        <tr key={p.id || idx} className="hover:bg-emerald-50/50">
+                          <td className="py-2 px-3 text-emerald-700 font-bold">#{p.id}</td>
+                          <td className="py-2 px-3 text-slate-900 font-bold">{p.name}</td>
+                          <td className="py-2 px-3 text-slate-600">{p.age}yo</td>
+                          <td className="py-2 px-3 text-slate-800">£{p.wage}</td>
+                          <td className="py-2 px-3 text-emerald-700 font-bold">{p.bti?.toLocaleString()}</td>
+                          <td className="py-2 px-3 capitalize text-slate-700">{p.batting}</td>
+                          <td className="py-2 px-3 capitalize text-slate-700">{p.bowling}</td>
+                          <td className="py-2 px-3 capitalize text-slate-700">{p.fielding}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -792,12 +812,28 @@ The engine automatically detects whether you pasted Squad, Finances, Ground, Fix
                 </div>
               )}
 
+              {/* MATCH SCORECARD PREVIEW */}
+              {parseResult.matches && parseResult.matches.length > 0 && (
+                <div className="space-y-2 font-mono text-xs">
+                  {parseResult.matches.map(m => (
+                    <div key={m.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900">{m.match_type} vs {m.opponent_club}</span>
+                        <span className="text-emerald-700 font-bold">{m.match_date}</span>
+                      </div>
+                      <p className="text-slate-600 mt-1">{m.result}</p>
+                      {m.scoreSummary && <p className="text-slate-500 text-[11px] mt-0.5">{m.scoreSummary}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* FINANCES PREVIEW */}
               {parseResult.finances && (
                 <div className="space-y-2 font-mono text-xs">
-                  <div className="p-3 bg-[#04120e] rounded-xl border border-emerald-800/40 flex items-center justify-between">
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
                     <span>Closing Bank Balance:</span>
-                    <span className="text-emerald-400 font-black text-sm">£{parseResult.clubUpdates?.bank_balance?.toLocaleString()}</span>
+                    <span className="text-emerald-700 font-black text-sm">£{parseResult.clubUpdates?.bank_balance?.toLocaleString()}</span>
                   </div>
                 </div>
               )}
@@ -806,9 +842,9 @@ The engine automatically detects whether you pasted Squad, Finances, Ground, Fix
               {parseResult.stadiumTiers && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
                   {parseResult.stadiumTiers.map(t => (
-                    <div key={t.id} className="p-3 bg-[#04120e] rounded-xl border border-emerald-800/40">
-                      <div className="text-[10px] text-slate-400">{t.tier_name}</div>
-                      <div className="text-white font-bold text-sm mt-0.5">{t.current_seats.toLocaleString()} seats</div>
+                    <div key={t.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="text-[10px] text-slate-500">{t.tier_name}</div>
+                      <div className="text-slate-900 font-bold text-sm mt-0.5">{t.current_seats.toLocaleString()} seats</div>
                     </div>
                   ))}
                 </div>
@@ -823,26 +859,25 @@ The engine automatically detects whether you pasted Squad, Finances, Ground, Fix
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             { id: 'squad', title: 'Squad Roster', file: 'squad.asp', desc: 'All 14 players, 11 skills, wages, BTI, and tactical roles.' },
+            { id: 'fixtures', title: 'Match Scorecards', file: 'matchinfofc.asp', desc: 'Real First Class, OD, and BT20 scorecards to recalculate career stats.' },
             { id: 'finances', title: 'Finances & Ledger', file: 'finances.asp', desc: 'Current balance (£1,325,820), gate receipts, staff & player wages.' },
             { id: 'ground', title: 'Ground & Stadium', file: 'ground.asp', desc: 'Prabhas Coastal Oval 10,000 capacity, seating tiers, pitch condition.' },
-            { id: 'fixtures', title: 'Fixtures & Matches', file: 'fixtures.asp', desc: 'Upcoming fixtures and past match scorecards vs Whykickamoocows & Diu CC.' },
-            { id: 'nets', title: 'Training Nets', file: 'nets.asp', desc: '10 training nets matrix and squad fielding session.' },
             { id: 'office', title: 'Club Headquarters', file: 'office.asp', desc: 'League standings (#1 in FC & BT20), 70 ITS points, fan club morale.' }
           ].map(d => (
-            <div key={d.id} className="sovereign-card p-5 rounded-2xl border-emerald-700/40 space-y-3">
+            <div key={d.id} className="sovereign-card p-5 rounded-2xl border-slate-200 space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-black text-white">{d.title}</h4>
-                <code className="text-[10px] px-2 py-0.5 rounded bg-[#030d0a] text-emerald-400 border border-emerald-800 font-mono">{d.file}</code>
+                <h4 className="text-sm font-black text-slate-900">{d.title}</h4>
+                <code className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-emerald-700 border border-slate-200 font-mono">{d.file}</code>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">{d.desc}</p>
+              <p className="text-xs text-slate-600 leading-relaxed">{d.desc}</p>
               <button
                 onClick={() => {
                   setActiveImportTab('paste');
                   loadDomainPreset(d.id);
                 }}
-                className="w-full py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition-all cursor-pointer shadow"
+                className="w-full py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs transition-all cursor-pointer shadow-sm"
               >
-                Load {d.title} &rarr;
+                Load {d.title} Sample &rarr;
               </button>
             </div>
           ))}
@@ -851,19 +886,19 @@ The engine automatically detects whether you pasted Squad, Finances, Ground, Fix
 
       {/* TAB 3: Google Sheet Sync */}
       {activeImportTab === 'sheet' && (
-        <div className="sovereign-card p-6 rounded-2xl border-emerald-600/40 shadow-xl space-y-4">
+        <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-4">
           <div className="flex items-center gap-3">
-            <Table className="w-6 h-6 text-emerald-400" />
+            <Table className="w-6 h-6 text-emerald-600" />
             <div>
-              <h3 className="text-base font-black text-white">Google Sheet & Apps Script Cloud Connector</h3>
-              <p className="text-xs text-slate-300">
-                Synchronize directly with your Master Google Sheet (ID: <code className="text-emerald-300 font-mono">1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E</code>)
+              <h3 className="text-base font-black text-slate-900">Google Sheet & Apps Script Cloud Connector</h3>
+              <p className="text-xs text-slate-600">
+                Synchronize directly with your Master Google Sheet (ID: <code className="text-emerald-700 font-mono">1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E</code>)
               </p>
             </div>
           </div>
-          <div className="p-4 rounded-xl bg-[#04120e] border border-emerald-800/40 text-xs space-y-2">
-            <div className="text-emerald-300 font-bold">Connected Google Apps Script Web App:</div>
-            <code className="block p-2 rounded bg-[#020b08] text-slate-300 font-mono text-[11px] break-all border border-emerald-900/40">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
+            <div className="text-emerald-700 font-bold">Connected Google Apps Script Web App:</div>
+            <code className="block p-2 rounded bg-white text-slate-700 font-mono text-[11px] break-all border border-slate-200">
               https://script.google.com/macros/s/AKfycby_56P0m_Mij_N-zz0K44NntJNyts_8bUtl1VoPZQhlSnUFsCOq-lh33A3B9b9npmA/exec
             </code>
           </div>
@@ -872,18 +907,18 @@ The engine automatically detects whether you pasted Squad, Finances, Ground, Fix
 
       {/* TAB 4: JSON Backup & Restore */}
       {activeImportTab === 'json' && (
-        <div className="sovereign-card p-6 rounded-2xl border-emerald-600/40 shadow-xl space-y-4">
-          <h3 className="text-base font-black text-white flex items-center gap-2">
-            <Upload className="w-5 h-5 text-emerald-400" />
+        <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-4">
+          <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+            <Upload className="w-5 h-5 text-emerald-600" />
             <span>Full JSON Backup & Snapshot Restore</span>
           </h3>
-          <p className="text-xs text-slate-300 leading-relaxed">
+          <p className="text-xs text-slate-600 leading-relaxed">
             Download a complete offline snapshot of all club records, or restore from a previous backup file.
           </p>
           <div className="flex items-center gap-3 pt-2">
             <button
               onClick={handleDownloadBackup}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs shadow-lg transition-all cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span>Download Full Backup JSON</span>

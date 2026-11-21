@@ -140,6 +140,7 @@ export interface MatchRecord {
   status: 'completed' | 'upcoming';
   scoreSummary?: string;
   topPerformer?: string;
+  scorecardData?: any;
 }
 
 export interface FinancialRecord {

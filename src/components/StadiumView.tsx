@@ -41,92 +41,92 @@ export const StadiumView: React.FC<StadiumViewProps> = () => {
   return (
     <div className="space-y-6">
       {/* Stadium Command Header */}
-      <div className="bg-[#0e2c24] p-6 rounded-2xl border border-emerald-600/30 shadow-xl">
+      <div className="sovereign-card p-6 rounded-2xl border-emerald-500/40 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-400">
-              <Building2 className="w-4 h-4 text-emerald-400" />
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-700">
+              <Building2 className="w-4 h-4 text-emerald-600" />
               <span>Infrastructure Architecture & Stadium Optimization</span>
             </div>
-            <h2 className="text-2xl font-black text-white mt-1">
+            <h2 className="text-2xl font-black text-slate-900 mt-1">
               Prabhas Coastal Oval Arena Planner
             </h2>
-            <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
               Somnath Super Devs home arena. Optimize seating distribution ratios (68% Standing, 23% Uncovered, 7% Covered, 2% Members), ticket pricing models, and ground expansion ROI.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="bg-[#061713] px-4 py-2 rounded-xl border border-emerald-800/40 text-center">
-              <span className="text-[10px] uppercase font-bold text-slate-400">Current Capacity</span>
-              <div className="text-xl font-black font-mono text-emerald-400">
+            <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center shadow-xs">
+              <span className="text-[10px] uppercase font-bold text-slate-500">Current Capacity</span>
+              <div className="text-xl font-black font-mono text-emerald-700">
                 10,000 Seats
               </div>
             </div>
-            <div className="bg-[#061713] px-4 py-2 rounded-xl border border-emerald-800/40 text-center">
-              <span className="text-[10px] uppercase font-bold text-slate-400">Pitch Condition</span>
-              <div className="text-sm font-bold text-amber-300">Hard & Fast</div>
+            <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center shadow-xs">
+              <span className="text-[10px] uppercase font-bold text-slate-500">Pitch Condition</span>
+              <div className="text-sm font-bold text-amber-700">Hard & Fast</div>
             </div>
           </div>
         </div>
 
         {/* Stadium Performance Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5 pt-4 border-t border-emerald-800/40">
-          <div className="p-4 rounded-xl bg-[#061713] border border-emerald-800/40">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Current Gate Potential</span>
-            <div className="text-2xl font-black font-mono text-emerald-300 mt-0.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5 pt-4 border-t border-slate-200">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Current Gate Potential</span>
+            <div className="text-2xl font-black font-mono text-emerald-700 mt-0.5">
               £{currentMaxGate.toLocaleString()}
             </div>
-            <div className="text-[11px] text-slate-300 mt-1">Per sellout home fixture</div>
+            <div className="text-[11px] text-slate-500 mt-1">Per sellout home fixture</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#061713] border border-emerald-800/40">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Target Gate Potential</span>
-            <div className="text-2xl font-black font-mono text-teal-300 mt-0.5">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Target Gate Potential</span>
+            <div className="text-2xl font-black font-mono text-teal-700 mt-0.5">
               £{targetMaxGate.toLocaleString()}
             </div>
-            <div className="text-[11px] text-emerald-400 mt-1 font-semibold">
+            <div className="text-[11px] text-emerald-700 mt-1 font-semibold">
               +£{incrementalRevenuePerHomeMatch.toLocaleString()} gain / match
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#061713] border border-emerald-800/40">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Total Expansion Cost</span>
-            <div className="text-2xl font-black font-mono text-amber-300 mt-0.5">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Total Expansion Cost</span>
+            <div className="text-2xl font-black font-mono text-amber-700 mt-0.5">
               £{totalExpansionCost.toLocaleString()}
             </div>
-            <div className="text-[11px] text-slate-300 mt-1">Contractor capital expenditure</div>
+            <div className="text-[11px] text-slate-500 mt-1">Contractor capital expenditure</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#061713] border border-emerald-800/40">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Capital Break-Even</span>
-            <div className="text-2xl font-black font-mono text-white mt-0.5">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Capital Break-Even</span>
+            <div className="text-2xl font-black font-mono text-slate-900 mt-0.5">
               ~{breakEvenHomeMatches} Home Matches
             </div>
-            <div className="text-[11px] text-emerald-400 mt-1 font-semibold">High ROI investment window</div>
+            <div className="text-[11px] text-emerald-700 mt-1 font-semibold">High ROI investment window</div>
           </div>
         </div>
       </div>
 
       {/* EXPANSION SLIDER & ROI CALCULATOR */}
-      <div className="bg-[#0e2c24] rounded-2xl border border-emerald-600/30 p-5 shadow-xl">
+      <div className="sovereign-card rounded-2xl border-slate-200 p-5 shadow-md">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
           <div>
-            <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-              <Hammer className="w-5 h-5 text-amber-400" />
+            <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <Hammer className="w-5 h-5 text-amber-600" />
               <span>Interactive Stadium Expansion Simulator</span>
             </h3>
-            <p className="text-xs text-slate-300 mt-0.5">
+            <p className="text-xs text-slate-600 mt-0.5">
               Drag slider to calculate optimal distribution ratios and contractor quotes for your next stadium tier upgrade.
             </p>
           </div>
-          <div className="bg-[#061713] px-3.5 py-1.5 rounded-xl border border-emerald-600/50 font-mono font-bold text-emerald-300 text-sm">
+          <div className="bg-emerald-50 px-3.5 py-1.5 rounded-xl border border-emerald-300 font-mono font-bold text-emerald-800 text-sm">
             Target: {targetCapacity.toLocaleString()} Seats
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#061713] border border-emerald-800/40">
-          <div className="flex justify-between text-xs text-slate-400 font-bold mb-2">
+        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div className="flex justify-between text-xs text-slate-500 font-bold mb-2">
             <span>10,000 (Current)</span>
             <span>15,000 (Recommended)</span>
             <span>20,000</span>
@@ -139,22 +139,22 @@ export const StadiumView: React.FC<StadiumViewProps> = () => {
             step="500"
             value={targetCapacity}
             onChange={(e) => setTargetCapacity(Number(e.target.value))}
-            className="w-full accent-emerald-500 cursor-pointer h-2 bg-emerald-950 rounded-lg"
+            className="w-full accent-emerald-600 cursor-pointer h-2 bg-slate-200 rounded-lg"
           />
         </div>
       </div>
 
       {/* DETAILED STAND-BY-STAND BLUEPRINT */}
-      <div className="bg-[#0e2c24] rounded-2xl border border-emerald-600/30 p-5 shadow-xl">
-        <h3 className="text-base font-extrabold text-white mb-4 flex items-center gap-2">
-          <Ticket className="w-5 h-5 text-emerald-400" />
+      <div className="sovereign-card rounded-2xl border-slate-200 p-5 shadow-md">
+        <h3 className="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+          <Ticket className="w-5 h-5 text-emerald-600" />
           <span>Prabhas Coastal Oval Seating Blueprint & Pricing Matrix</span>
         </h3>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-[#061713] text-slate-300 uppercase tracking-wider text-[10px] border-b border-emerald-800/40">
+              <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] border-b border-slate-200">
                 <th className="py-3 px-4">Stand / Seating Enclosure</th>
                 <th className="py-3 px-3 text-right">Current Seats</th>
                 <th className="py-3 px-3 text-center">Current Ratio</th>
@@ -165,111 +165,111 @@ export const StadiumView: React.FC<StadiumViewProps> = () => {
                 <th className="py-3 px-4 text-right">Weekly Gate Potential</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-emerald-950/60 font-mono">
-              <tr className="hover:bg-[#12362b]/70 transition-colors">
-                <td className="py-3.5 px-4 font-sans font-bold text-white">
+            <tbody className="divide-y divide-slate-100 font-mono">
+              <tr className="hover:bg-emerald-50/50 transition-colors">
+                <td className="py-3.5 px-4 font-sans font-bold text-slate-900">
                   Standing Terraces (General Admission)
                 </td>
-                <td className="py-3.5 px-3 text-right font-bold text-slate-200">
+                <td className="py-3.5 px-3 text-right font-bold text-slate-800">
                   {currentStanding.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-3 text-center text-slate-400">
+                <td className="py-3.5 px-3 text-center text-slate-500">
                   {((currentStanding / currentTotal) * 100).toFixed(1)}%
                 </td>
-                <td className="py-3.5 px-3 text-center text-emerald-400 font-bold">
+                <td className="py-3.5 px-3 text-center text-emerald-700 font-bold">
                   68.0%
                 </td>
-                <td className="py-3.5 px-3 text-right font-bold text-emerald-300">
+                <td className="py-3.5 px-3 text-right font-bold text-emerald-700">
                   {targetStanding.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-3 text-right text-slate-300">
+                <td className="py-3.5 px-3 text-right text-slate-700">
                   £5.00
                 </td>
-                <td className="py-3.5 px-3 text-right text-amber-300 font-semibold">
+                <td className="py-3.5 px-3 text-right text-amber-700 font-semibold">
                   £{costStanding.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-4 text-right font-bold text-white">
+                <td className="py-3.5 px-4 text-right font-bold text-slate-900">
                   £{(targetStanding * 5).toLocaleString()}
                 </td>
               </tr>
 
-              <tr className="hover:bg-[#12362b]/70 transition-colors">
-                <td className="py-3.5 px-4 font-sans font-bold text-white">
+              <tr className="hover:bg-emerald-50/50 transition-colors">
+                <td className="py-3.5 px-4 font-sans font-bold text-slate-900">
                   Uncovered Grandstand
                 </td>
-                <td className="py-3.5 px-3 text-right font-bold text-slate-200">
+                <td className="py-3.5 px-3 text-right font-bold text-slate-800">
                   {currentUncovered.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-3 text-center text-slate-400">
+                <td className="py-3.5 px-3 text-center text-slate-500">
                   {((currentUncovered / currentTotal) * 100).toFixed(1)}%
                 </td>
-                <td className="py-3.5 px-3 text-center text-emerald-400 font-bold">
+                <td className="py-3.5 px-3 text-center text-emerald-700 font-bold">
                   23.0%
                 </td>
-                <td className="py-3.5 px-3 text-right font-bold text-emerald-300">
+                <td className="py-3.5 px-3 text-right font-bold text-emerald-700">
                   {targetUncovered.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-3 text-right text-slate-300">
+                <td className="py-3.5 px-3 text-right text-slate-700">
                   £8.00
                 </td>
-                <td className="py-3.5 px-3 text-right text-amber-300 font-semibold">
+                <td className="py-3.5 px-3 text-right text-amber-700 font-semibold">
                   £{costUncovered.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-4 text-right font-bold text-white">
+                <td className="py-3.5 px-4 text-right font-bold text-slate-900">
                   £{(targetUncovered * 8).toLocaleString()}
                 </td>
               </tr>
 
-              <tr className="hover:bg-[#12362b]/70 transition-colors">
-                <td className="py-3.5 px-4 font-sans font-bold text-white">
+              <tr className="hover:bg-emerald-50/50 transition-colors">
+                <td className="py-3.5 px-4 font-sans font-bold text-slate-900">
                   Covered Pavilion Seats
                 </td>
-                <td className="py-3.5 px-3 text-right font-bold text-slate-200">
+                <td className="py-3.5 px-3 text-right font-bold text-slate-800">
                   {currentCovered.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-3 text-center text-slate-400">
+                <td className="py-3.5 px-3 text-center text-slate-500">
                   {((currentCovered / currentTotal) * 100).toFixed(1)}%
                 </td>
-                <td className="py-3.5 px-3 text-center text-emerald-400 font-bold">
+                <td className="py-3.5 px-3 text-center text-emerald-700 font-bold">
                   7.0%
                 </td>
-                <td className="py-3.5 px-3 text-right font-bold text-emerald-300">
+                <td className="py-3.5 px-3 text-right font-bold text-emerald-700">
                   {targetCovered.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-3 text-right text-slate-300">
+                <td className="py-3.5 px-3 text-right text-slate-700">
                   £14.00
                 </td>
-                <td className="py-3.5 px-3 text-right text-amber-300 font-semibold">
+                <td className="py-3.5 px-3 text-right text-amber-700 font-semibold">
                   £{costCovered.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-4 text-right font-bold text-white">
+                <td className="py-3.5 px-4 text-right font-bold text-slate-900">
                   £{(targetCovered * 14).toLocaleString()}
                 </td>
               </tr>
 
-              <tr className="hover:bg-[#12362b]/70 transition-colors">
-                <td className="py-3.5 px-4 font-sans font-bold text-white">
+              <tr className="hover:bg-emerald-50/50 transition-colors">
+                <td className="py-3.5 px-4 font-sans font-bold text-slate-900">
                   Members & Executive Enclosure
                 </td>
-                <td className="py-3.5 px-3 text-right font-bold text-slate-200">
+                <td className="py-3.5 px-3 text-right font-bold text-slate-800">
                   {currentMembers.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-3 text-center text-slate-400">
+                <td className="py-3.5 px-3 text-center text-slate-500">
                   {((currentMembers / currentTotal) * 100).toFixed(1)}%
                 </td>
-                <td className="py-3.5 px-3 text-center text-emerald-400 font-bold">
+                <td className="py-3.5 px-3 text-center text-emerald-700 font-bold">
                   2.0%
                 </td>
-                <td className="py-3.5 px-3 text-right font-bold text-emerald-300">
+                <td className="py-3.5 px-3 text-right font-bold text-emerald-700">
                   {targetMembers.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-3 text-right text-slate-300">
+                <td className="py-3.5 px-3 text-right text-slate-700">
                   £25.00
                 </td>
-                <td className="py-3.5 px-3 text-right text-amber-300 font-semibold">
+                <td className="py-3.5 px-3 text-right text-amber-700 font-semibold">
                   £{costMembers.toLocaleString()}
                 </td>
-                <td className="py-3.5 px-4 text-right font-bold text-white">
+                <td className="py-3.5 px-4 text-right font-bold text-slate-900">
                   £{(targetMembers * 25).toLocaleString()}
                 </td>
               </tr>

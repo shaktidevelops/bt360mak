@@ -85,14 +85,6 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
     }));
   };
 
-  // Convert ITS points to realistic Battrick skill levels for a 17yo pull from a Superb Academy:
-  // Base academy output gives woeful/feeble floor.
-  // Points invested boost skill:
-  // 12-16 pts -> Respectable / Proficient
-  // 8-11 pts  -> Competent
-  // 4-7 pts   -> Mediocre
-  // 1-3 pts   -> Feeble
-  // 0 pts     -> Woeful / Worthless
   function pointsToLevel(pts: number): string {
     if (pts >= 14) return 'respectable';
     if (pts >= 11) return 'competent';
@@ -170,40 +162,40 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
   return (
     <div className="space-y-6">
       {/* Youth Academy Sovereign Header */}
-      <div className="scoreboard-panel p-6 rounded-2xl border-2 border-emerald-500/50 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="sovereign-card p-6 rounded-2xl border-emerald-500/40 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-400">
-            <Sparkles className="w-4 h-4 text-amber-400" />
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-700">
+            <Sparkles className="w-4 h-4 text-emerald-600" />
             <span>Somnath Super Devs &bull; Superb Youth Academy (ITS)</span>
           </div>
-          <h2 className="text-3xl font-black text-white mt-1 flex items-center gap-2">
+          <h2 className="text-3xl font-black text-slate-900 mt-1 flex items-center gap-2">
             <span>Saturday Youth Draft & ITS Point Allocator</span>
             <span className="text-lg">✨</span>
           </h2>
-          <p className="text-xs text-slate-200 mt-1 max-w-2xl leading-relaxed">
-            The lifeblood of your cricket franchise. In Battrick, your club can bank up to <strong className="text-amber-300">70 ITS points</strong> total, with a strict engine cap of <strong className="text-emerald-300">35 ITS points per single youth pull</strong>. With 70 ITS banked, you have enough points for <strong className="text-amber-300">two complete 35-point wonderkid pulls</strong>!
+          <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
+            The lifeblood of your cricket franchise. In Battrick, your club can bank up to <strong className="text-amber-700">70 ITS points</strong> total, with a strict engine cap of <strong className="text-emerald-700">35 ITS points per single youth pull</strong>. With 70 ITS banked, you have enough points for <strong className="text-amber-700">two complete 35-point wonderkid pulls</strong>!
           </p>
         </div>
 
         {/* Live Bank & Weekly Funding Cards */}
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <div className="p-3.5 rounded-xl bg-[#03150f] border border-amber-500/60 text-center min-w-[140px] shadow-lg">
-            <span className="text-[10px] uppercase font-black text-slate-300 block">Banked ITS Reserve</span>
-            <div className="text-2xl font-black font-mono text-amber-300 mt-0.5">
+          <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-center min-w-[140px] shadow-xs">
+            <span className="text-[10px] uppercase font-black text-slate-500 block">Banked ITS Reserve</span>
+            <div className="text-2xl font-black font-mono text-amber-700 mt-0.5">
               {bankedITS} / 70 Max
             </div>
-            <span className="text-[10px] text-emerald-300 font-bold">2 Full Pulls Ready</span>
+            <span className="text-[10px] text-emerald-700 font-bold">2 Full Pulls Ready</span>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-[#03150f] border border-emerald-600/60 text-center min-w-[170px] shadow-lg">
-            <div className="flex items-center justify-between text-[10px] uppercase font-black text-slate-300 mb-1">
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center min-w-[170px] shadow-xs">
+            <div className="flex items-center justify-between text-[10px] uppercase font-black text-slate-500 mb-1">
               <span>Weekly Investment</span>
-              <span className="text-amber-300 font-mono font-bold">Lvl 20 (Max)</span>
+              <span className="text-amber-700 font-mono font-bold">Lvl 20 (Max)</span>
             </div>
-            <div className="text-xl font-black font-mono text-white mb-1">
+            <div className="text-xl font-black font-mono text-slate-900 mb-1">
               £{weeklyInvestment.toLocaleString()}/wk
             </div>
-            <span className="text-[10px] text-emerald-400 font-bold block">+3 ITS Added Every Sunday</span>
+            <span className="text-[10px] text-emerald-700 font-bold block">+3 ITS Added Every Sunday</span>
           </div>
         </div>
       </div>
@@ -211,58 +203,58 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
       {/* 2-PULL STRATEGIC PIPELINE PLANNER */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Pull 1 Status */}
-        <div className="p-4 rounded-xl cricket-turf-card border border-emerald-500/60 shadow-md">
+        <div className="p-4 rounded-xl sovereign-card border-emerald-400 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-base">🎯</span>
-              <span className="text-xs font-black uppercase text-emerald-300">Active Pull #1 (This Saturday)</span>
+              <span className="text-xs font-black uppercase text-emerald-800">Active Pull #1 (This Saturday)</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/70 font-mono font-black">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono font-black">
               Max 35 ITS
             </span>
           </div>
-          <div className="mt-2 text-xs text-slate-200">
-            Current configuration allocates <strong className="text-amber-300 font-bold font-mono">{totalAllocatedThisPull} / 35 ITS</strong>. This creates an immediate 17-year-old wonderkid ready for Friday training nets.
+          <div className="mt-2 text-xs text-slate-700">
+            Current configuration allocates <strong className="text-amber-700 font-bold font-mono">{totalAllocatedThisPull} / 35 ITS</strong>. This creates an immediate 17-year-old wonderkid ready for Friday training nets.
           </div>
         </div>
 
         {/* Pull 2 Reserve Status */}
-        <div className="p-4 rounded-xl cricket-turf-card border border-amber-500/60 shadow-md">
+        <div className="p-4 rounded-xl sovereign-card-gold border-amber-300 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-base">⏳</span>
-              <span className="text-xs font-black uppercase text-amber-300">Reserve Pull #2 (Next Saturday)</span>
+              <span className="text-xs font-black uppercase text-amber-800">Reserve Pull #2 (Next Saturday)</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/70 font-mono font-black">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-mono font-black">
               35 ITS Banked
             </span>
           </div>
-          <div className="mt-2 text-xs text-slate-200">
-            After this pull, you will still retain <strong className="text-emerald-300 font-bold font-mono">{remainingBankAfterPull} ITS points</strong> in reserve, allowing an immediate second 35-ITS wonderkid pull next week!
+          <div className="mt-2 text-xs text-slate-700">
+            After this pull, you will still retain <strong className="text-emerald-700 font-bold font-mono">{remainingBankAfterPull} ITS points</strong> in reserve, allowing an immediate second 35-ITS wonderkid pull next week!
           </div>
         </div>
       </div>
 
       {/* ITS ALLOCATION CONTROL CONSOLE */}
-      <div className="sovereign-card p-6 rounded-2xl border-2 border-emerald-500/50 shadow-2xl space-y-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-emerald-700/50">
+      <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-200">
           <div>
-            <h3 className="text-base font-black text-white flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-amber-400" />
+            <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-emerald-600" />
               <span>Saturday Trainee Specification & 35-ITS Point Allocator</span>
             </h3>
-            <p className="text-xs text-slate-300 mt-0.5">
+            <p className="text-xs text-slate-600 mt-0.5">
               Distribute your 35 ITS points across the 7 skills below. Points determine the starting skill levels of your 17yo draft pull.
             </p>
           </div>
 
           {/* Allocation Budget Meter (Strictly 35 Max) */}
-          <div className={`px-4 py-2 rounded-xl border font-mono font-black text-xs flex items-center gap-2 shadow-md ${
+          <div className={`px-4 py-2 rounded-xl border font-mono font-black text-xs flex items-center gap-2 shadow-xs ${
             remainingForThisPull === 0 
-              ? 'bg-emerald-950 text-emerald-300 border-emerald-400' 
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
               : remainingForThisPull > 0 
-              ? 'bg-amber-950 text-amber-300 border-amber-400' 
-              : 'bg-rose-950 text-rose-300 border-rose-500'
+              ? 'bg-amber-50 text-amber-800 border-amber-300' 
+              : 'bg-rose-50 text-rose-800 border-rose-300'
           }`}>
             <span>This Pull:</span>
             <span className="text-sm font-black">{totalAllocatedThisPull} / {MAX_ITS_PER_PULL} ITS</span>
@@ -272,8 +264,8 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
 
         {/* Quick Presets & Player Specification */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl bg-[#03150f] border border-emerald-700/60 space-y-2.5">
-            <span className="text-[10px] uppercase font-black text-amber-400">Quick 35-ITS Archetype Presets</span>
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <span className="text-[10px] uppercase font-black text-emerald-800">Quick 35-ITS Archetype Presets</span>
             <div className="flex flex-wrap gap-1.5">
               {[
                 { label: '🏏 Pure Opening Batter', type: 'Batter' as const },
@@ -287,8 +279,8 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
                   onClick={() => applyPreset(p.type)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
                     traineeRole === p.type
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow font-black border border-amber-300'
-                      : 'bg-[#052017] text-slate-300 hover:text-white border border-emerald-800/60'
+                      ? 'bg-amber-500 text-black shadow-xs font-black border border-amber-400'
+                      : 'bg-white text-slate-700 hover:text-slate-900 border border-slate-200'
                   }`}
                 >
                   {p.label}
@@ -297,24 +289,24 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#03150f] border border-emerald-700/60 grid grid-cols-2 gap-3 text-xs">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-2 gap-3 text-xs">
             <div>
-              <span className="text-[10px] text-slate-300 uppercase font-black">Batting Hand</span>
+              <span className="text-[10px] text-slate-500 uppercase font-black">Batting Hand</span>
               <select
                 value={battingHand}
                 onChange={(e) => setBattingHand(e.target.value as any)}
-                className="mt-1 w-full p-2 rounded-lg bg-[#05241b] text-white font-bold border border-emerald-600/70 focus:outline-none cursor-pointer"
+                className="mt-1 w-full p-2 rounded-lg bg-white text-slate-900 font-bold border border-slate-300 focus:outline-none cursor-pointer shadow-xs"
               >
                 <option value="RHB">Right Hand Bat (RHB)</option>
                 <option value="LHB">Left Hand Bat (LHB)</option>
               </select>
             </div>
             <div>
-              <span className="text-[10px] text-slate-300 uppercase font-black">Bowling Style</span>
+              <span className="text-[10px] text-slate-500 uppercase font-black">Bowling Style</span>
               <select
                 value={bowlingStyle}
                 onChange={(e) => setBowlingStyle(e.target.value)}
-                className="mt-1 w-full p-2 rounded-lg bg-[#05241b] text-white font-bold border border-emerald-600/70 focus:outline-none cursor-pointer"
+                className="mt-1 w-full p-2 rounded-lg bg-white text-slate-900 font-bold border border-slate-300 focus:outline-none cursor-pointer shadow-xs"
               >
                 <option value="None">None (Pure Batter/Keeper)</option>
                 <option value="Right-arm Fast">Right-arm Fast (RF)</option>
@@ -332,21 +324,21 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
         {/* 7 Skill Sliders with Live Battrick Level Translations */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
           {[
-            { key: 'batting' as const, label: 'Batting 🏏', max: 20, color: 'accent-emerald-400' },
-            { key: 'bowling' as const, label: 'Bowling 🔴', max: 20, color: 'accent-teal-400' },
-            { key: 'keeping' as const, label: 'Keeping 🧤', max: 20, color: 'accent-cyan-400' },
-            { key: 'fielding' as const, label: 'Fielding ⚡', max: 10, color: 'accent-amber-400' },
-            { key: 'concentration' as const, label: 'Concentration', max: 12, color: 'accent-emerald-400' },
-            { key: 'consistency' as const, label: 'Consistency', max: 12, color: 'accent-teal-400' },
-            { key: 'stamina' as const, label: 'Stamina', max: 10, color: 'accent-amber-400' }
+            { key: 'batting' as const, label: 'Batting 🏏', max: 20, color: 'accent-emerald-600' },
+            { key: 'bowling' as const, label: 'Bowling 🔴', max: 20, color: 'accent-teal-600' },
+            { key: 'keeping' as const, label: 'Keeping 🧤', max: 20, color: 'accent-cyan-600' },
+            { key: 'fielding' as const, label: 'Fielding ⚡', max: 10, color: 'accent-amber-600' },
+            { key: 'concentration' as const, label: 'Concentration', max: 12, color: 'accent-emerald-600' },
+            { key: 'consistency' as const, label: 'Consistency', max: 12, color: 'accent-teal-600' },
+            { key: 'stamina' as const, label: 'Stamina', max: 10, color: 'accent-amber-600' }
           ].map(skill => {
             const val = allocations[skill.key];
             const level = pointsToLevel(val);
             return (
-              <div key={skill.key} className="p-3.5 rounded-xl bg-[#03150f] border border-emerald-800/60 space-y-2">
+              <div key={skill.key} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-black text-white">{skill.label}</span>
-                  <span className="font-mono font-black text-amber-300">{val} pts</span>
+                  <span className="font-black text-slate-900">{skill.label}</span>
+                  <span className="font-mono font-black text-amber-700">{val} pts</span>
                 </div>
                 <input
                   type="range"
@@ -354,11 +346,11 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
                   max={skill.max}
                   value={val}
                   onChange={(e) => handleSliderChange(skill.key, Number(e.target.value))}
-                  className={`w-full cursor-pointer h-2 bg-[#06241b] rounded-lg ${skill.color}`}
+                  className={`w-full cursor-pointer h-2 bg-slate-200 rounded-lg ${skill.color}`}
                 />
-                <div className="flex justify-between items-center text-[11px] pt-1.5 border-t border-emerald-900/60">
-                  <span className="text-slate-400">Predicted Skill:</span>
-                  <span className="capitalize font-mono font-black text-emerald-300 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-600/70">
+                <div className="flex justify-between items-center text-[11px] pt-1.5 border-t border-slate-200">
+                  <span className="text-slate-500">Predicted Skill:</span>
+                  <span className="capitalize font-mono font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">
                     {level}
                   </span>
                 </div>
@@ -367,12 +359,12 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
           })}
 
           {/* Action Trigger Card */}
-          <div className="p-3.5 rounded-xl bg-gradient-to-br from-[#06291e] to-[#041a14] border border-amber-500/60 flex flex-col justify-between shadow-lg">
+          <div className="p-3.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-300 flex flex-col justify-between shadow-sm">
             <div>
-              <span className="text-[10px] uppercase font-black text-amber-400 flex items-center gap-1">
+              <span className="text-[10px] uppercase font-black text-emerald-800 flex items-center gap-1">
                 <span>⚡</span> Saturday Draft Pull
               </span>
-              <div className="text-xs text-slate-200 mt-1">
+              <div className="text-xs text-slate-700 mt-1">
                 Draw 17yo trainee with {totalAllocatedThisPull}/35 allocated ITS points.
               </div>
             </div>
@@ -380,10 +372,10 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
             <button
               onClick={handleExecuteDraft}
               disabled={totalAllocatedThisPull > MAX_ITS_PER_PULL || totalAllocatedThisPull === 0}
-              className={`w-full py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-lg ${
+              className={`w-full py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md ${
                 totalAllocatedThisPull > MAX_ITS_PER_PULL || totalAllocatedThisPull === 0
-                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                  : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black border border-amber-300'
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
+                  : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black border border-amber-400'
               }`}
             >
               <Dices className="w-4 h-4" />
@@ -395,23 +387,23 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
 
       {/* REVEAL ROOM: GENERATED 17YO TRAINEE CARD */}
       {simulatedPull && (
-        <div className="p-6 rounded-2xl sovereign-card-gold border-2 border-amber-500/70 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-500/40">
+        <div className="p-6 rounded-2xl sovereign-card-gold border-2 border-amber-400 shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-300">
             <div className="flex items-center gap-3">
               <span className="text-3xl">🌟</span>
               <div>
-                <span className="text-[10px] uppercase font-mono font-black text-amber-300 tracking-wider flex items-center gap-1">
+                <span className="text-[10px] uppercase font-mono font-black text-amber-800 tracking-wider flex items-center gap-1">
                   <span>Saturday Intake Certified</span> &bull; <span>17yo Superb Academy Wonderkid</span>
                 </span>
-                <h3 className="text-2xl font-black text-white">{simulatedPull.name}</h3>
+                <h3 className="text-2xl font-black text-slate-900">{simulatedPull.name}</h3>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-black px-3 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/70">
+              <span className="text-xs font-mono font-black px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
                 #{simulatedPull.id}
               </span>
-              <span className="text-xs font-mono font-black px-3 py-1 rounded-full bg-amber-950 text-amber-300 border border-amber-500/70">
+              <span className="text-xs font-mono font-black px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
                 BTI: {simulatedPull.bti.toLocaleString()}
               </span>
             </div>
@@ -419,54 +411,54 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
 
           {/* Generated Trainee Full Skills Card */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 text-xs text-center">
-            <div className="p-2.5 rounded-xl bg-[#03150f] border border-emerald-700/50">
-              <span className="text-[10px] text-slate-400 uppercase font-black">Batting 🏏</span>
-              <div className="text-sm font-black capitalize text-emerald-300 mt-0.5">{simulatedPull.batting}</div>
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
+              <span className="text-[10px] text-slate-500 uppercase font-black">Batting 🏏</span>
+              <div className="text-sm font-black capitalize text-emerald-700 mt-0.5">{simulatedPull.batting}</div>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#03150f] border border-emerald-700/50">
-              <span className="text-[10px] text-slate-400 uppercase font-black">Bowling 🔴</span>
-              <div className="text-sm font-black capitalize text-teal-300 mt-0.5">{simulatedPull.bowling}</div>
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
+              <span className="text-[10px] text-slate-500 uppercase font-black">Bowling 🔴</span>
+              <div className="text-sm font-black capitalize text-teal-700 mt-0.5">{simulatedPull.bowling}</div>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#03150f] border border-emerald-700/50">
-              <span className="text-[10px] text-slate-400 uppercase font-black">Keeping 🧤</span>
-              <div className="text-sm font-black capitalize text-slate-200 mt-0.5">{simulatedPull.keeping}</div>
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
+              <span className="text-[10px] text-slate-500 uppercase font-black">Keeping 🧤</span>
+              <div className="text-sm font-black capitalize text-slate-800 mt-0.5">{simulatedPull.keeping}</div>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#03150f] border border-emerald-700/50">
-              <span className="text-[10px] text-slate-400 uppercase font-black">Fielding ⚡</span>
-              <div className="text-sm font-black capitalize text-amber-300 mt-0.5">{simulatedPull.fielding}</div>
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
+              <span className="text-[10px] text-slate-500 uppercase font-black">Fielding ⚡</span>
+              <div className="text-sm font-black capitalize text-amber-700 mt-0.5">{simulatedPull.fielding}</div>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#03150f] border border-emerald-700/50">
-              <span className="text-[10px] text-slate-400 uppercase font-black">Concentration</span>
-              <div className="text-sm font-black capitalize text-emerald-300 mt-0.5">{simulatedPull.concentration}</div>
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
+              <span className="text-[10px] text-slate-500 uppercase font-black">Concentration</span>
+              <div className="text-sm font-black capitalize text-emerald-700 mt-0.5">{simulatedPull.concentration}</div>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#03150f] border border-emerald-700/50">
-              <span className="text-[10px] text-slate-400 uppercase font-black">Consistency</span>
-              <div className="text-sm font-black capitalize text-teal-300 mt-0.5">{simulatedPull.consistency}</div>
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
+              <span className="text-[10px] text-slate-500 uppercase font-black">Consistency</span>
+              <div className="text-sm font-black capitalize text-teal-700 mt-0.5">{simulatedPull.consistency}</div>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#03150f] border border-emerald-700/50">
-              <span className="text-[10px] text-slate-400 uppercase font-black">Stamina</span>
-              <div className="text-sm font-black capitalize text-amber-300 mt-0.5">{simulatedPull.stamina}</div>
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
+              <span className="text-[10px] text-slate-500 uppercase font-black">Stamina</span>
+              <div className="text-sm font-black capitalize text-amber-700 mt-0.5">{simulatedPull.stamina}</div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-amber-600/30 text-xs">
-            <div className="text-slate-200">
-              <span>Role: <strong className="text-white font-bold">{simulatedPull.tactical_role}</strong></span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-amber-300 text-xs">
+            <div className="text-slate-800">
+              <span>Role: <strong className="text-slate-900 font-bold">{simulatedPull.tactical_role}</strong></span>
               <span className="mx-2">&bull;</span>
-              <span>Style: <strong className="text-white font-mono">{formatBattingHand(simulatedPull.batting_hand)} | {formatBowlingType(simulatedPull.bowling_type)}</strong> <span className="text-slate-400 font-sans">({simulatedPull.bowling_type})</span></span>
+              <span>Style: <strong className="text-slate-900 font-mono">{formatBattingHand(simulatedPull.batting_hand)} | {formatBowlingType(simulatedPull.bowling_type)}</strong> <span className="text-slate-500 font-sans">({simulatedPull.bowling_type})</span></span>
               <span className="mx-2">&bull;</span>
-              <span>Wage: <strong className="text-white font-mono">£{simulatedPull.wage}/wk</strong></span>
+              <span>Wage: <strong className="text-slate-900 font-mono">£{simulatedPull.wage}/wk</strong></span>
             </div>
 
             {isPromoted ? (
-              <div className="flex items-center gap-1.5 text-xs text-emerald-300 font-black bg-emerald-950 px-4 py-2 rounded-xl border border-emerald-400/80 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <div className="flex items-center gap-1.5 text-xs text-emerald-800 font-black bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-300 shadow-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span>Successfully Inducted into Senior Roster!</span>
               </div>
             ) : (
               <button
                 onClick={handlePromoteToSquad}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-xs transition-all cursor-pointer shadow-lg flex items-center gap-2 border border-emerald-400/50"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs transition-all cursor-pointer shadow-md flex items-center gap-2 border border-emerald-500"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>Induct Trainee into First Team Squad &rarr;</span>
@@ -477,34 +469,34 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
       )}
 
       {/* ACTIVE ACADEMY WONDERKIDS IN SENIOR ROSTER */}
-      <div className="sovereign-card p-6 rounded-2xl border-2 border-emerald-600/40 shadow-xl space-y-4">
+      <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-black text-white flex items-center gap-2">
-            <Award className="w-4 h-4 text-amber-400" />
+          <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+            <Award className="w-4 h-4 text-amber-600" />
             <span>Active Academy Wonderkids Currently in Senior Roster ({wonderkids.length})</span>
           </h3>
-          <span className="text-xs text-emerald-300 font-mono font-black bg-emerald-950 px-3 py-1 rounded-full border border-emerald-600/60">
+          <span className="text-xs text-emerald-800 font-mono font-black bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300">
             17yo Prodigies
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {wonderkids.map((player) => (
-            <div key={player.id} className="p-4 rounded-xl bg-[#03150f] border border-amber-500/50 flex justify-between items-center hover:border-amber-400 transition-all shadow-md">
+            <div key={player.id} className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center hover:border-amber-400 transition-all shadow-xs">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-black text-emerald-400">#{player.id}</span>
-                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/70 font-black font-mono">
+                  <span className="text-xs font-mono font-black text-emerald-700">#{player.id}</span>
+                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-black font-mono">
                     Age {player.age} Wonderkid
                   </span>
                 </div>
-                <h4 className="text-base font-black text-white mt-1">{player.name}</h4>
-                <div className="text-xs text-emerald-200/90 mt-0.5">{player.tactical_role} &bull; {player.batting_hand}</div>
+                <h4 className="text-base font-black text-slate-900 mt-1">{player.name}</h4>
+                <div className="text-xs text-slate-600 mt-0.5">{player.tactical_role} &bull; {player.batting_hand}</div>
               </div>
               <div className="text-right">
-                <span className="text-[10px] text-slate-400 uppercase font-black">BTI Talent</span>
-                <div className="text-base font-black font-mono text-emerald-300">{(player.bti ?? 0).toLocaleString()}</div>
-                <span className="text-[10px] text-amber-300 font-black">Subskill: {player.subskill} / 7.0</span>
+                <span className="text-[10px] text-slate-500 uppercase font-black">BTI Talent</span>
+                <div className="text-base font-black font-mono text-emerald-700">{(player.bti ?? 0).toLocaleString()}</div>
+                <span className="text-[10px] text-amber-700 font-black">Subskill: {player.subskill} / 7.0</span>
               </div>
             </div>
           ))}

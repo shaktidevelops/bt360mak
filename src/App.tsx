@@ -46,16 +46,98 @@ export function App() {
   const [currentTab, setCurrentTab] = useState<TabType>('overview');
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('6099466');
 
-  const [club, setClub] = useState<Club>(fallbackClub);
-  const [squad, setSquad] = useState<Player[]>(fallbackSquad);
+  const [club, setClub] = useState<Club>(() => {
+    try {
+      const saved = localStorage.getItem('bt360_club');
+      return saved ? JSON.parse(saved) : fallbackClub;
+    } catch {
+      return fallbackClub;
+    }
+  });
+
+  const [squad, setSquad] = useState<Player[]>(() => {
+    try {
+      const saved = localStorage.getItem('bt360_squad');
+      return saved ? JSON.parse(saved) : fallbackSquad;
+    } catch {
+      return fallbackSquad;
+    }
+  });
+
   const [trainingLogs, setTrainingLogs] = useState<TrainingLog[]>(fallbackTrainingLogs);
-  const [nets, setNets] = useState<NetAllocation[]>(fallbackNets);
-  const [matches, setMatches] = useState<MatchRecord[]>(fallbackMatches);
-  const [stadiumTiers, setStadiumTiers] = useState<StadiumTier[]>(fallbackStadiumTiers);
-  const [finances, setFinances] = useState<FinancialRecord[]>(fallbackFinances);
+
+  const [nets, setNets] = useState<NetAllocation[]>(() => {
+    try {
+      const saved = localStorage.getItem('bt360_nets');
+      return saved ? JSON.parse(saved) : fallbackNets;
+    } catch {
+      return fallbackNets;
+    }
+  });
+
+  const [matches, setMatches] = useState<MatchRecord[]>(() => {
+    try {
+      const saved = localStorage.getItem('bt360_matches');
+      return saved ? JSON.parse(saved) : fallbackMatches;
+    } catch {
+      return fallbackMatches;
+    }
+  });
+
+  const [stadiumTiers, setStadiumTiers] = useState<StadiumTier[]>(() => {
+    try {
+      const saved = localStorage.getItem('bt360_stadiumTiers');
+      return saved ? JSON.parse(saved) : fallbackStadiumTiers;
+    } catch {
+      return fallbackStadiumTiers;
+    }
+  });
+
+  const [finances, setFinances] = useState<FinancialRecord[]>(() => {
+    try {
+      const saved = localStorage.getItem('bt360_finances');
+      return saved ? JSON.parse(saved) : fallbackFinances;
+    } catch {
+      return fallbackFinances;
+    }
+  });
+
   const [staff, setStaff] = useState<StaffMember[]>(fallbackStaff);
   const [calendar, setCalendar] = useState<CalendarEvent[]>(fallbackCalendar);
-  const [records, setRecords] = useState<CricketRecord[]>(fallbackRecords);
+
+  const [records, setRecords] = useState<CricketRecord[]>(() => {
+    try {
+      const saved = localStorage.getItem('bt360_records');
+      return saved ? JSON.parse(saved) : fallbackRecords;
+    } catch {
+      return fallbackRecords;
+    }
+  });
+
+  // LocalStorage synchronizers
+  useEffect(() => {
+    try {
+      localStorage.setItem('bt360_squad', JSON.stringify(squad));
+    } catch (e) {
+      console.warn('LocalStorage squad write error', e);
+    }
+  }, [squad]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('bt360_matches', JSON.stringify(matches));
+    } catch (e) {
+      console.warn('LocalStorage matches write error', e);
+    }
+  }, [matches]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('bt360_records', JSON.stringify(records));
+    } catch (e) {
+      console.warn('LocalStorage records write error', e);
+    }
+  }, [records]);
 
   // Fetch from Supabase if credentials are provided and tables exist
   useEffect(() => {
@@ -120,7 +202,7 @@ export function App() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col cricket-stadium-canvas text-slate-100">
+    <div className="min-h-screen flex flex-col cricket-stadium-canvas text-slate-900">
       {/* Immersive Cricket Sport Header */}
       <Header club={club} onOpenImport={() => setCurrentTab('import')} />
 
@@ -196,7 +278,10 @@ export function App() {
           )}
 
           {currentTab === 'fixtures' && (
-            <MatchesView matches={matches} />
+            <MatchesView 
+              matches={matches} 
+              onNavigateToImport={() => setCurrentTab('import')}
+            />
           )}
 
           {currentTab === 'calendar' && (
@@ -208,7 +293,10 @@ export function App() {
           )}
 
           {currentTab === 'records' && (
-            <RecordsView records={records} />
+            <RecordsView 
+              records={records} 
+              onNavigateToImport={() => setCurrentTab('import')}
+            />
           )}
 
           {currentTab === 'database' && (
@@ -219,6 +307,8 @@ export function App() {
             <ImportView 
               club={club} 
               squad={squad} 
+              matches={matches}
+              records={records}
               onImportSquad={(newSquad) => {
                 setSquad(newSquad);
                 setCurrentTab('squad');
@@ -234,6 +324,9 @@ export function App() {
               onImportMatches={(newMatches) => {
                 setMatches(newMatches);
                 setCurrentTab('fixtures');
+              }}
+              onImportRecords={(newRecords) => {
+                setRecords(newRecords);
               }}
               onImportStadium={(newTiers) => {
                 setStadiumTiers(newTiers);
