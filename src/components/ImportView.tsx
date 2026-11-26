@@ -1444,7 +1444,7 @@ Coach Quality: Competent`;
               title="Delete all data and make the project 100% fresh"
             >
               <Trash2 className="w-4 h-4" />
-              <span>⚡ 100% Fresh Start (Wipe Data)</span>
+              <span>100% Fresh Start (Wipe Data)</span>
             </button>
 
             <button
@@ -1533,7 +1533,7 @@ Coach Quality: Competent`;
           }`}
         >
           <FolderUp className="w-4 h-4" />
-          <span>📂 Bulk Multi-File Upload (.html / .htm / .txt)</span>
+          <span>Bulk Multi-File Upload (.html / .htm / .txt)</span>
           <span className="bg-amber-400 text-slate-900 text-[10px] font-black px-1.5 py-0.2 rounded-md uppercase tracking-wider">
             RECOMMENDED
           </span>
@@ -1548,7 +1548,7 @@ Coach Quality: Competent`;
           }`}
         >
           <Sparkles className="w-4 h-4 text-amber-400" />
-          <span>⚡ 1-Click Browser Button</span>
+          <span>1-Click Browser Button</span>
         </button>
 
         <button
@@ -2045,8 +2045,8 @@ Coach Quality: Competent`;
                   className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-base shadow-2xl cursor-grab transition-all hover:scale-105 select-none border-2 border-emerald-300"
                   title="Drag this button to your Bookmarks Toolbar"
                 >
-                  <Sparkles className="w-5 h-5 text-amber-300" />
-                  <span>📥 Send to BT360</span>
+                  <Download className="w-5 h-5 text-amber-300" />
+                  <span>Send to BT360</span>
                 </a>
               </div>
 
@@ -2066,7 +2066,7 @@ Coach Quality: Competent`;
                   className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <Copy className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>{copiedBookmarklet ? '✓ Copied Bookmarklet Code!' : 'Copy Bookmarklet Code'}</span>
+                  <span>{copiedBookmarklet ? 'Copied Bookmarklet Code!' : 'Copy Bookmarklet Code'}</span>
                 </button>
               </div>
             </div>
@@ -2079,7 +2079,7 @@ Coach Quality: Competent`;
                 </div>
                 <h4 className="text-xs font-black text-slate-900">Add to Bookmarks</h4>
                 <p className="text-[11px] text-slate-600 leading-relaxed">
-                  Drag the <span className="font-bold text-emerald-700">"📥 Send to BT360"</span> button up into your browser bookmarks bar once.
+                  Drag the <span className="font-bold text-emerald-700">"Send to BT360"</span> button up into your browser bookmarks bar once.
                 </p>
               </div>
 
@@ -2099,7 +2099,7 @@ Coach Quality: Competent`;
                 </div>
                 <h4 className="text-xs font-black text-slate-900">1-Click Ingestion</h4>
                 <p className="text-[11px] text-slate-600 leading-relaxed">
-                  Click <span className="font-bold text-emerald-700">"📥 Send to BT360"</span> in your bookmarks. The match is instantly captured, player stats compute, and records sync!
+                  Click <span className="font-bold text-emerald-700">"Send to BT360"</span> in your bookmarks. The match is instantly captured, player stats compute, and records sync!
                 </p>
               </div>
             </div>
@@ -2113,7 +2113,7 @@ Coach Quality: Competent`;
                     <span>Power Option: Tampermonkey / Greasemonkey Userscript</span>
                   </h4>
                   <p className="text-[11px] text-slate-500">
-                    Injects a floating "📥 Send to BT360" button directly onto the Battrick website pages.
+                    Injects a floating "Send to BT360" button directly onto the Battrick website pages.
                   </p>
                 </div>
                 <button
@@ -2144,27 +2144,31 @@ Coach Quality: Competent`;
               <span>Quick Select:</span>
             </span>
             {[
-              { id: 'squad', label: '👥 Squad (squad.asp)', icon: Users },
-              { id: 'fixtures', label: '🏏 Scorecard (matchinfofc.asp)', icon: Trophy },
-              { id: 'finances', label: '💰 Finances (finances.asp)', icon: DollarSign },
-              { id: 'ground', label: '🏟️ Ground (ground.asp)', icon: Building },
-              { id: 'office', label: '🏢 Office (office.asp)', icon: Building }
-            ].map(item => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setSelectedDomain(item.id as any);
-                  loadDomainPreset(item.id);
-                }}
-                className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer shadow-xs ${
-                  selectedDomain === item.id 
-                    ? 'btn-cricket-emerald text-white border-emerald-600 font-black shadow-sm' 
-                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+              { id: 'squad', label: 'Squad (squad.asp)', icon: Users },
+              { id: 'fixtures', label: 'Scorecard (matchinfofc.asp)', icon: Trophy },
+              { id: 'finances', label: 'Finances (finances.asp)', icon: DollarSign },
+              { id: 'ground', label: 'Ground (ground.asp)', icon: Building },
+              { id: 'office', label: 'Office (office.asp)', icon: Building }
+            ].map(item => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedDomain(item.id as any);
+                    loadDomainPreset(item.id);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer shadow-xs flex items-center gap-1.5 ${
+                    selectedDomain === item.id 
+                      ? 'btn-cricket-emerald text-white border-emerald-600 font-black shadow-sm' 
+                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* RECENT INGESTION ACTIVITY (LAST 5 IMPORTS) */}
@@ -2209,8 +2213,8 @@ Coach Quality: Competent`;
                     className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-emerald-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs"
                   >
                     <div className="flex items-start sm:items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-100/80 border border-emerald-200 flex items-center justify-center text-base shrink-0 shadow-xs">
-                        {item.type === 'scorecard' ? '🏏' : item.type === 'squad' ? '👥' : item.type === 'finances' ? '💰' : item.type === 'ground' ? '🏟️' : '🎯'}
+                      <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center shrink-0 shadow-xs">
+                        {item.type === 'scorecard' ? <Trophy className="w-4 h-4" /> : item.type === 'squad' ? <Users className="w-4 h-4" /> : item.type === 'finances' ? <DollarSign className="w-4 h-4" /> : item.type === 'ground' ? <Building className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
                       </div>
                       <div>
                         <div className="flex flex-wrap items-center gap-2">

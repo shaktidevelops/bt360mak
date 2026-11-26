@@ -173,8 +173,27 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
         </div>
       </div>
 
-      {/* MATRIX VIEW: ULTRA-WIDE, SPACIOUS 11-SKILLS DATA TABLE */}
-      {viewMode === 'matrix' ? (
+      {/* MATRIX VIEW OR EMPTY STATE */}
+      {squad.length === 0 ? (
+        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 shadow-sm max-w-xl mx-auto my-12">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center mx-auto mb-4 shadow-xs">
+            <Users className="w-8 h-8" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-900 tracking-tight">Squad Roster is Empty</h3>
+          <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+            The project is in 100% fresh slate mode. Upload or paste your Battrick squad (<code>squad.asp</code>) or use the 1-Click Browser Button in Import Hub to register your squad.
+          </p>
+          {onNavigateToImport && (
+            <button
+              onClick={onNavigateToImport}
+              className="mt-6 px-6 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition-all cursor-pointer inline-flex items-center gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              <span>Open Import Hub &bull; Ingest Squad</span>
+            </button>
+          )}
+        </div>
+      ) : viewMode === 'matrix' ? (
         <div className="w-full overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-md relative">
           <table className="w-full min-w-[1780px] text-left border-collapse text-xs">
             <thead>

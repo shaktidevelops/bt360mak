@@ -29,7 +29,6 @@ import {
   fallbackRecords
 } from './lib/mockData';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
-import { EMPTY_STATS } from './lib/matchStatsEngine';
 import { 
   Club, 
   Player, 
@@ -146,6 +145,12 @@ export function App() {
 
     const fetchLiveClubData = async () => {
       try {
+        const savedSquad = localStorage.getItem('bt360_squad');
+        if (savedSquad === '[]') {
+          // User explicitly initiated a 100% fresh start; do not resurrect old dummy data
+          return;
+        }
+
         const { data: clubData } = await supabase.from('clubs').select('*').eq('id', '13108').single();
         if (clubData) setClub(clubData);
 
@@ -233,39 +238,26 @@ export function App() {
 
   const handleFactoryReset = async () => {
     try {
-      localStorage.removeItem('bt360_matches');
-      localStorage.removeItem('bt360_records');
-      localStorage.removeItem('bt360_finances');
-      localStorage.removeItem('bt360_recent_imports');
-      localStorage.removeItem('bt360_squad');
+      localStorage.setItem('bt360_matches', '[]');
+      localStorage.setItem('bt360_records', '[]');
+      localStorage.setItem('bt360_finances', '[]');
+      localStorage.setItem('bt360_squad', '[]');
+      localStorage.setItem('bt360_recent_imports', '[]');
       localStorage.removeItem('bt360_nets');
       localStorage.removeItem('bt360_stadiumTiers');
       localStorage.removeItem('bt360_club');
 
-      localStorage.setItem('bt360_matches', '[]');
-      localStorage.setItem('bt360_records', '[]');
-      localStorage.setItem('bt360_finances', '[]');
-
-      const resetSquad: Player[] = squad.map(p => ({
-        ...p,
-        statsFC: { ...EMPTY_STATS },
-        statsOD: { ...EMPTY_STATS },
-        statsT20: { ...EMPTY_STATS },
-        statsU19: { ...EMPTY_STATS },
-        statsNational: { ...EMPTY_STATS },
-        statsFriendly: { ...EMPTY_STATS }
-      }));
-
       setMatches([]);
       setRecords([]);
       setFinances([]);
-      setSquad(resetSquad);
+      setSquad([]);
+      setTrainingLogs([]);
 
       if (isSupabaseConfigured) {
         try {
           await supabase.from('matches').delete().eq('club_id', club.id);
           await supabase.from('cricket_records').delete().eq('club_id', club.id);
-          await supabase.from('players').upsert(resetSquad);
+          await supabase.from('players').delete().eq('club_id', club.id);
         } catch (sErr) {
           console.warn('Supabase reset error', sErr);
         }
@@ -314,6 +306,7 @@ export function App() {
             <PlayerProfileView 
               squad={squad} 
               selectedPlayerId={selectedPlayerId} 
+              matches={matches}
             />
           )}
 
