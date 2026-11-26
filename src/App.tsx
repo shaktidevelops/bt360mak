@@ -210,6 +210,27 @@ export function App() {
     fetchLiveClubData();
   }, []);
 
+  // 1-Click Browser Bookmarklet & Cross-Window Ingest Listener
+  useEffect(() => {
+    if (window.opener) {
+      try {
+        window.opener.postMessage('BT360_READY', '*');
+      } catch (e) {
+        console.warn('Opener postMessage notice:', e);
+      }
+    }
+
+    const handleIncomingMessage = (event: MessageEvent) => {
+      if (event.data && (event.data.type === 'BT360_ONE_CLICK_IMPORT' || event.data.type === 'BT360_IMPORT_HTML') && event.data.html) {
+        setCurrentTab('import');
+        window.dispatchEvent(new CustomEvent('bt360:bookmarklet-import', { detail: event.data }));
+      }
+    };
+
+    window.addEventListener('message', handleIncomingMessage);
+    return () => window.removeEventListener('message', handleIncomingMessage);
+  }, []);
+
   const handleFactoryReset = async () => {
     try {
       localStorage.removeItem('bt360_matches');
@@ -229,7 +250,10 @@ export function App() {
         ...p,
         statsFC: { ...EMPTY_STATS },
         statsOD: { ...EMPTY_STATS },
-        statsT20: { ...EMPTY_STATS }
+        statsT20: { ...EMPTY_STATS },
+        statsU19: { ...EMPTY_STATS },
+        statsNational: { ...EMPTY_STATS },
+        statsFriendly: { ...EMPTY_STATS }
       }));
 
       setMatches([]);

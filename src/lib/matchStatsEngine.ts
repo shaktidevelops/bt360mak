@@ -3,22 +3,31 @@ import { Player, MatchRecord, CricketRecord, PlayerStats } from '../types/databa
 export const EMPTY_STATS: PlayerStats = {
   matches: 0,
   innings: 0,
+  notOuts: 0,
   runs: 0,
   highestScore: '-',
   average: 0,
+  ballsFaced: 0,
   strikeRate: 0,
   centuries: 0,
   fifties: 0,
   fours: 0,
   sixes: 0,
+  catches: 0,
+  stumpings: 0,
+  inningsBowled: 0,
+  ballsBowled: 0,
+  runsConceded: 0,
   oversBowled: 0,
   wickets: 0,
   bestBowling: '-',
+  bestBowlingMatch: '-',
   bowlingAverage: 0,
   economy: 0,
+  bowlingStrikeRate: 0,
+  fourWickets: 0,
   fiveWickets: 0,
-  catches: 0,
-  stumpings: 0
+  tenWickets: 0
 };
 
 export interface ParsedPlayerBatting {
@@ -488,6 +497,8 @@ export function recalculateStatsFromMatches(
   baseSquad: Player[]
 ): { updatedSquad: Player[]; updatedRecords: CricketRecord[] } {
   // Helper for tracking intermediate totals
+  type CricketFormatKey = 'FC' | 'OD' | 'T20' | 'U19' | 'National' | 'Friendly';
+
   interface Accumulator {
     matchesPlayed: Set<string>;
     innings: number;
@@ -500,13 +511,18 @@ export function recalculateStatsFromMatches(
     fifties: number;
     highestScoreVal: number;
     highestScoreStr: string;
+    inningsBowled: number;
     oversBowled: number;
     maidens: number;
     wickets: number;
     runsConceded: number;
     bestBowlingWkts: number;
     bestBowlingRuns: number;
+    bestBowlingMatchWkts: number;
+    bestBowlingMatchRuns: number;
+    fourWickets: number;
     fiveWickets: number;
+    tenWickets: number;
     catches: number;
     stumpings: number;
   }
@@ -523,18 +539,23 @@ export function recalculateStatsFromMatches(
     fifties: 0,
     highestScoreVal: 0,
     highestScoreStr: '-',
+    inningsBowled: 0,
     oversBowled: 0,
     maidens: 0,
     wickets: 0,
     runsConceded: 0,
     bestBowlingWkts: 0,
     bestBowlingRuns: 999,
+    bestBowlingMatchWkts: 0,
+    bestBowlingMatchRuns: 999,
+    fourWickets: 0,
     fiveWickets: 0,
+    tenWickets: 0,
     catches: 0,
     stumpings: 0
   });
 
-  const playerAccs = new Map<string, { FC: Accumulator; OD: Accumulator; T20: Accumulator }>();
+  const playerAccs = new Map<string, Record<CricketFormatKey, Accumulator>>();
 
   // Map squad players by both clean ID and normalized name
   const idToPlayer = new Map<string, Player>();
@@ -555,7 +576,10 @@ export function recalculateStatsFromMatches(
     playerAccs.set(cleanId, {
       FC: createBlankAcc(),
       OD: createBlankAcc(),
-      T20: createBlankAcc()
+      T20: createBlankAcc(),
+      U19: createBlankAcc(),
+      National: createBlankAcc(),
+      Friendly: createBlankAcc()
     });
   }
 
@@ -575,11 +599,34 @@ export function recalculateStatsFromMatches(
   let highestTeamTotalContext = '';
   let highestTeamTotalDate = '';
 
+  // Match format classifier supporting FC, OD, BT20, U19, National, Friendly
+  const classifyMatchFormat = (m: MatchRecord): CricketFormatKey => {
+    const t = (m.match_type || '').toLowerCase();
+    const sc = m.scorecardData as ParsedScorecard | undefined;
+    const opp = (m.opponent_club || '').toLowerCase();
+    const venue = (m.venue || '').toLowerCase();
+
+    if (t.includes('u19') || t.includes('under-19') || t.includes('youth') || opp.includes('u19')) {
+      return 'U19';
+    }
+    if (t.includes('national') || t.includes('international') || t.includes('inter-continental') || t.includes('world cup') || t.includes('nat ')) {
+      return 'National';
+    }
+    if (t.includes('friendly') || t.includes('fr ') || venue.includes('friendly') || (sc && sc.format && sc.format.toLowerCase().includes('friendly'))) {
+      return 'Friendly';
+    }
+    if (t === 'one day' || t === 'od' || t.includes('list a')) {
+      return 'OD';
+    }
+    if (t === 'bt20' || t === 't20' || t.includes('twenty20')) {
+      return 'T20';
+    }
+    return 'FC';
+  };
+
   // Process all matches
   for (const match of matches) {
-    const formatKey: 'FC' | 'OD' | 'T20' = 
-      (match.match_type === 'One Day' || match.match_type === 'OD') ? 'OD' : 
-      (match.match_type === 'BT20' || match.match_type === 'T20') ? 'T20' : 'FC';
+    const formatKey = classifyMatchFormat(match);
 
     // Parse team total if summary present
     const totalMatch = match.scoreSummary?.match(/(\d+)\/(\d+)/) || match.scoreSummary?.match(/(\d+)\s+runs/i);
@@ -651,13 +698,19 @@ export function recalculateStatsFromMatches(
       if (!pId || !playerAccs.has(pId)) continue;
       const acc = playerAccs.get(pId)![formatKey];
       acc.matchesPlayed.add(match.id);
+      acc.inningsBowled += 1;
       acc.oversBowled += bowl.overs;
       acc.maidens += bowl.maidens;
       acc.runsConceded += bowl.runs;
       acc.wickets += bowl.wickets;
 
-      if (bowl.wickets >= 5) {
+      if (bowl.wickets === 4) {
+        acc.fourWickets += 1;
+      } else if (bowl.wickets >= 5) {
         acc.fiveWickets += 1;
+      }
+      if (bowl.wickets >= 10) {
+        acc.tenWickets += 1;
       }
 
       const isBetter = bowl.wickets > acc.bestBowlingWkts || 
@@ -682,35 +735,50 @@ export function recalculateStatsFromMatches(
   // Helper to convert accumulator into clean PlayerStats
   const accToStats = (acc: Accumulator): PlayerStats => {
     const matchesCount = acc.matchesPlayed.size;
+    const notOuts = Math.max(0, acc.innings - acc.outs);
     const average = acc.outs > 0 ? parseFloat((acc.runs / acc.outs).toFixed(2)) : acc.runs > 0 ? acc.runs : 0;
     const strikeRate = acc.balls > 0 ? parseFloat(((acc.runs / acc.balls) * 100).toFixed(2)) : 0;
     const bestBowling = acc.bestBowlingWkts > 0 ? `${acc.bestBowlingWkts}/${acc.bestBowlingRuns}` : '-';
+    const bestBowlingMatch = acc.bestBowlingMatchWkts > 0 
+      ? `${acc.bestBowlingMatchWkts}/${acc.bestBowlingMatchRuns}` 
+      : bestBowling;
     const bowlingAvg = acc.wickets > 0 ? parseFloat((acc.runsConceded / acc.wickets).toFixed(2)) : 0;
     const wholeOvers = Math.floor(acc.oversBowled);
     const partialBalls = Math.round((acc.oversBowled - wholeOvers) * 10);
     const totalBalls = wholeOvers * 6 + partialBalls;
     const actualOvers = totalBalls > 0 ? totalBalls / 6 : 0;
     const economy = actualOvers > 0 ? parseFloat((acc.runsConceded / actualOvers).toFixed(2)) : 0;
+    const bowlingStrikeRate = acc.wickets > 0 ? parseFloat((totalBalls / acc.wickets).toFixed(1)) : 0;
 
     return {
       matches: matchesCount,
       innings: acc.innings,
+      notOuts,
       runs: acc.runs,
       highestScore: acc.highestScoreStr,
       average,
+      ballsFaced: acc.balls,
       strikeRate,
       centuries: acc.centuries,
       fifties: acc.fifties,
       fours: acc.fours,
       sixes: acc.sixes,
+      catches: acc.catches,
+      stumpings: acc.stumpings,
+
+      inningsBowled: acc.inningsBowled,
+      ballsBowled: totalBalls,
+      runsConceded: acc.runsConceded,
       oversBowled: parseFloat(acc.oversBowled.toFixed(1)),
       wickets: acc.wickets,
       bestBowling,
+      bestBowlingMatch,
       bowlingAverage: bowlingAvg,
       economy,
+      bowlingStrikeRate,
+      fourWickets: acc.fourWickets,
       fiveWickets: acc.fiveWickets,
-      catches: acc.catches,
-      stumpings: acc.stumpings
+      tenWickets: acc.tenWickets
     };
   };
 
@@ -723,7 +791,10 @@ export function recalculateStatsFromMatches(
         ...player,
         statsFC: { ...EMPTY_STATS },
         statsOD: { ...EMPTY_STATS },
-        statsT20: { ...EMPTY_STATS }
+        statsT20: { ...EMPTY_STATS },
+        statsU19: { ...EMPTY_STATS },
+        statsNational: { ...EMPTY_STATS },
+        statsFriendly: { ...EMPTY_STATS }
       };
     }
 
@@ -731,7 +802,10 @@ export function recalculateStatsFromMatches(
       ...player,
       statsFC: accToStats(acc.FC),
       statsOD: accToStats(acc.OD),
-      statsT20: accToStats(acc.T20)
+      statsT20: accToStats(acc.T20),
+      statsU19: accToStats(acc.U19),
+      statsNational: accToStats(acc.National),
+      statsFriendly: accToStats(acc.Friendly)
     };
   });
 

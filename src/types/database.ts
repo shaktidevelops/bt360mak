@@ -22,22 +22,33 @@ export interface Club {
 export interface PlayerStats {
   matches: number;
   innings: number;
-  runs: number;
-  highestScore: string;
-  average: number;
-  strikeRate: number;
-  centuries: number;
-  fifties: number;
-  fours: number;
-  sixes: number;
-  oversBowled: number;
-  wickets: number;
-  bestBowling: string;
-  bowlingAverage: number;
-  economy: number;
-  fiveWickets: number;
-  catches: number;
-  stumpings: number;
+  notOuts?: number; // NO (Not Outs)
+  runs: number; // Runs
+  highestScore: string; // HS (e.g. 367* or 64)
+  average: number; // Ave
+  ballsFaced?: number; // BF (Balls Faced)
+  strikeRate: number; // SR
+  centuries: number; // 100s
+  fifties: number; // 50s
+  fours: number; // 4s
+  sixes: number; // 6s
+  catches: number; // Ct
+  stumpings: number; // St
+
+  // Bowling
+  inningsBowled?: number; // Inns (Innings Bowled)
+  ballsBowled?: number; // Balls (Total Balls Delivered)
+  runsConceded?: number; // Runs (Runs Conceded)
+  oversBowled: number; // Overs
+  wickets: number; // Wkts
+  bestBowling: string; // BBI (Best Bowling in Innings e.g. 7/31)
+  bestBowlingMatch?: string; // BBM (Best Bowling in Match e.g. 8/46)
+  bowlingAverage: number; // Ave
+  economy: number; // Econ
+  bowlingStrikeRate?: number; // SR (Balls per Wicket)
+  fourWickets?: number; // 4w
+  fiveWickets?: number; // 5w
+  tenWickets?: number; // 10w
 }
 
 export interface Player {
@@ -69,6 +80,9 @@ export interface Player {
   statsFC: PlayerStats;
   statsOD: PlayerStats;
   statsT20: PlayerStats;
+  statsU19?: PlayerStats;
+  statsNational?: PlayerStats;
+  statsFriendly?: PlayerStats;
 }
 
 export interface StaffMember {

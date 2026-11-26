@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   Club, 
   Player, 
@@ -242,8 +242,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
   onImportStadium,
   onImportNets
 }) => {
-  // Tabs: Default to 'bulk' as requested by the user for multi-file HTML ingestion
-  const [activeImportTab, setActiveImportTab] = useState<'bulk' | 'paste' | 'domains' | 'sheet' | 'json'>('bulk');
+  // Tabs: Support Bulk, 1-Click Bookmarklet, Single Paste, Domains, Sheet, and JSON
+  const [activeImportTab, setActiveImportTab] = useState<'bulk' | 'bookmarklet' | 'paste' | 'domains' | 'sheet' | 'json'>('bulk');
   const [selectedDomain, setSelectedDomain] = useState<'squad' | 'finances' | 'ground' | 'fixtures' | 'nets' | 'office' | 'diary'>('squad');
   const [formatOverride, setFormatOverride] = useState<'auto' | 'First Class' | 'One Day' | 'BT20'>('auto');
   const [matchesFilter, setMatchesFilter] = useState<string>('ALL');
@@ -265,6 +265,11 @@ export const ImportView: React.FC<ImportViewProps> = ({
   const [isSyncing, setIsSyncing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [showResetModal, setShowResetModal] = useState(false);
+
+  // 1-Click Browser Bookmarklet & Extension State
+  const [bookmarkletTarget, setBookmarkletTarget] = useState<'local' | 'cloud'>('local');
+  const [copiedBookmarklet, setCopiedBookmarklet] = useState(false);
+  const [copiedUserscript, setCopiedUserscript] = useState(false);
 
   // Bulk File Ingestion State
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -325,6 +330,25 @@ export const ImportView: React.FC<ImportViewProps> = ({
       .sort((a, b) => parseMatchDateSortKey(b.match_date) - parseMatchDateSortKey(a.match_date));
   }, [matches, matchesFilter]);
 
+  // Listen for 1-Click Browser Bookmarklet Ingestion Events
+  useEffect(() => {
+    const handleBookmarkletImport = (e: any) => {
+      const detail = e.detail;
+      if (detail && detail.html) {
+        setRawText(detail.html);
+        parseBattrickData(detail.html);
+        setActiveImportTab('paste');
+        setStatusMessage({
+          text: `⚡ 1-Click Browser Import received from ${detail.url || 'Battrick'}! Review the parsed match below and click "Apply & Synchronize" to record.`,
+          type: 'info'
+        });
+      }
+    };
+
+    window.addEventListener('bt360:bookmarklet-import', handleBookmarkletImport);
+    return () => window.removeEventListener('bt360:bookmarklet-import', handleBookmarkletImport);
+  }, []);
+
   // Ingestion History state (persisted in localStorage)
   const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>(() => {
     try {
@@ -360,7 +384,10 @@ export const ImportView: React.FC<ImportViewProps> = ({
           ...p,
           statsFC: { ...EMPTY_STATS },
           statsOD: { ...EMPTY_STATS },
-          statsT20: { ...EMPTY_STATS }
+          statsT20: { ...EMPTY_STATS },
+          statsU19: { ...EMPTY_STATS },
+          statsNational: { ...EMPTY_STATS },
+          statsFriendly: { ...EMPTY_STATS }
         }));
         if (onImportMatches) onImportMatches([]);
         onImportSquad(resetSquad);
@@ -414,7 +441,10 @@ export const ImportView: React.FC<ImportViewProps> = ({
         ...p,
         statsFC: { ...EMPTY_STATS },
         statsOD: { ...EMPTY_STATS },
-        statsT20: { ...EMPTY_STATS }
+        statsT20: { ...EMPTY_STATS },
+        statsU19: { ...EMPTY_STATS },
+        statsNational: { ...EMPTY_STATS },
+        statsFriendly: { ...EMPTY_STATS }
       }));
 
       if (onImportMatches) onImportMatches([]);
@@ -640,7 +670,10 @@ export const ImportView: React.FC<ImportViewProps> = ({
                 uniqueRecords: p.uniqueRecords || ['Official Registered Squad Member'],
                 statsFC: { ...EMPTY_STATS },
                 statsOD: { ...EMPTY_STATS },
-                statsT20: { ...EMPTY_STATS }
+                statsT20: { ...EMPTY_STATS },
+                statsU19: { ...EMPTY_STATS },
+                statsNational: { ...EMPTY_STATS },
+                statsFriendly: { ...EMPTY_STATS }
               }));
 
               // Merge or replace squad players by ID
@@ -1151,7 +1184,10 @@ export const ImportView: React.FC<ImportViewProps> = ({
           uniqueRecords: p.uniqueRecords || ['Official Registered Squad Member'],
           statsFC: { ...EMPTY_STATS },
           statsOD: { ...EMPTY_STATS },
-          statsT20: { ...EMPTY_STATS }
+          statsT20: { ...EMPTY_STATS },
+          statsU19: { ...EMPTY_STATS },
+          statsNational: { ...EMPTY_STATS },
+          statsFriendly: { ...EMPTY_STATS }
         }));
 
         onImportSquad(formatted);
@@ -1501,6 +1537,18 @@ Coach Quality: Competent`;
           <span className="bg-amber-400 text-slate-900 text-[10px] font-black px-1.5 py-0.2 rounded-md uppercase tracking-wider">
             RECOMMENDED
           </span>
+        </button>
+
+        <button
+          onClick={() => setActiveImportTab('bookmarklet')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            activeImportTab === 'bookmarklet'
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 text-amber-400" />
+          <span>⚡ 1-Click Browser Button</span>
         </button>
 
         <button
@@ -1932,6 +1980,156 @@ Coach Quality: Competent`;
                 })}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: 1-Click Browser Bookmarklet & Extension */}
+      {activeImportTab === 'bookmarklet' && (
+        <div className="space-y-6">
+          <div className="sovereign-card p-6 rounded-2xl border-emerald-500/40 shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white text-xl shadow-md shrink-0">
+                  ⚡
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">
+                    1-Click Browser Button for Battrick
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    No copying, no pasting, no saving files. Click one button in your browser on any Battrick page to import instantly!
+                  </p>
+                </div>
+              </div>
+
+              {/* Target Selector (Localhost vs Cloud) */}
+              <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200 text-xs">
+                <span className="text-[10px] font-bold text-slate-500 uppercase px-1">Target:</span>
+                <button
+                  onClick={() => setBookmarkletTarget('local')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    bookmarkletTarget === 'local' 
+                      ? 'bg-emerald-600 text-white shadow-xs font-black' 
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Local App (localhost:5173)
+                </button>
+                <button
+                  onClick={() => setBookmarkletTarget('cloud')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    bookmarkletTarget === 'cloud' 
+                      ? 'bg-emerald-600 text-white shadow-xs font-black' 
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Cloud (GitHub Pages)
+                </button>
+              </div>
+            </div>
+
+            {/* Draggable Bookmarklet Zone */}
+            <div className="p-8 rounded-2xl bg-gradient-to-r from-emerald-50/80 via-teal-50/80 to-blue-50/80 border-2 border-dashed border-emerald-300 text-center space-y-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                DRAG THIS BUTTON TO YOUR BROWSER BOOKMARKS BAR
+              </p>
+
+              <div>
+                <a
+                  href={`javascript:(function(){try{var h=document.documentElement.outerHTML;var u=window.location.href;var t='${bookmarkletTarget === 'local' ? (typeof window !== 'undefined' ? window.location.origin + '/' : 'http://localhost:5173/') : 'https://shaktidevelops.github.io/bt360mak/'}';var w=window.open(t+'?source=bookmarklet','bt360_importer');if(w){window.addEventListener('message',function hdl(e){if(e.data==='BT360_READY'){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');window.removeEventListener('message',hdl);}});setTimeout(function(){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');},1500);}if(navigator.clipboard){navigator.clipboard.writeText(h).catch(function(){});}}catch(err){alert('BT360 Bookmarklet: '+err.message);}})();`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    alert("👆 Don't click here! Drag this button up into your browser's Bookmarks Bar (press Ctrl+Shift+B if bookmarks bar is hidden). Then click it when viewing any Battrick page!");
+                  }}
+                  className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-base shadow-2xl cursor-grab transition-all hover:scale-105 select-none border-2 border-emerald-300"
+                  title="Drag this button to your Bookmarks Toolbar"
+                >
+                  <Sparkles className="w-5 h-5 text-amber-300" />
+                  <span>📥 Send to BT360</span>
+                </a>
+              </div>
+
+              <p className="text-xs text-slate-600 max-w-lg mx-auto">
+                Press <kbd className="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-mono font-bold shadow-2xs">Ctrl + Shift + B</kbd> (or <kbd className="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-mono font-bold shadow-2xs">Cmd + Shift + B</kbd> on Mac) to show your browser Bookmarks bar, then drag the button above into it.
+              </p>
+
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={() => {
+                    const tUrl = bookmarkletTarget === 'local' ? (typeof window !== 'undefined' ? window.location.origin + '/' : 'http://localhost:5173/') : 'https://shaktidevelops.github.io/bt360mak/';
+                    const code = `javascript:(function(){try{var h=document.documentElement.outerHTML;var u=window.location.href;var t='${tUrl}';var w=window.open(t+'?source=bookmarklet','bt360_importer');if(w){window.addEventListener('message',function hdl(e){if(e.data==='BT360_READY'){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');window.removeEventListener('message',hdl);}});setTimeout(function(){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');},1500);}if(navigator.clipboard){navigator.clipboard.writeText(h).catch(function(){});}}catch(err){alert('BT360 Bookmarklet: '+err.message);}})();`;
+                    navigator.clipboard.writeText(code);
+                    setCopiedBookmarklet(true);
+                    setTimeout(() => setCopiedBookmarklet(false), 2500);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Copy className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{copiedBookmarklet ? '✓ Copied Bookmarklet Code!' : 'Copy Bookmarklet Code'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 3-Step Walkthrough */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-black text-sm">
+                  1
+                </div>
+                <h4 className="text-xs font-black text-slate-900">Add to Bookmarks</h4>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Drag the <span className="font-bold text-emerald-700">"📥 Send to BT360"</span> button up into your browser bookmarks bar once.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-black text-sm">
+                  2
+                </div>
+                <h4 className="text-xs font-black text-slate-900">Open Any Battrick Page</h4>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Browse to your match scorecard (<code className="text-emerald-700">matchinfofc.asp</code>), squad (<code className="text-emerald-700">squad.asp</code>), ground, or finances.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-black text-sm">
+                  3
+                </div>
+                <h4 className="text-xs font-black text-slate-900">1-Click Ingestion</h4>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Click <span className="font-bold text-emerald-700">"📥 Send to BT360"</span> in your bookmarks. The match is instantly captured, player stats compute, and records sync!
+                </p>
+              </div>
+            </div>
+
+            {/* Tampermonkey Userscript Option */}
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h4 className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Power Option: Tampermonkey / Greasemonkey Userscript</span>
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Injects a floating "📥 Send to BT360" button directly onto the Battrick website pages.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const tUrl = bookmarkletTarget === 'local' ? (typeof window !== 'undefined' ? window.location.origin + '/' : 'http://localhost:5173/') : 'https://shaktidevelops.github.io/bt360mak/';
+                    const script = `// ==UserScript==\n// @name         BT360MAK Battrick 1-Click Importer\n// @namespace    https://shaktidevelops.github.io/bt360mak/\n// @version      1.0\n// @description  Adds 1-click button to send match scorecards & squad data directly to BT360MAK\n// @match        *://*.battrick.org/*\n// @grant        none\n// ==/UserScript==\n(function(){\n  'use strict';\n  const btn = document.createElement('button');\n  btn.innerHTML = '📥 Send to BT360';\n  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:999999;background:#059669;color:#fff;padding:12px 18px;border-radius:12px;font-weight:900;font-size:13px;border:2px solid #34d399;box-shadow:0 8px 24px rgba(0,0,0,0.3);cursor:pointer;font-family:sans-serif;';\n  btn.onclick = function() {\n    const html = document.documentElement.outerHTML;\n    const target = '${tUrl}';\n    const win = window.open(target + '?source=userscript', 'bt360_importer');\n    if (win) {\n      setTimeout(() => {\n        win.postMessage({ type: 'BT360_ONE_CLICK_IMPORT', html: html, url: location.href }, '*');\n      }, 1500);\n    }\n  };\n  document.body.appendChild(btn);\n})();`;
+                    navigator.clipboard.writeText(script);
+                    setCopiedUserscript(true);
+                    setTimeout(() => setCopiedUserscript(false), 2500);
+                  }}
+                  className="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-[11px] font-bold transition-all shadow-xs cursor-pointer shrink-0"
+                >
+                  {copiedUserscript ? '✓ Copied Userscript!' : 'Copy Userscript Code'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

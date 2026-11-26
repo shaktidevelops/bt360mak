@@ -32,33 +32,106 @@ function cleanId(id?: string): string {
   return String(id || '').replace(/^BT-/, '').trim();
 }
 
-const EMPTY_CAREER_STATS: PlayerStats = {
-  matches: 0,
-  innings: 0,
-  runs: 0,
-  highestScore: '-',
-  average: 0,
-  strikeRate: 0,
-  centuries: 0,
-  fifties: 0,
-  fours: 0,
-  sixes: 0,
-  oversBowled: 0,
-  wickets: 0,
-  bestBowling: '-',
-  bowlingAverage: 0,
-  economy: 0,
-  fiveWickets: 0,
-  catches: 0,
-  stumpings: 0
-};
+import { EMPTY_STATS } from '../lib/matchStatsEngine';
 
 function resolvePlayerStats(player: Player) {
-  return {
-    fc: player.statsFC || EMPTY_CAREER_STATS,
-    od: player.statsOD || EMPTY_CAREER_STATS,
-    t20: player.statsT20 || EMPTY_CAREER_STATS
+  const fc = player.statsFC || EMPTY_STATS;
+  const od = player.statsOD || EMPTY_STATS;
+  const t20 = player.statsT20 || EMPTY_STATS;
+  const u19 = player.statsU19 || EMPTY_STATS;
+  const national = player.statsNational || EMPTY_STATS;
+  const friendly = player.statsFriendly || EMPTY_STATS;
+
+  // Compute Career Total row across all formats
+  const totalMatches = fc.matches + od.matches + t20.matches + (u19.matches || 0) + (national.matches || 0) + (friendly.matches || 0);
+  const totalInns = fc.innings + od.innings + t20.innings + (u19.innings || 0) + (national.innings || 0) + (friendly.innings || 0);
+  const totalNotOuts = (fc.notOuts || 0) + (od.notOuts || 0) + (t20.notOuts || 0) + (u19.notOuts || 0) + (national.notOuts || 0) + (friendly.notOuts || 0);
+  const totalRuns = fc.runs + od.runs + t20.runs + (u19.runs || 0) + (national.runs || 0) + (friendly.runs || 0);
+  const totalOuts = Math.max(0, totalInns - totalNotOuts);
+  const totalAverage = totalOuts > 0 ? parseFloat((totalRuns / totalOuts).toFixed(2)) : totalRuns > 0 ? totalRuns : 0;
+  const totalBF = (fc.ballsFaced || 0) + (od.ballsFaced || 0) + (t20.ballsFaced || 0) + (u19.ballsFaced || 0) + (national.ballsFaced || 0) + (friendly.ballsFaced || 0);
+  const totalSR = totalBF > 0 ? parseFloat(((totalRuns / totalBF) * 100).toFixed(2)) : 0;
+  const total100s = fc.centuries + od.centuries + t20.centuries + (u19.centuries || 0) + (national.centuries || 0) + (friendly.centuries || 0);
+  const total50s = fc.fifties + od.fifties + t20.fifties + (u19.fifties || 0) + (national.fifties || 0) + (friendly.fifties || 0);
+  const total4s = fc.fours + od.fours + t20.fours + (u19.fours || 0) + (national.fours || 0) + (friendly.fours || 0);
+  const total6s = fc.sixes + od.sixes + t20.sixes + (u19.sixes || 0) + (national.sixes || 0) + (friendly.sixes || 0);
+  const totalCatches = fc.catches + od.catches + t20.catches + (u19.catches || 0) + (national.catches || 0) + (friendly.catches || 0);
+  const totalStumpings = fc.stumpings + od.stumpings + t20.stumpings + (u19.stumpings || 0) + (national.stumpings || 0) + (friendly.stumpings || 0);
+
+  // Highest score overall
+  const scores = [fc.highestScore, od.highestScore, t20.highestScore, u19.highestScore, national.highestScore, friendly.highestScore].filter(s => s && s !== '-');
+  let topHS = '-';
+  let topHSVal = -1;
+  scores.forEach(s => {
+    const num = parseInt(s);
+    if (!isNaN(num) && num > topHSVal) {
+      topHSVal = num;
+      topHS = s;
+    }
+  });
+
+  // Bowling Totals
+  const totalInnsBowled = (fc.inningsBowled || 0) + (od.inningsBowled || 0) + (t20.inningsBowled || 0) + (u19.inningsBowled || 0) + (national.inningsBowled || 0) + (friendly.inningsBowled || 0);
+  const totalBallsBowled = (fc.ballsBowled || 0) + (od.ballsBowled || 0) + (t20.ballsBowled || 0) + (u19.ballsBowled || 0) + (national.ballsBowled || 0) + (friendly.ballsBowled || 0);
+  const totalRunsConceded = (fc.runsConceded || 0) + (od.runsConceded || 0) + (t20.runsConceded || 0) + (u19.runsConceded || 0) + (national.runsConceded || 0) + (friendly.runsConceded || 0);
+  const totalWickets = fc.wickets + od.wickets + t20.wickets + (u19.wickets || 0) + (national.wickets || 0) + (friendly.wickets || 0);
+  const totalBowlAvg = totalWickets > 0 ? parseFloat((totalRunsConceded / totalWickets).toFixed(2)) : 0;
+  const totalOvers = totalBallsBowled > 0 ? totalBallsBowled / 6 : 0;
+  const totalEconomy = totalOvers > 0 ? parseFloat((totalRunsConceded / totalOvers).toFixed(2)) : 0;
+  const totalBowlSR = totalWickets > 0 ? parseFloat((totalBallsBowled / totalWickets).toFixed(1)) : 0;
+  const total4w = (fc.fourWickets || 0) + (od.fourWickets || 0) + (t20.fourWickets || 0) + (u19.fourWickets || 0) + (national.fourWickets || 0) + (friendly.fourWickets || 0);
+  const total5w = (fc.fiveWickets || 0) + (od.fiveWickets || 0) + (t20.fiveWickets || 0) + (u19.fiveWickets || 0) + (national.fiveWickets || 0) + (friendly.fiveWickets || 0);
+  const total10w = (fc.tenWickets || 0) + (od.tenWickets || 0) + (t20.tenWickets || 0) + (u19.tenWickets || 0) + (national.tenWickets || 0) + (friendly.tenWickets || 0);
+
+  // Best bowling across formats
+  const bbis = [fc.bestBowling, od.bestBowling, t20.bestBowling, u19.bestBowling, national.bestBowling, friendly.bestBowling].filter(b => b && b !== '-');
+  let topBBI = '-';
+  let topWkts = 0;
+  let topRuns = 999;
+  bbis.forEach(b => {
+    const parts = b.split('/');
+    if (parts.length === 2) {
+      const w = parseInt(parts[0]);
+      const r = parseInt(parts[1]);
+      if (w > topWkts || (w === topWkts && r < topRuns)) {
+        topWkts = w;
+        topRuns = r;
+        topBBI = b;
+      }
+    }
+  });
+
+  const total: PlayerStats = {
+    matches: totalMatches,
+    innings: totalInns,
+    notOuts: totalNotOuts,
+    runs: totalRuns,
+    highestScore: topHS,
+    average: totalAverage,
+    ballsFaced: totalBF,
+    strikeRate: totalSR,
+    centuries: total100s,
+    fifties: total50s,
+    fours: total4s,
+    sixes: total6s,
+    catches: totalCatches,
+    stumpings: totalStumpings,
+    inningsBowled: totalInnsBowled,
+    ballsBowled: totalBallsBowled,
+    runsConceded: totalRunsConceded,
+    oversBowled: parseFloat(totalOvers.toFixed(1)),
+    wickets: totalWickets,
+    bestBowling: topBBI,
+    bestBowlingMatch: topBBI,
+    bowlingAverage: totalBowlAvg,
+    economy: totalEconomy,
+    bowlingStrikeRate: totalBowlSR,
+    fourWickets: total4w,
+    fiveWickets: total5w,
+    tenWickets: total10w
   };
+
+  return { fc, od, t20, u19, national, friendly, total };
 }
 
 export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({ 
@@ -425,89 +498,99 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
         </div>
       </div>
 
-      {/* Official Battrick Career Statistics & Records (FC, OD, T20) */}
-      <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-5">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-emerald-600" />
-            <span>Official Battrick Career Statistics & Match Records</span>
-          </h3>
-          <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono font-bold">
-            All 3 Formats (FC &bull; OD &bull; BT20)
+      {/* Official Battrick Career Statistics & Records (FC, OD, T20, U19, National, Friendly) */}
+      <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
+          <div>
+            <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-emerald-600" />
+              <span>Official Battrick Career Statistics & Records</span>
+            </h3>
+            <p className="text-xs text-slate-600 mt-0.5">
+              Comprehensive performance breakdown across all competition formats + U19, National & Friendlies
+            </p>
+          </div>
+          <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono font-bold self-start sm:self-auto">
+            All 6 Match Formats + Career Total
           </span>
         </div>
 
         {/* Batting Career Table */}
         <div>
-          <h4 className="text-xs font-black uppercase text-emerald-700 mb-2.5 flex items-center gap-1.5">
-            <span>🏏</span>
-            <span>Batting & Fielding Records</span>
-          </h4>
+          <div className="flex items-center justify-between mb-2.5">
+            <h4 className="text-xs font-black uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+              <span>🏏</span>
+              <span>BATTING & FIELDING</span>
+            </h4>
+            <span className="text-[10px] text-slate-500 font-mono">
+              6 Formats &bull; Career Aggregate
+            </span>
+          </div>
+
           <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] border-b border-slate-200">
+                <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] font-bold border-b border-slate-200">
                   <th className="py-2.5 px-3">Format</th>
                   <th className="py-2.5 px-2 text-center">Mat</th>
                   <th className="py-2.5 px-2 text-center">Inns</th>
+                  <th className="py-2.5 px-2 text-center">NO</th>
                   <th className="py-2.5 px-3 text-right">Runs</th>
                   <th className="py-2.5 px-3 text-center">HS</th>
-                  <th className="py-2.5 px-3 text-right">Avg</th>
+                  <th className="py-2.5 px-3 text-right">Ave</th>
+                  <th className="py-2.5 px-2 text-right">BF</th>
                   <th className="py-2.5 px-3 text-right">SR</th>
                   <th className="py-2.5 px-2 text-center">100s</th>
                   <th className="py-2.5 px-2 text-center">50s</th>
                   <th className="py-2.5 px-2 text-center">4s</th>
                   <th className="py-2.5 px-2 text-center">6s</th>
-                  <th className="py-2.5 px-2 text-center">Catches</th>
-                  <th className="py-2.5 px-2 text-center">Stumpings</th>
+                  <th className="py-2.5 px-2 text-center">Ct</th>
+                  <th className="py-2.5 px-2 text-center">St</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-mono">
-                <tr className="hover:bg-emerald-50/50">
-                  <td className="py-2.5 px-3 font-sans font-bold text-slate-900">First Class (FC)</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.fc.matches}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.fc.innings}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-emerald-700">{stats.fc.runs}</td>
-                  <td className="py-2.5 px-3 text-center font-bold text-slate-800">{stats.fc.highestScore}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-amber-700">{stats.fc.average.toFixed(2)}</td>
-                  <td className="py-2.5 px-3 text-right text-slate-700">{stats.fc.strikeRate.toFixed(1)}</td>
-                  <td className="py-2.5 px-2 text-center text-amber-700 font-bold">{stats.fc.centuries}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.fc.fifties}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.fc.fours}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.fc.sixes}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.fc.catches}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.fc.stumpings}</td>
-                </tr>
-                <tr className="hover:bg-emerald-50/50">
-                  <td className="py-2.5 px-3 font-sans font-bold text-slate-900">One Day (OD)</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.od.matches}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.od.innings}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-emerald-700">{stats.od.runs}</td>
-                  <td className="py-2.5 px-3 text-center font-bold text-slate-800">{stats.od.highestScore}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-amber-700">{stats.od.average.toFixed(2)}</td>
-                  <td className="py-2.5 px-3 text-right text-slate-700">{stats.od.strikeRate.toFixed(1)}</td>
-                  <td className="py-2.5 px-2 text-center text-amber-700 font-bold">{stats.od.centuries}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.od.fifties}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.od.fours}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.od.sixes}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.od.catches}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.od.stumpings}</td>
-                </tr>
-                <tr className="hover:bg-emerald-50/50">
-                  <td className="py-2.5 px-3 font-sans font-bold text-slate-900">Twenty20 (BT20)</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.t20.matches}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.t20.innings}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-emerald-700">{stats.t20.runs}</td>
-                  <td className="py-2.5 px-3 text-center font-bold text-slate-800">{stats.t20.highestScore}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-amber-700">{stats.t20.average.toFixed(2)}</td>
-                  <td className="py-2.5 px-3 text-right text-slate-700">{stats.t20.strikeRate.toFixed(1)}</td>
-                  <td className="py-2.5 px-2 text-center text-amber-700 font-bold">{stats.t20.centuries}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.t20.fifties}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.t20.fours}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.t20.sixes}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.t20.catches}</td>
-                  <td className="py-2.5 px-2 text-center text-slate-700">{stats.t20.stumpings}</td>
-                </tr>
+              <tbody className="divide-y divide-slate-100 font-mono text-xs">
+                {[
+                  { label: 'First Class (FC)', tag: 'FC', st: stats.fc },
+                  { label: 'One Day (OD / List A)', tag: 'OD', st: stats.od },
+                  { label: 'Twenty20 (BT20)', tag: 'T20', st: stats.t20 },
+                  { label: 'Under-19 (U19)', tag: 'U19', st: stats.u19 },
+                  { label: 'National Team', tag: 'NAT', st: stats.national },
+                  { label: 'Friendly Matches', tag: 'FR', st: stats.friendly },
+                  { label: 'Career Total', tag: 'ALL', st: stats.total, isTotal: true }
+                ].map((row) => (
+                  <tr 
+                    key={row.tag} 
+                    className={`transition-colors ${
+                      row.isTotal 
+                        ? 'bg-slate-50 hover:bg-slate-100/80 font-bold border-t-2 border-slate-300 text-slate-900' 
+                        : 'hover:bg-emerald-50/50'
+                    }`}
+                  >
+                    <td className={`py-2.5 px-3 font-sans ${row.isTotal ? 'font-black text-slate-900' : 'font-bold text-slate-900'}`}>
+                      {row.label}
+                    </td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.matches}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.innings}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.notOuts ?? 0}</td>
+                    <td className={`py-2.5 px-3 text-right font-black ${row.isTotal ? 'text-emerald-800' : 'text-emerald-700'}`}>
+                      {row.st.runs}
+                    </td>
+                    <td className="py-2.5 px-3 text-center font-bold text-slate-800">{row.st.highestScore || '-'}</td>
+                    <td className="py-2.5 px-3 text-right font-bold text-amber-800">
+                      {row.st.average > 0 ? row.st.average.toFixed(2) : (row.st.innings > 0 ? '0.00' : '-')}
+                    </td>
+                    <td className="py-2.5 px-2 text-right text-slate-700">{row.st.ballsFaced ?? 0}</td>
+                    <td className="py-2.5 px-3 text-right text-slate-700">
+                      {row.st.strikeRate > 0 ? row.st.strikeRate.toFixed(2) : '-'}
+                    </td>
+                    <td className="py-2.5 px-2 text-center text-amber-700 font-bold">{row.st.centuries}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.fifties}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.fours}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.sixes}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.catches}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.stumpings}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -515,51 +598,80 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
 
         {/* Bowling Career Table */}
         <div className="pt-2">
-          <h4 className="text-xs font-black uppercase text-teal-700 mb-2.5 flex items-center gap-1.5">
-            <span>⚡</span>
-            <span>Bowling Career Records</span>
-          </h4>
+          <div className="flex items-center justify-between mb-2.5">
+            <h4 className="text-xs font-black uppercase tracking-wider text-teal-800 flex items-center gap-1.5">
+              <span>⚡</span>
+              <span>BOWLING</span>
+            </h4>
+            <span className="text-[10px] text-slate-500 font-mono">
+              6 Formats &bull; Career Aggregate
+            </span>
+          </div>
+
           <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] border-b border-slate-200">
+                <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] font-bold border-b border-slate-200">
                   <th className="py-2.5 px-3">Format</th>
-                  <th className="py-2.5 px-3 text-right">Overs Bowled</th>
-                  <th className="py-2.5 px-3 text-right">Wickets</th>
-                  <th className="py-2.5 px-3 text-center">Best Bowling (BBI)</th>
-                  <th className="py-2.5 px-3 text-right">Bowling Avg</th>
-                  <th className="py-2.5 px-3 text-right">Economy (RPO)</th>
-                  <th className="py-2.5 px-2 text-center">5w Hauls</th>
+                  <th className="py-2.5 px-2 text-center">Mat</th>
+                  <th className="py-2.5 px-2 text-center">Inns</th>
+                  <th className="py-2.5 px-2 text-right">Balls</th>
+                  <th className="py-2.5 px-3 text-right">Runs</th>
+                  <th className="py-2.5 px-2 text-right">Wkts</th>
+                  <th className="py-2.5 px-3 text-center">BBI</th>
+                  <th className="py-2.5 px-3 text-center">BBM</th>
+                  <th className="py-2.5 px-3 text-right">Ave</th>
+                  <th className="py-2.5 px-3 text-right">Econ</th>
+                  <th className="py-2.5 px-2 text-right">SR</th>
+                  <th className="py-2.5 px-2 text-center">4w</th>
+                  <th className="py-2.5 px-2 text-center">5w</th>
+                  <th className="py-2.5 px-2 text-center">10w</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-mono">
-                <tr className="hover:bg-emerald-50/50">
-                  <td className="py-2.5 px-3 font-sans font-bold text-slate-900">First Class (FC)</td>
-                  <td className="py-2.5 px-3 text-right text-slate-700">{stats.fc.oversBowled.toFixed(1)}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-teal-700">{stats.fc.wickets}</td>
-                  <td className="py-2.5 px-3 text-center font-bold text-slate-800">{stats.fc.bestBowling}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-amber-700">{stats.fc.bowlingAverage.toFixed(2)}</td>
-                  <td className="py-2.5 px-3 text-right text-slate-700">{stats.fc.economy.toFixed(2)}</td>
-                  <td className="py-2.5 px-2 text-center text-amber-700 font-bold">{stats.fc.fiveWickets}</td>
-                </tr>
-                <tr className="hover:bg-emerald-50/50">
-                  <td className="py-2.5 px-3 font-sans font-bold text-slate-900">One Day (OD)</td>
-                  <td className="py-2.5 px-3 text-right text-slate-700">{stats.od.oversBowled.toFixed(1)}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-teal-700">{stats.od.wickets}</td>
-                  <td className="py-2.5 px-3 text-center font-bold text-slate-800">{stats.od.bestBowling}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-amber-700">{stats.od.bowlingAverage.toFixed(2)}</td>
-                  <td className="py-2.5 px-3 text-right text-slate-700">{stats.od.economy.toFixed(2)}</td>
-                  <td className="py-2.5 px-2 text-center text-amber-700 font-bold">{stats.od.fiveWickets}</td>
-                </tr>
-                <tr className="hover:bg-emerald-50/50">
-                  <td className="py-2.5 px-3 font-sans font-bold text-slate-900">Twenty20 (BT20)</td>
-                  <td className="py-2.5 px-3 text-right text-slate-700">{stats.t20.oversBowled.toFixed(1)}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-teal-700">{stats.t20.wickets}</td>
-                  <td className="py-2.5 px-3 text-center font-bold text-slate-800">{stats.t20.bestBowling}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-amber-700">{stats.t20.bowlingAverage.toFixed(2)}</td>
-                  <td className="py-2.5 px-3 text-right text-slate-700">{stats.t20.economy.toFixed(2)}</td>
-                  <td className="py-2.5 px-2 text-center text-amber-700 font-bold">{stats.t20.fiveWickets}</td>
-                </tr>
+              <tbody className="divide-y divide-slate-100 font-mono text-xs">
+                {[
+                  { label: 'First Class (FC)', tag: 'FC', st: stats.fc },
+                  { label: 'One Day (OD / List A)', tag: 'OD', st: stats.od },
+                  { label: 'Twenty20 (BT20)', tag: 'T20', st: stats.t20 },
+                  { label: 'Under-19 (U19)', tag: 'U19', st: stats.u19 },
+                  { label: 'National Team', tag: 'NAT', st: stats.national },
+                  { label: 'Friendly Matches', tag: 'FR', st: stats.friendly },
+                  { label: 'Career Total', tag: 'ALL', st: stats.total, isTotal: true }
+                ].map((row) => (
+                  <tr 
+                    key={row.tag} 
+                    className={`transition-colors ${
+                      row.isTotal 
+                        ? 'bg-slate-50 hover:bg-slate-100/80 font-bold border-t-2 border-slate-300 text-slate-900' 
+                        : 'hover:bg-emerald-50/50'
+                    }`}
+                  >
+                    <td className={`py-2.5 px-3 font-sans ${row.isTotal ? 'font-black text-slate-900' : 'font-bold text-slate-900'}`}>
+                      {row.label}
+                    </td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.matches}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.inningsBowled ?? (row.st.oversBowled > 0 ? row.st.matches : 0)}</td>
+                    <td className="py-2.5 px-2 text-right text-slate-700">{row.st.ballsBowled ?? Math.round(row.st.oversBowled * 6)}</td>
+                    <td className="py-2.5 px-3 text-right text-slate-700">{row.st.runsConceded ?? 0}</td>
+                    <td className={`py-2.5 px-2 text-right font-black ${row.isTotal ? 'text-teal-800' : 'text-teal-700'}`}>
+                      {row.st.wickets}
+                    </td>
+                    <td className="py-2.5 px-3 text-center font-bold text-slate-800">{row.st.bestBowling || '-'}</td>
+                    <td className="py-2.5 px-3 text-center font-bold text-slate-700">{row.st.bestBowlingMatch || row.st.bestBowling || '-'}</td>
+                    <td className="py-2.5 px-3 text-right font-bold text-amber-800">
+                      {row.st.bowlingAverage > 0 ? row.st.bowlingAverage.toFixed(2) : (row.st.wickets > 0 ? '0.00' : '-')}
+                    </td>
+                    <td className="py-2.5 px-3 text-right text-slate-700">
+                      {row.st.economy > 0 ? row.st.economy.toFixed(2) : '-'}
+                    </td>
+                    <td className="py-2.5 px-2 text-right text-slate-700">
+                      {(row.st.bowlingStrikeRate && row.st.bowlingStrikeRate > 0) ? row.st.bowlingStrikeRate.toFixed(1) : '-'}
+                    </td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.fourWickets ?? 0}</td>
+                    <td className="py-2.5 px-2 text-center text-amber-700 font-bold">{row.st.fiveWickets ?? 0}</td>
+                    <td className="py-2.5 px-2 text-center text-teal-700 font-bold">{row.st.tenWickets ?? 0}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
