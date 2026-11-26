@@ -300,64 +300,72 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
       <div className={`p-6 rounded-2xl border shadow-xl relative overflow-hidden ${
         player.is_wonderkid ? 'sovereign-card-gold' : 'sovereign-card'
       }`}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div className="flex items-start gap-4">
-            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-4xl font-black shadow-md border shrink-0 ${
-              player.is_wonderkid 
-                ? 'bg-gradient-to-br from-amber-400 to-amber-600 border-amber-300 text-black' 
-                : 'bg-gradient-to-br from-emerald-600 to-teal-700 border-emerald-400 text-white'
-            }`}>
-              {player.is_wonderkid ? '🏏' : '🧢'}
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs px-2.5 py-0.5 rounded-full font-mono font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
-                  ID: #{cleanId(player.id)}
-                </span>
-                {player.is_wonderkid && (
-                  <span className="flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                    <Sparkles className="w-3 h-3 text-amber-600" /> 17yo Academy Wonderkid
-                  </span>
-                )}
-                <span className="text-xs text-emerald-700 font-semibold">
-                  Somnath Super Devs &bull; Tamil Nadu, IND
-                </span>
-              </div>
-              <h2 className="text-3xl font-black text-slate-900 mt-1.5 tracking-tight">{player.name}</h2>
-              <div className="text-sm font-semibold text-slate-600 mt-0.5 flex items-center gap-2 flex-wrap">
-                <span className="text-emerald-700 font-bold">{player.tactical_role}</span>
-                <span>&bull;</span>
-                <span>Batting: <strong className="text-slate-800 font-mono">{formatBattingHand(player.batting_hand)}</strong> <span className="text-xs text-slate-500">({getBattingHandFullName(player.batting_hand)})</span></span>
-                <span>&bull;</span>
-                <span>Bowling: <strong className="text-cyan-800 font-mono px-1.5 py-0.5 rounded bg-cyan-100 border border-cyan-300 text-xs">{formatBowlingType(player.bowling_type)}</strong> <span className="text-xs text-slate-500">({getBowlingTypeFullName(player.bowling_type)})</span></span>
-              </div>
-            </div>
-          </div>
+        {(() => {
+          const isKeeper = player.tactical_role?.includes('Keeper') || (player.keeping && getSkillLevel(player.keeping) >= 7);
+          const isBowler = player.tactical_role?.includes('Bowler') || player.tactical_role?.includes('Spinner') || (player.bowling && getSkillLevel(player.bowling) >= 7);
+          const roleEmoji = isKeeper ? '🧤' : isBowler ? '🔴' : '🏏';
 
-          {/* Key Metrics Quick Box */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-center shadow-xs">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-slate-500">Age</span>
-              <div className="text-xl font-black text-slate-900">{player.age} Years</div>
-              <span className="text-[10px] text-emerald-700 font-medium">{player.age <= 18 ? 'Youth Trainee' : 'Senior'}</span>
+          return (
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+              <div className="flex items-start gap-4">
+                <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-4xl font-black shadow-md border shrink-0 ${
+                  player.is_wonderkid 
+                    ? 'bg-gradient-to-br from-amber-400 to-amber-600 border-amber-300 text-black' 
+                    : 'bg-gradient-to-br from-emerald-600 to-teal-700 border-emerald-400 text-white'
+                }`}>
+                  {roleEmoji}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs px-2.5 py-0.5 rounded-full font-mono font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      ID: #{cleanId(player.id)}
+                    </span>
+                    {player.is_wonderkid && (
+                      <span className="flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                        <Sparkles className="w-3 h-3 text-amber-600" /> 17yo Academy Wonderkid
+                      </span>
+                    )}
+                    <span className="text-xs text-emerald-700 font-semibold">
+                      Somnath Super Devs &bull; Tamil Nadu, IND
+                    </span>
+                  </div>
+                  <h2 className="text-3xl font-black text-slate-900 mt-1.5 tracking-tight">{player.name}</h2>
+                  <div className="text-sm font-semibold text-slate-600 mt-0.5 flex items-center gap-2 flex-wrap">
+                    <span className="text-emerald-700 font-bold">{player.tactical_role}</span>
+                    <span>&bull;</span>
+                    <span>Batting: <strong className="text-slate-800 font-mono">{formatBattingHand(player.batting_hand)}</strong> <span className="text-xs text-slate-500">({getBattingHandFullName(player.batting_hand)})</span></span>
+                    <span>&bull;</span>
+                    <span>Bowling: <strong className="text-cyan-800 font-mono px-1.5 py-0.5 rounded bg-cyan-100 border border-cyan-300 text-xs">{formatBowlingType(player.bowling_type)}</strong> <span className="text-xs text-slate-500">({getBowlingTypeFullName(player.bowling_type)})</span></span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Key Metrics Quick Box */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-center shadow-xs">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-500">Age</span>
+                  <div className="text-xl font-black text-slate-900">{player.age} Years</div>
+                  <span className="text-[10px] text-emerald-700 font-medium">{player.age <= 18 ? 'Youth Trainee' : 'Senior'}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-500">Battrick Talent (BTI)</span>
+                  <div className="text-xl font-black font-mono text-emerald-700">{(player.bti ?? 0).toLocaleString()}</div>
+                  <span className="text-[10px] text-slate-500">Subskill: {player.subskill ?? 6.20}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-500">Weekly Wage</span>
+                  <div className="text-xl font-black font-mono text-slate-800">£{(player.wage ?? 0).toLocaleString()}</div>
+                  <span className="text-[10px] text-slate-500">/ week</span>
+                </div>
+                <div className="min-w-0" title={`£${(player.market_value ?? 0).toLocaleString()}`}>
+                  <span className="text-[10px] uppercase font-bold text-slate-500">Market Value</span>
+                  <div className="text-sm sm:text-base font-black font-mono text-amber-700 whitespace-nowrap">£{(player.market_value ?? 0).toLocaleString()}</div>
+                  <span className="text-[10px] text-amber-600/80">Estimated</span>
+                </div>
+              </div>
             </div>
-            <div>
-              <span className="text-[10px] uppercase font-bold text-slate-500">Battrick Talent (BTI)</span>
-              <div className="text-xl font-black font-mono text-emerald-700">{(player.bti ?? 0).toLocaleString()}</div>
-              <span className="text-[10px] text-slate-500">Subskill: {player.subskill ?? 6.20}</span>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase font-bold text-slate-500">Weekly Wage</span>
-              <div className="text-xl font-black font-mono text-slate-800">£{(player.wage ?? 0).toLocaleString()}</div>
-              <span className="text-[10px] text-slate-500">/ week</span>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase font-bold text-slate-500">Market Value</span>
-              <div className="text-xl font-black font-mono text-amber-700">£{(player.market_value ?? 0).toLocaleString()}</div>
-              <span className="text-[10px] text-amber-600/80">Estimated</span>
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Unique Club Milestones */}
         {player.uniqueRecords && player.uniqueRecords.length > 0 && (

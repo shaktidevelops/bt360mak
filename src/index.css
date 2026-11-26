@@ -6,14 +6,14 @@
 }
 
 /* =====================================================================
-   WORLD-CLASS BRIGHT CRICKET STADIUM & PAVILION THEME (DAYLIGHT SPORTS)
+   WORLD-CLASS BRIGHT CRICKET STADIUM & PAVILION THEME (DAYLIGHT SOVEREIGN)
    ===================================================================== */
 
 html, body {
   font-family: var(--font-sans);
   margin: 0;
   padding: 0;
-  background-color: #f6f9f8;
+  background-color: #f8faf9;
   color: #0f172a;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -21,14 +21,14 @@ html, body {
 
 /* Radiant Daylight Stadium Canvas: Sunlit Oval Lawn, Gentle Mown Turf Patterns */
 .cricket-stadium-canvas {
-  background-color: #f6f9f8;
+  background-color: #f8faf9;
   background-image: 
     /* Sunlit Oval Radial Glow */
-    radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.09) 0%, rgba(245, 158, 11, 0.04) 35%, transparent 70%),
+    radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.08) 0%, rgba(245, 158, 11, 0.03) 30%, transparent 65%),
     /* Subtle Boundary Lawn Mowing Patterns */
-    repeating-linear-gradient(90deg, rgba(16, 185, 129, 0.012) 0px, rgba(16, 185, 129, 0.012) 60px, transparent 60px, transparent 120px),
+    repeating-linear-gradient(90deg, rgba(16, 185, 129, 0.015) 0px, rgba(16, 185, 129, 0.015) 60px, transparent 60px, transparent 120px),
     /* Soft Pearl Daylight Gradient */
-    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
+    linear-gradient(180deg, #ffffff 0%, #f8faf9 40%, #f1f5f9 100%);
   background-attachment: fixed;
   min-height: 100vh;
 }
@@ -42,7 +42,7 @@ html, body {
   background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #10b98160;
+  background: rgba(16, 185, 129, 0.45);
   border-radius: 9999px;
   border: 1px solid rgba(16, 185, 129, 0.35);
 }
@@ -57,57 +57,124 @@ html, body {
 /* 1. Premier Sovereign Card (Crisp White Pavilion & Emerald Trim) */
 .sovereign-card {
   background: #ffffff;
-  border: 1px solid rgba(16, 185, 129, 0.28);
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   color: #0f172a;
 }
 .sovereign-card:hover {
-  border-color: #10b981;
-  box-shadow: 0 10px 25px -4px rgba(16, 185, 129, 0.16), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 10px 25px -4px rgba(16, 185, 129, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
 }
 
 /* 2. Golden Willow Card (For Batting MVP, Wonderkids, Finances) */
 .sovereign-card-gold {
   background: linear-gradient(145deg, #fffdfa 0%, #fffbeb 100%);
-  border: 1px solid rgba(245, 158, 11, 0.45);
-  box-shadow: 0 4px 20px -2px rgba(245, 158, 11, 0.12), 0 1px 3px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(245, 158, 11, 0.40);
+  box-shadow: 0 4px 18px -2px rgba(245, 158, 11, 0.10), 0 1px 3px rgba(0, 0, 0, 0.02);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   color: #0f172a;
 }
 .sovereign-card-gold:hover {
   border-color: #f59e0b;
-  box-shadow: 0 10px 25px -4px rgba(245, 158, 11, 0.22);
+  box-shadow: 0 10px 25px -4px rgba(245, 158, 11, 0.18);
 }
 
 /* 3. Strike Cyan Card (For Bowling Aces, Tacticians, Match Radar) */
 .sovereign-card-cyan {
   background: linear-gradient(145deg, #f7fdfd 0%, #f0fdfa 100%);
-  border: 1px solid rgba(6, 182, 212, 0.40);
-  box-shadow: 0 4px 20px -2px rgba(6, 182, 212, 0.12), 0 1px 3px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(13, 148, 136, 0.35);
+  box-shadow: 0 4px 18px -2px rgba(13, 148, 136, 0.10), 0 1px 3px rgba(0, 0, 0, 0.02);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   color: #0f172a;
 }
 .sovereign-card-cyan:hover {
-  border-color: #06b6d4;
-  box-shadow: 0 10px 25px -4px rgba(6, 182, 212, 0.22);
+  border-color: #0d9488;
+  box-shadow: 0 10px 25px -4px rgba(13, 148, 136, 0.18);
 }
 
 /* 4. Stadium Turf Panel */
 .cricket-turf-card {
   background: linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  box-shadow: 0 4px 15px -2px rgba(16, 185, 129, 0.10);
+  border: 1px solid rgba(16, 185, 129, 0.30);
+  box-shadow: 0 4px 15px -2px rgba(16, 185, 129, 0.08);
   color: #0f172a;
 }
 
-/* 5. Stadium Scoreboard Panel (Daylight Broadcasting Digital Ribbon) */
+/* 5. Stadium Scoreboard Panel */
 .scoreboard-panel {
   background: #ffffff;
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  box-shadow: 0 6px 20px -2px rgba(15, 23, 42, 0.07);
+  border: 1px solid rgba(16, 185, 129, 0.30);
+  box-shadow: 0 6px 20px -2px rgba(15, 23, 42, 0.06);
   position: relative;
   color: #0f172a;
+}
+
+/* Segmented Sub-Nav Tab Container Track */
+.nav-tab-track {
+  background-color: #f1f5f9;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  display: inline-flex;
+  gap: 4px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* =====================================================================
+   HIGH-CONTRAST CRICKET BUTTON SYSTEM
+   ===================================================================== */
+.btn-cricket-emerald {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+  border: 1px solid #059669;
+  transition: all 0.15s ease-in-out;
+}
+.btn-cricket-emerald:hover {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+}
+
+.btn-cricket-amber {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
+  border: 1px solid #d97706;
+  transition: all 0.15s ease-in-out;
+}
+.btn-cricket-amber:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
+}
+
+.btn-cricket-teal {
+  background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.3);
+  border: 1px solid #0f766e;
+  transition: all 0.15s ease-in-out;
+}
+.btn-cricket-teal:hover {
+  background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.4);
+}
+
+.btn-cricket-white {
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 700;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s ease-in-out;
+}
+.btn-cricket-white:hover {
+  background: #f8fafc;
+  border-color: #10b981;
+  color: #047857;
 }
 
 /* =====================================================================
@@ -165,7 +232,7 @@ html, body {
   border-radius: 1px;
 }
 
-/* 22-Yard Pitch Strip Textures */
+/* 22-Yard Pitch Strip Textures & High-Contrast Markings */
 .cricket-pitch-strip {
   background: linear-gradient(180deg, #c7a783 0%, #dfc3a4 25%, #be9c76 50%, #dfc3a4 75%, #c7a783 100%);
   box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.15), 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -182,6 +249,13 @@ html, body {
 .cricket-pitch-uneven {
   background: linear-gradient(180deg, #a8845e 0%, #c19e79 30%, #9c7650 70%, #b8936e 100%);
   border: 2px dashed rgba(255, 255, 255, 0.9);
+}
+
+/* High-Contrast Pitch Crease Labels */
+.crease-label-dark {
+  color: #3e2208 !important;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 /* Shimmer & Glow Keyframes */

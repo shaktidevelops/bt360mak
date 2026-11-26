@@ -984,35 +984,37 @@ Coach Quality: Competent`;
         </button>
       </div>
 
-      {/* DOMAIN QUICK SELECTOR BAR */}
-      <div className="flex flex-wrap items-center gap-2 p-3 bg-white rounded-xl border border-slate-200 text-xs shadow-xs">
-        <span className="text-[10px] uppercase font-bold text-slate-500 mr-2 flex items-center gap-1">
-          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-          <span>Quick Select:</span>
-        </span>
-        {[
-          { id: 'squad', label: '👥 Squad (squad.asp)', icon: Users },
-          { id: 'fixtures', label: '🏏 Scorecard (matchinfofc.asp)', icon: Trophy },
-          { id: 'finances', label: '💰 Finances (finances.asp)', icon: DollarSign },
-          { id: 'ground', label: '🏟️ Ground (ground.asp)', icon: Building },
-          { id: 'office', label: '🏢 Office (office.asp)', icon: Building }
-        ].map(item => (
-          <button
-            key={item.id}
-            onClick={() => {
-              setSelectedDomain(item.id as any);
-              loadDomainPreset(item.id);
-            }}
-            className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer shadow-xs ${
-              selectedDomain === item.id 
-                ? 'bg-emerald-600 text-white border-emerald-600 font-black shadow-sm' 
-                : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      {/* DOMAIN QUICK SELECTOR BAR (Available in Paste tab) */}
+      {activeImportTab === 'paste' && (
+        <div className="flex flex-wrap items-center gap-2 p-3 bg-white rounded-xl border border-slate-200 text-xs shadow-xs">
+          <span className="text-[10px] uppercase font-bold text-slate-500 mr-2 flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>Quick Select:</span>
+          </span>
+          {[
+            { id: 'squad', label: '👥 Squad (squad.asp)', icon: Users },
+            { id: 'fixtures', label: '🏏 Scorecard (matchinfofc.asp)', icon: Trophy },
+            { id: 'finances', label: '💰 Finances (finances.asp)', icon: DollarSign },
+            { id: 'ground', label: '🏟️ Ground (ground.asp)', icon: Building },
+            { id: 'office', label: '🏢 Office (office.asp)', icon: Building }
+          ].map(item => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setSelectedDomain(item.id as any);
+                loadDomainPreset(item.id);
+              }}
+              className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer shadow-xs ${
+                selectedDomain === item.id 
+                  ? 'btn-cricket-emerald text-white border-emerald-600 font-black shadow-sm' 
+                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* TAB 1: Smart Text / HTML Paste */}
       {activeImportTab === 'paste' && (

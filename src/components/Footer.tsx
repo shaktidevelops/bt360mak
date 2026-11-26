@@ -11,34 +11,34 @@ export const Footer: React.FC<FooterProps> = ({ club }) => {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Club Status Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center text-xl font-black text-white shadow-sm border border-emerald-400">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center text-xl font-black text-white shadow-sm border border-emerald-400 shrink-0">
             🏏
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-black text-slate-900 text-sm">{club.name}</span>
-              <span className="font-mono text-[10px] text-emerald-800 font-black bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 shadow-xs">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-black text-slate-900 text-sm whitespace-nowrap">{club.name}</span>
+              <span className="font-mono text-[10px] text-emerald-800 font-black bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 shadow-xs whitespace-nowrap">
                 #{club.id}
               </span>
-              <span className="text-[11px] text-slate-600 font-bold hidden sm:inline">&bull; 🏟️ Prabhas Coastal Oval 🏔️</span>
+              <span className="text-[11px] text-slate-600 font-bold whitespace-nowrap hidden sm:inline">&bull; 🏟️ Prabhas Coastal Oval</span>
             </div>
             <div className="text-[11px] text-slate-600 mt-1 flex items-center gap-2 flex-wrap font-mono">
-              <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">FC: <strong className="text-emerald-700">{club.division_fc}</strong></span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 whitespace-nowrap">FC: <strong className="text-emerald-700">{club.division_fc}</strong></span>
               <span>&bull;</span>
-              <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">OD: <strong className="text-teal-700">{club.division_od}</strong></span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 whitespace-nowrap">OD: <strong className="text-teal-700">{club.division_od}</strong></span>
               <span>&bull;</span>
-              <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">T20: <strong className="text-amber-700">{club.division_t20}</strong></span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 whitespace-nowrap">T20: <strong className="text-amber-700">{club.division_t20}</strong></span>
             </div>
           </div>
         </div>
 
         {/* Live Engine Synchronizer */}
-        <div className="flex items-center gap-4 text-center">
-          <div className="flex items-center gap-2 bg-emerald-50 px-3.5 py-1.5 rounded-xl border border-emerald-200 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center">
+          <div className="flex items-center gap-2 bg-emerald-50 px-3.5 py-1.5 rounded-xl border border-emerald-200 shadow-xs whitespace-nowrap">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-xs" />
             <span className="text-[11px] font-black text-emerald-800">Battrick S69 Real Engine Active</span>
           </div>
-          <div className="hidden sm:block text-[11px] text-slate-600">
+          <div className="text-[11px] text-slate-600 whitespace-nowrap">
             Next Cycle: <span className="text-amber-700 font-mono font-black">Friday Training Pops (05:00 UTC)</span>
           </div>
         </div>
@@ -46,10 +46,10 @@ export const Footer: React.FC<FooterProps> = ({ club }) => {
         {/* Version & Sovereign Tag */}
         <div className="flex items-center gap-3 text-right">
           <div>
-            <div className="font-mono text-[11px] font-black text-slate-900">
+            <div className="font-mono text-[11px] font-black text-slate-900 whitespace-nowrap">
               BT360MAK <span className="text-emerald-700 font-mono">v3.0 Daylight Sovereign</span>
             </div>
-            <div className="text-[10px] text-slate-500">
+            <div className="text-[10px] text-slate-500 whitespace-nowrap">
               React 19 &bull; Vite 6 &bull; Supabase Live &bull; 12 Battrick Domains
             </div>
           </div>

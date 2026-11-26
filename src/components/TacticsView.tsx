@@ -196,13 +196,12 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
 
   // Bowling Quota State
   const maxOversPerBowler = matchFormat === 'T20' ? 4 : matchFormat === 'OD' ? 10 : 35;
-  const [bowlerOvers, setBowlerOvers] = useState<number[]>([
-    maxOversPerBowler,
-    maxOversPerBowler,
-    maxOversPerBowler,
-    maxOversPerBowler,
-    maxOversPerBowler
-  ]);
+  const getFormatBowlerDefaults = (fmt: 'FC' | 'OD' | 'T20') => {
+    if (fmt === 'T20') return [4, 4, 4, 4, 4];
+    if (fmt === 'OD') return [10, 10, 10, 10, 10];
+    return [20, 20, 20, 20, 20]; // First Class standard 100 overs
+  };
+  const [bowlerOvers, setBowlerOvers] = useState<number[]>(() => getFormatBowlerDefaults(matchFormat));
 
   // Handle position swaps / moves
   const movePlayer = (fromIndex: number, toIndex: number) => {
@@ -337,6 +336,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
     setLineupPlayerIds(new11);
     setLineupAggressions(newAgg);
     setCaptainId(cleanId(captainRankings[0]?.player?.id || squad[0]?.id));
+    setBowlerOvers(getFormatBowlerDefaults(fmt));
   };
 
   // Resolve player objects in lineup
@@ -361,26 +361,26 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
   const fieldPositions = useMemo(() => {
     if (fieldSetup === 'Attacking') {
       return [
-        { name: 'Wicketkeeper', top: '78%', left: '50%', role: 'WK' },
-        { name: '1st Slip', top: '76%', left: '56%', role: 'Catching' },
-        { name: '2nd Slip', top: '74%', left: '61%', role: 'Catching' },
-        { name: 'Gully', top: '68%', left: '68%', role: 'Catching' },
-        { name: 'Point', top: '55%', left: '76%', role: 'Ring' },
+        { name: 'Wicketkeeper', top: '80%', left: '46%', role: 'WK' },
+        { name: '1st Slip', top: '76%', left: '57%', role: 'Catching' },
+        { name: '2nd Slip', top: '72%', left: '65%', role: 'Catching' },
+        { name: 'Gully', top: '65%', left: '73%', role: 'Catching' },
+        { name: 'Point', top: '54%', left: '78%', role: 'Ring' },
         { name: 'Cover', top: '42%', left: '72%', role: 'Ring' },
-        { name: 'Mid-Off', top: '35%', left: '58%', role: 'Ring' },
-        { name: 'Bowler', top: '30%', left: '50%', role: 'Bowler' },
-        { name: 'Mid-On', top: '35%', left: '42%', role: 'Ring' },
-        { name: 'Mid-Wicket', top: '50%', left: '30%', role: 'Ring' },
+        { name: 'Mid-Off', top: '34%', left: '58%', role: 'Ring' },
+        { name: 'Bowler', top: '28%', left: '50%', role: 'Bowler' },
+        { name: 'Mid-On', top: '34%', left: '42%', role: 'Ring' },
+        { name: 'Mid-Wicket', top: '48%', left: '29%', role: 'Ring' },
         { name: 'Square Leg', top: '65%', left: '32%', role: 'Ring' }
       ];
     } else if (fieldSetup === 'Defensive') {
       return [
-        { name: 'Wicketkeeper', top: '80%', left: '50%', role: 'WK' },
-        { name: '1st Slip', top: '78%', left: '58%', role: 'Catching' },
+        { name: 'Wicketkeeper', top: '81%', left: '46%', role: 'WK' },
+        { name: '1st Slip', top: '77%', left: '58%', role: 'Catching' },
         { name: 'Deep Point', top: '70%', left: '88%', role: 'Boundary' },
         { name: 'Deep Cover', top: '45%', left: '86%', role: 'Boundary' },
         { name: 'Long-Off', top: '15%', left: '65%', role: 'Boundary' },
-        { name: 'Bowler', top: '30%', left: '50%', role: 'Bowler' },
+        { name: 'Bowler', top: '28%', left: '50%', role: 'Bowler' },
         { name: 'Long-On', top: '15%', left: '35%', role: 'Boundary' },
         { name: 'Deep Mid-Wicket', top: '45%', left: '14%', role: 'Boundary' },
         { name: 'Deep Square Leg', top: '70%', left: '14%', role: 'Boundary' },
@@ -390,13 +390,13 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
     } else {
       // Balanced
       return [
-        { name: 'Wicketkeeper', top: '79%', left: '50%', role: 'WK' },
-        { name: '1st Slip', top: '77%', left: '57%', role: 'Catching' },
+        { name: 'Wicketkeeper', top: '80%', left: '46%', role: 'WK' },
+        { name: '1st Slip', top: '77%', left: '58%', role: 'Catching' },
         { name: 'Cover Point', top: '58%', left: '72%', role: 'Ring' },
         { name: 'Extra Cover', top: '45%', left: '68%', role: 'Ring' },
-        { name: 'Mid-Off', top: '32%', left: '58%', role: 'Ring' },
+        { name: 'Mid-Off', top: '33%', left: '58%', role: 'Ring' },
         { name: 'Bowler', top: '28%', left: '50%', role: 'Bowler' },
-        { name: 'Mid-On', top: '32%', left: '42%', role: 'Ring' },
+        { name: 'Mid-On', top: '33%', left: '42%', role: 'Ring' },
         { name: 'Mid-Wicket', top: '48%', left: '32%', role: 'Ring' },
         { name: 'Deep Square Leg', top: '68%', left: '16%', role: 'Boundary' },
         { name: 'Deep Point', top: '68%', left: '84%', role: 'Boundary' },
@@ -432,7 +432,10 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
               {(['FC', 'OD', 'T20'] as const).map(fmt => (
                 <button
                   key={fmt}
-                  onClick={() => setMatchFormat(fmt)}
+                  onClick={() => {
+                    setMatchFormat(fmt);
+                    setBowlerOvers(getFormatBowlerDefaults(fmt));
+                  }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
                     matchFormat === fmt
                       ? 'bg-emerald-600 text-white shadow'
@@ -465,7 +468,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
             <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-xs">
               <button
                 onClick={() => autoOptimizeForFormat('FC')}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition-all cursor-pointer shadow-xs"
+                className="btn-cricket-emerald flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shadow-xs"
                 title="Optimize XI for First Class: high concentration, patient batting, 3-seam/2-spin battery"
               >
                 <span>🏆</span>
@@ -473,7 +476,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
               </button>
               <button
                 onClick={() => autoOptimizeForFormat('OD')}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-black text-xs transition-all cursor-pointer shadow-xs"
+                className="btn-cricket-teal flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shadow-xs"
                 title="Optimize XI for One Day: balanced run scoring, powerplay & death bowlers"
               >
                 <span>⚡</span>
@@ -481,7 +484,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
               </button>
               <button
                 onClick={() => autoOptimizeForFormat('T20')}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-black font-black text-xs transition-all cursor-pointer shadow-xs"
+                className="btn-cricket-amber flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shadow-xs"
                 title="Optimize XI for BT20: explosive boundary hitters & express strike bowling"
               >
                 <span>🔥</span>
@@ -739,27 +742,27 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
       {/* VIEW 2: VISUAL 2D CRICKET GROUND & FIELD FORMATION RADAR */}
       {activeTab === 'field' && (
         <div className="space-y-4">
-          <div className="sovereign-card p-6 rounded-2xl border-emerald-600/30 shadow-2xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-emerald-800/40">
+          <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
               <div>
-                <h3 className="text-base font-black text-white flex items-center gap-2">
-                  <Target className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-emerald-600" />
                   <span>2D Cricket Oval & Field Setup Radar</span>
                 </h3>
-                <p className="text-xs text-slate-300 mt-0.5">
+                <p className="text-xs text-slate-600 mt-0.5">
                   Visual tactical representation of fielders positioned on the Prabhas Coastal Oval ground.
                 </p>
               </div>
 
-              <div className="flex items-center gap-1.5 bg-[#04120e] p-1 rounded-xl border border-emerald-800/60 text-xs">
+              <div className="flex items-center gap-1.5 nav-tab-track p-1 rounded-xl text-xs">
                 {(['Attacking', 'Balanced', 'Defensive'] as FieldSetup[]).map(setup => (
                   <button
                     key={setup}
                     onClick={() => setFieldSetup(setup)}
                     className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                       fieldSetup === setup
-                        ? 'bg-emerald-600 text-white shadow font-black'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'btn-cricket-emerald shadow'
+                        : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     {setup}
@@ -822,12 +825,12 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
               })}
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300 pt-2">
-              <span className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 pt-2">
+              <span className="flex items-center gap-1.5 font-bold">
                 <span className="w-3 h-3 rounded-full cricket-ball" />
                 <span>Fielders & Positions</span>
               </span>
-              <span className="text-emerald-400 font-bold">
+              <span className="text-emerald-700 font-bold">
                 Field Strategy: {fieldSetup} ({fieldSetup === 'Attacking' ? 'Targeting slips & edges' : fieldSetup === 'Defensive' ? 'Boundary ring protection' : 'Balanced containment'})
               </span>
             </div>
@@ -980,7 +983,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                       <span className="w-1.5 h-5 bg-amber-200 rounded-xs shadow"></span>
                       <span className="w-1.5 h-5 bg-amber-200 rounded-xs shadow"></span>
                     </div>
-                    <span className="text-[9px] font-mono text-white font-bold mt-0.5 drop-shadow">Bowling Crease</span>
+                    <span className="text-[9px] font-mono font-bold mt-1 px-2.5 py-0.5 rounded-full bg-black/85 text-white shadow-sm border border-white/20">Bowling Crease</span>
                   </div>
 
                   {/* Pitch Center Surface Intel */}
@@ -992,7 +995,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
 
                   {/* Bottom Batting Crease & Stumps (Striker End) */}
                   <div className="w-full flex flex-col items-center border-t-2 border-white/90 pt-2">
-                    <span className="text-[9px] font-mono text-white font-bold mb-0.5 drop-shadow">Popping Crease</span>
+                    <span className="text-[9px] font-mono font-bold mb-1 px-2.5 py-0.5 rounded-full bg-black/85 text-white shadow-sm border border-white/20">Popping Crease</span>
                     <div className="flex items-end gap-1.5 h-6">
                       <span className="w-1.5 h-5 bg-amber-200 rounded-xs shadow"></span>
                       <span className="w-1.5 h-5 bg-amber-200 rounded-xs shadow"></span>

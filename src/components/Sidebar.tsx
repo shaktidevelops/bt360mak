@@ -99,9 +99,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Club Administration Section */}
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-wider mb-1.5 px-2.5 text-amber-700 flex items-center justify-between">
+          <div className="text-[10px] font-bold uppercase tracking-wider mb-1.5 px-2.5 text-slate-500 flex items-center justify-between">
             <span>Club Administration</span>
-            <span className="text-[9px] text-amber-700/80 font-mono">MGMT</span>
+            <span className="text-[9px] text-slate-400 font-mono">MGMT</span>
           </div>
           <nav className="space-y-0.5">
             {operationsItems.map((item) => {
@@ -113,11 +113,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => onSelectTab(item.id)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-gradient-to-r from-amber-600 to-emerald-700 text-white shadow-md border border-amber-500 font-bold'
-                      : 'text-slate-700 hover:text-amber-800 hover:bg-amber-50/80 border border-transparent'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md border border-emerald-500 font-bold'
+                      : 'text-slate-700 hover:text-emerald-800 hover:bg-emerald-50/80 border border-transparent'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-amber-600'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-emerald-600'}`} />
                   <span className="truncate">{item.label}</span>
                 </button>
               );

@@ -62,7 +62,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <span className="w-2.5 h-2.5 rounded-full cricket-ball shrink-0"></span>
               <span>Prabhas Coastal Arena &bull; Season 69 Command</span>
             </div>
-            <h2 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2 flex-wrap">
               <span>Welcome back, Lead Tactician {club.manager}</span>
               <span className="text-lg">🏏</span>
             </h2>
@@ -89,13 +89,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="flex flex-wrap sm:flex-nowrap gap-3 shrink-0">
             <button 
               onClick={() => onNavigate('tactics')}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md border border-emerald-500 transition-all cursor-pointer whitespace-nowrap"
+              className="btn-cricket-emerald flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer whitespace-nowrap"
             >
               <span>⚔️</span> Best XI Strategy &rarr;
             </button>
             <button 
               onClick={() => onNavigate('training')}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-emerald-800 border border-emerald-300 font-bold text-xs transition-all cursor-pointer shadow-xs whitespace-nowrap"
+              className="btn-cricket-white flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs whitespace-nowrap"
             >
               <span>🎯</span> 10-Net Facility &rarr;
             </button>
@@ -104,71 +104,71 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* 6 Key Club Executive Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5">
-        <div className="p-4 rounded-2xl sovereign-card">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-3.5">
+        <div className="p-3.5 rounded-2xl sovereign-card min-w-0" title={`£${club.bank_balance.toLocaleString()}`}>
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Treasury</span>
-            <CircleDollarSign className="w-4 h-4 text-emerald-600" />
+            <CircleDollarSign className="w-4 h-4 text-emerald-600 shrink-0" />
           </div>
-          <div className="text-xl lg:text-2xl font-black font-mono text-emerald-700 mt-1">
+          <div className="text-sm sm:text-base xl:text-[17px] font-black font-mono text-emerald-700 mt-1 whitespace-nowrap">
             £{club.bank_balance.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-500 mt-0.5">Solvent Capital</div>
+          <div className="text-xs text-slate-500 mt-0.5 truncate">Solvent Capital</div>
         </div>
 
-        <div className="p-4 rounded-2xl sovereign-card">
+        <div className="p-3.5 rounded-2xl sovereign-card min-w-0" title={`£${totalMarketVal.toLocaleString()}`}>
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Squad Val</span>
-            <Users className="w-4 h-4 text-cyan-600" />
+            <Users className="w-4 h-4 text-teal-600 shrink-0" />
           </div>
-          <div className="text-xl lg:text-2xl font-black font-mono text-cyan-700 mt-1">
+          <div className="text-sm sm:text-base xl:text-[17px] font-black font-mono text-teal-700 mt-1 whitespace-nowrap">
             £{totalMarketVal.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-500 mt-0.5">14 Active Players</div>
+          <div className="text-xs text-slate-500 mt-0.5 truncate">14 Active Squad</div>
         </div>
 
-        <div className="p-4 rounded-2xl sovereign-card-gold">
+        <div className="p-3.5 rounded-2xl sovereign-card-gold min-w-0" title={`${wonderkids.length} Wonderkid Trainees`}>
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider">Wonderkids</span>
-            <Award className="w-4 h-4 text-amber-600" />
+            <Award className="w-4 h-4 text-amber-600 shrink-0" />
           </div>
-          <div className="text-xl lg:text-2xl font-black font-mono text-amber-800 mt-1">
-            {wonderkids.length} Wonderkids
+          <div className="text-sm sm:text-base xl:text-[17px] font-black font-mono text-amber-800 mt-1 whitespace-nowrap">
+            {wonderkids.length} Trainees
           </div>
-          <div className="text-xs text-amber-700 mt-0.5">17yo Prodigies</div>
+          <div className="text-xs text-amber-700 mt-0.5 truncate">17yo Prodigies</div>
         </div>
 
-        <div className="p-4 rounded-2xl sovereign-card">
+        <div className="p-3.5 rounded-2xl sovereign-card min-w-0" title={`${club.stadium_capacity.toLocaleString()} Capacity`}>
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Stadium</span>
-            <Building2 className="w-4 h-4 text-emerald-600" />
+            <Building2 className="w-4 h-4 text-emerald-600 shrink-0" />
           </div>
-          <div className="text-xl lg:text-2xl font-black font-mono text-slate-900 mt-1">
+          <div className="text-sm sm:text-base xl:text-[17px] font-black font-mono text-slate-900 mt-1 whitespace-nowrap">
             {club.stadium_capacity.toLocaleString()}
           </div>
           <div className="text-xs text-slate-500 mt-0.5 truncate">Prabhas Oval</div>
         </div>
 
-        <div className="p-4 rounded-2xl sovereign-card">
+        <div className="p-3.5 rounded-2xl sovereign-card min-w-0" title={`Form Average: ${club.form_avg}`}>
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Squad Form</span>
-            <TrendingUp className="w-4 h-4 text-teal-600" />
+            <TrendingUp className="w-4 h-4 text-teal-600 shrink-0" />
           </div>
-          <div className="text-xl lg:text-2xl font-black font-mono text-teal-700 mt-1">
+          <div className="text-sm sm:text-base xl:text-[17px] font-black font-mono text-teal-700 mt-1 whitespace-nowrap">
             {club.form_avg}
           </div>
-          <div className="text-xs text-slate-500 mt-0.5">High Cohesion</div>
+          <div className="text-xs text-slate-500 mt-0.5 truncate">High Cohesion</div>
         </div>
 
-        <div className="p-4 rounded-2xl sovereign-card-gold">
+        <div className="p-3.5 rounded-2xl sovereign-card-gold min-w-0" title="70 ITS Level 20 Banked">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider">ITS Reserve</span>
-            <Zap className="w-4 h-4 text-amber-600" />
+            <Zap className="w-4 h-4 text-amber-600 shrink-0" />
           </div>
-          <div className="text-xl lg:text-2xl font-black font-mono text-amber-800 mt-1">
-            70 Lvl 20
+          <div className="text-sm sm:text-base xl:text-[17px] font-black font-mono text-amber-800 mt-1 whitespace-nowrap">
+            70 ITS
           </div>
-          <div className="text-xs text-amber-700 mt-0.5">2 Pulls Ready</div>
+          <div className="text-xs text-amber-700 mt-0.5 truncate">Lvl 20 &bull; 2 Pulls</div>
         </div>
       </div>
 
@@ -281,9 +281,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               onSelectPlayer?.(topRunScorer.id);
               onNavigate('player-dossier');
             }}
-            className="mt-4 w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+            className="mt-4 w-full py-2.5 rounded-xl btn-cricket-amber text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
           >
-            <UserSquare2 className="w-3.5 h-3.5" />
+            <UserSquare2 className="w-3.5 h-3.5 text-white" />
             <span>Open Player Career Dossier &rarr;</span>
           </button>
         </div>
@@ -344,9 +344,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               onSelectPlayer?.(topWicketTaker.id);
               onNavigate('player-dossier');
             }}
-            className="mt-4 w-full py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-700 hover:from-teal-500 hover:to-cyan-600 text-white font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+            className="mt-4 w-full py-2.5 rounded-xl btn-cricket-teal text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
           >
-            <UserSquare2 className="w-3.5 h-3.5" />
+            <UserSquare2 className="w-3.5 h-3.5 text-white" />
             <span>Open Strike Bowler Dossier &rarr;</span>
           </button>
         </div>

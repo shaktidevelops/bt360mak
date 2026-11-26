@@ -12,7 +12,9 @@ interface SquadViewProps {
 const skillScoreMap: Record<string, number> = {
   nonexistent: 1, worthless: 2, abysmal: 3, woeful: 4, feeble: 5,
   mediocre: 6, competent: 7, respectable: 8, proficient: 9, strong: 10,
-  superb: 11, quality: 12, remarkable: 13, wonderful: 14, exceptional: 15, sensational: 16
+  superb: 11, quality: 12, remarkable: 13, wonderful: 14, exceptional: 15, sensational: 16,
+  // Battrick Fatigue & Specialty levels
+  sublime: 16, energetic: 14, revived: 12, rested: 10, fresh: 9, 'fully fit': 8, fair: 6, tired: 4, exhausted: 2, dead: 1
 };
 
 function getScore(skill?: string): number {
@@ -21,6 +23,15 @@ function getScore(skill?: string): number {
 }
 
 function getSkillBadge(skillName?: string) {
+  const lower = (skillName || '').toLowerCase();
+  if (lower === 'sublime' || lower === 'energetic') {
+    return (
+      <span className="inline-block px-2 py-0.5 rounded text-[11px] font-mono capitalize border bg-emerald-100 text-emerald-900 border-emerald-500 font-bold shadow-xs whitespace-nowrap min-w-[72px] text-center">
+        {skillName}
+      </span>
+    );
+  }
+
   const score = getScore(skillName);
   let color = 'bg-slate-100 text-slate-600 border-slate-200';
   if (score >= 13) color = 'bg-purple-100 text-purple-900 border-purple-400 font-bold shadow-xs';
@@ -152,7 +163,7 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
           {onNavigateToImport && (
             <button
               onClick={onNavigateToImport}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-black text-xs hover:from-amber-400 hover:to-amber-500 transition-all cursor-pointer shadow"
+              className="btn-cricket-amber flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer shadow"
               title="Import new players from Battrick"
             >
               <Upload className="w-3.5 h-3.5" />
@@ -164,19 +175,21 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
 
       {/* MATRIX VIEW: ULTRA-WIDE, SPACIOUS 11-SKILLS DATA TABLE */}
       {viewMode === 'matrix' ? (
-        <div className="w-full overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-md">
+        <div className="w-full overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-md relative">
           <table className="w-full min-w-[1780px] text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200 uppercase tracking-wider text-[11px] sticky top-0 z-10 shadow-xs">
-                <th className="py-4 px-3.5 w-32">
-                  <span className="flex items-center gap-1 text-emerald-700 font-bold">
+              <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200 uppercase tracking-wider text-[11px] sticky top-0 z-30 shadow-xs">
+                {/* Sticky Column 1: Player ID */}
+                <th className="py-4 px-3.5 w-24 sticky left-0 z-40 bg-slate-100 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
+                  <span className="flex items-center gap-1 text-emerald-700 font-bold whitespace-nowrap">
                     <span>#</span>
                     <span>Player ID</span>
                   </span>
                 </th>
+                {/* Sticky Column 2: Player Name & Role */}
                 <th 
                   onClick={() => toggleSort('name')}
-                  className="py-4 px-4 min-w-[280px] cursor-pointer hover:text-emerald-700 transition-colors"
+                  className="py-4 px-4 min-w-[280px] sticky left-24 z-40 bg-slate-100 shadow-[4px_0_8px_rgba(0,0,0,0.08)] cursor-pointer hover:text-emerald-700 transition-colors whitespace-nowrap"
                 >
                   <div className="flex items-center gap-1.5">
                     <span>🏏 Player Name & Role</span>
@@ -185,38 +198,38 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                 </th>
                 <th 
                   onClick={() => toggleSort('age')}
-                  className="py-4 px-2 w-16 text-center cursor-pointer hover:text-emerald-700"
+                  className="py-4 px-2 w-16 text-center cursor-pointer hover:text-emerald-700 whitespace-nowrap"
                 >
                   Age
                 </th>
                 <th 
                   onClick={() => toggleSort('bti')}
-                  className="py-4 px-3.5 w-28 text-right cursor-pointer hover:text-emerald-700"
+                  className="py-4 px-3.5 w-28 text-right cursor-pointer hover:text-emerald-700 whitespace-nowrap"
                 >
                   <div className="flex items-center justify-end gap-1">
                     <span>BTI Index</span>
                     <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   </div>
                 </th>
-                <th className="py-4 px-2 w-20 text-center">Subskill</th>
-                <th className="py-4 px-2 text-center w-28">Batting 🏏</th>
-                <th className="py-4 px-2 text-center w-28">Bowling 🔴</th>
-                <th className="py-4 px-2 text-center w-28">Keeping 🧤</th>
-                <th className="py-4 px-2 text-center w-28">Fielding ⚡</th>
-                <th className="py-4 px-2 text-center w-28">Consistency</th>
-                <th className="py-4 px-2 text-center w-28">Concentration</th>
-                <th className="py-4 px-2 text-center w-28">Stamina</th>
-                <th className="py-4 px-2 text-center w-28">Form</th>
-                <th className="py-4 px-2 text-center w-28">Fatigue</th>
-                <th className="py-4 px-2 text-center w-24">Ldr / Exp</th>
+                <th className="py-4 px-2 w-20 text-center whitespace-nowrap">Subskill</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Batting 🏏</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Bowling 🔴</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Keeping 🧤</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Fielding ⚡</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Consistency</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Concentration</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Stamina</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Form</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Fatigue</th>
+                <th className="py-4 px-2 text-center w-24 whitespace-nowrap">Ldr / Exp</th>
                 <th 
                   onClick={() => toggleSort('wage')}
-                  className="py-4 px-3.5 w-32 text-right cursor-pointer hover:text-emerald-700"
+                  className="py-4 px-3.5 w-32 text-right cursor-pointer hover:text-emerald-700 whitespace-nowrap"
                 >
                   Wage (£)
                 </th>
-                <th className="py-4 px-3.5 w-32 text-center">Active Net</th>
-                <th className="py-4 px-3.5 w-28 text-center">Dossier</th>
+                <th className="py-4 px-3.5 w-32 text-center whitespace-nowrap">Active Net</th>
+                <th className="py-4 px-3.5 w-28 text-center whitespace-nowrap">Dossier</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-mono">
@@ -227,14 +240,14 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                 const roleIcon = isKeeper ? '🧤' : isBowler ? '🔴' : isBatter ? '🏏' : '⚡';
 
                 return (
-                  <tr key={player.id} className="odd:bg-white even:bg-slate-50/70 hover:bg-emerald-50/60 transition-colors">
-                    {/* Clean Numeric ID */}
-                    <td className="py-4 px-3.5 font-mono text-xs text-emerald-700 font-extrabold whitespace-nowrap">
+                  <tr key={player.id} className="group odd:bg-white even:bg-slate-50/70 hover:bg-emerald-50/60 transition-colors">
+                    {/* Sticky Column 1: Clean Numeric ID */}
+                    <td className="py-4 px-3.5 font-mono text-xs text-emerald-700 font-extrabold whitespace-nowrap sticky left-0 z-20 bg-white group-odd:bg-white group-even:bg-slate-50 group-hover:bg-emerald-50 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                       #{String(player.id).replace(/^BT-/, '')}
                     </td>
 
-                    {/* Name, Wonderkid Tag, Tactical Role */}
-                    <td className="py-4 px-4 whitespace-nowrap">
+                    {/* Sticky Column 2: Name, Wonderkid Tag, Tactical Role */}
+                    <td className="py-4 px-4 whitespace-nowrap sticky left-24 z-20 bg-white group-odd:bg-white group-even:bg-slate-50 group-hover:bg-emerald-50 shadow-[4px_0_8px_rgba(0,0,0,0.08)]">
                       <div className="flex items-center gap-2 font-black text-slate-900 text-[13px] font-sans">
                         <span>{roleIcon}</span>
                         <span>{player.name}</span>
