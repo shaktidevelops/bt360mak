@@ -34,7 +34,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onSelectPlayer
 }) => {
   const wonderkids = squad.filter(p => p.is_wonderkid);
-  const totalMarketVal = squad.reduce((acc, p) => acc + p.market_value, 0);
+  const totalMarketVal = squad.reduce((acc, p) => acc + (p.market_value || 0), 0);
 
   // Dynamically calculate batting leader from squad
   const sortedBatters = [...squad].sort((a, b) => {
@@ -42,8 +42,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     const runsB = (b.statsFC?.runs || 0) + (b.statsOD?.runs || 0) + (b.statsT20?.runs || 0);
     return runsB - runsA;
   });
-  const topRunScorer = sortedBatters[0] || squad[0];
-  const topRuns = (topRunScorer?.statsFC?.runs || 0) + (topRunScorer?.statsOD?.runs || 0) + (topRunScorer?.statsT20?.runs || 0);
+  const topRunScorer: Partial<Player> = sortedBatters[0] || squad[0] || {};
+  const topRuns = (topRunScorer.statsFC?.runs || 0) + (topRunScorer.statsOD?.runs || 0) + (topRunScorer.statsT20?.runs || 0);
 
   // Dynamically calculate bowling leader from squad
   const sortedBowlers = [...squad].sort((a, b) => {
@@ -51,8 +51,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     const wktsB = (b.statsFC?.wickets || 0) + (b.statsOD?.wickets || 0) + (b.statsT20?.wickets || 0);
     return wktsB - wktsA;
   });
-  const topWicketTaker = sortedBowlers[0] || squad[1];
-  const topWickets = (topWicketTaker?.statsFC?.wickets || 0) + (topWicketTaker?.statsOD?.wickets || 0) + (topWicketTaker?.statsT20?.wickets || 0);
+  const topWicketTaker: Partial<Player> = sortedBowlers[0] || squad[1] || {};
+  const topWickets = (topWicketTaker.statsFC?.wickets || 0) + (topWicketTaker.statsOD?.wickets || 0) + (topWicketTaker.statsT20?.wickets || 0);
 
   return (
     <div className="space-y-6">
@@ -316,13 +316,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <Zap className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="text-base font-bold text-slate-900">{topWicketTaker.name || 'Awaiting Squad Ingestion'}</h4>
+                <h4 className="text-base font-bold text-slate-900">{topWicketTaker?.name || 'Awaiting Squad Ingestion'}</h4>
                 <div className="text-xs text-cyan-800 font-medium flex items-center gap-1.5 mt-0.5">
-                  <span>{topWicketTaker.tactical_role || 'Strike Bowler'}</span>
-                  <span className="text-cyan-600">&bull;</span>
-                  <span className="font-mono px-1.5 py-0.5 rounded text-[10px] bg-cyan-100 text-cyan-900 border border-cyan-400 font-bold" title={getBowlingTypeFullName(topWicketTaker.bowling_type)}>
-                    {formatBowlingType(topWicketTaker.bowling_type)}
-                  </span>
+                  <span>{topWicketTaker?.tactical_role || 'Strike Bowler'}</span>
+                  {topWicketTaker?.bowling_type && (
+                    <>
+                      <span className="text-cyan-600">&bull;</span>
+                      <span className="font-mono px-1.5 py-0.5 rounded text-[10px] bg-cyan-100 text-cyan-900 border border-cyan-400 font-bold" title={getBowlingTypeFullName(topWicketTaker.bowling_type)}>
+                        {formatBowlingType(topWicketTaker.bowling_type)}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -351,7 +355,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
           <button
             onClick={() => {
-              onSelectPlayer?.(topWicketTaker.id);
+              if (topWicketTaker?.id) onSelectPlayer?.(topWicketTaker.id);
               onNavigate('player-dossier');
             }}
             className="mt-4 w-full py-2.5 rounded-xl btn-cricket-teal text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"

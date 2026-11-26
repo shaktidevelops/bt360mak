@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Player } from '../types/database';
-import { Sparkles, Dices, Award, CheckCircle2, Sliders, UserPlus } from 'lucide-react';
+import { Sparkles, Dices, Award, CheckCircle2, Sliders, UserPlus, Target } from 'lucide-react';
 import { formatBowlingType, formatBattingHand } from '../lib/cricketFormatters';
 
 interface YouthViewProps {
@@ -170,7 +170,6 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
           </div>
           <h2 className="text-3xl font-black text-slate-900 mt-1 flex items-center gap-2">
             <span>Saturday Youth Draft & ITS Point Allocator</span>
-            <span className="text-lg">✨</span>
           </h2>
           <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
             The lifeblood of your cricket franchise. In Battrick, your club can bank up to <strong className="text-amber-700">70 ITS points</strong> total, with a strict engine cap of <strong className="text-emerald-700">35 ITS points per single youth pull</strong>. With 70 ITS banked, you have enough points for <strong className="text-amber-700">two complete 35-point wonderkid pulls</strong>!
@@ -206,7 +205,7 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
         <div className="p-4 rounded-xl sovereign-card border-emerald-400 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-base">🎯</span>
+              <Target className="w-4 h-4 text-emerald-800" />
               <span className="text-xs font-black uppercase text-emerald-800">Active Pull #1 (This Saturday)</span>
             </div>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono font-black">
@@ -268,11 +267,11 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
             <span className="text-[10px] uppercase font-black text-emerald-800">Quick 35-ITS Archetype Presets</span>
             <div className="flex flex-wrap gap-1.5">
               {[
-                { label: '🏏 Pure Opening Batter', type: 'Batter' as const },
-                { label: '🌀 Strike Finger Spinner', type: 'Spinner' as const },
-                { label: '🔴 Express Opening Pacer', type: 'Pacer' as const },
-                { label: '🧤 Specialist Wicketkeeper', type: 'Keeper' as const },
-                { label: '⚡ Dynamic All-Rounder', type: 'AllRounder' as const }
+                { label: 'Pure Opening Batter', type: 'Batter' as const },
+                { label: 'Strike Finger Spinner', type: 'Spinner' as const },
+                { label: 'Express Opening Pacer', type: 'Pacer' as const },
+                { label: 'Specialist Wicketkeeper', type: 'Keeper' as const },
+                { label: 'Dynamic All-Rounder', type: 'AllRounder' as const }
               ].map(p => (
                 <button
                   key={p.type}
@@ -324,10 +323,10 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
         {/* 7 Skill Sliders with Live Battrick Level Translations */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
           {[
-            { key: 'batting' as const, label: 'Batting 🏏', max: 20, color: 'accent-emerald-600' },
-            { key: 'bowling' as const, label: 'Bowling 🔴', max: 20, color: 'accent-teal-600' },
-            { key: 'keeping' as const, label: 'Keeping 🧤', max: 20, color: 'accent-cyan-600' },
-            { key: 'fielding' as const, label: 'Fielding ⚡', max: 10, color: 'accent-amber-600' },
+            { key: 'batting' as const, label: 'Batting', max: 20, color: 'accent-emerald-600' },
+            { key: 'bowling' as const, label: 'Bowling', max: 20, color: 'accent-teal-600' },
+            { key: 'keeping' as const, label: 'Keeping', max: 20, color: 'accent-cyan-600' },
+            { key: 'fielding' as const, label: 'Fielding', max: 10, color: 'accent-amber-600' },
             { key: 'concentration' as const, label: 'Concentration', max: 12, color: 'accent-emerald-600' },
             { key: 'consistency' as const, label: 'Consistency', max: 12, color: 'accent-teal-600' },
             { key: 'stamina' as const, label: 'Stamina', max: 10, color: 'accent-amber-600' }
@@ -361,8 +360,9 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
           {/* Action Trigger Card */}
           <div className="p-3.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-300 flex flex-col justify-between shadow-sm">
             <div>
-              <span className="text-[10px] uppercase font-black text-emerald-800 flex items-center gap-1">
-                <span>⚡</span> Saturday Draft Pull
+              <span className="text-[10px] uppercase font-black text-emerald-800 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-800" />
+                <span>Saturday Draft Pull</span>
               </span>
               <div className="text-xs text-slate-700 mt-1">
                 Draw 17yo trainee with {totalAllocatedThisPull}/35 allocated ITS points.
@@ -390,7 +390,7 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
         <div className="p-6 rounded-2xl sovereign-card-gold border-2 border-amber-400 shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-300">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">🌟</span>
+              <Sparkles className="w-7 h-7 text-amber-600" />
               <div>
                 <span className="text-[10px] uppercase font-mono font-black text-amber-800 tracking-wider flex items-center gap-1">
                   <span>Saturday Intake Certified</span> &bull; <span>17yo Superb Academy Wonderkid</span>
@@ -412,19 +412,19 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
           {/* Generated Trainee Full Skills Card */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 text-xs text-center">
             <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
-              <span className="text-[10px] text-slate-500 uppercase font-black">Batting 🏏</span>
+              <span className="text-[10px] text-slate-500 uppercase font-black">Batting</span>
               <div className="text-sm font-black capitalize text-emerald-700 mt-0.5">{simulatedPull.batting}</div>
             </div>
             <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
-              <span className="text-[10px] text-slate-500 uppercase font-black">Bowling 🔴</span>
+              <span className="text-[10px] text-slate-500 uppercase font-black">Bowling</span>
               <div className="text-sm font-black capitalize text-teal-700 mt-0.5">{simulatedPull.bowling}</div>
             </div>
             <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
-              <span className="text-[10px] text-slate-500 uppercase font-black">Keeping 🧤</span>
+              <span className="text-[10px] text-slate-500 uppercase font-black">Keeping</span>
               <div className="text-sm font-black capitalize text-slate-800 mt-0.5">{simulatedPull.keeping}</div>
             </div>
             <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">
-              <span className="text-[10px] text-slate-500 uppercase font-black">Fielding ⚡</span>
+              <span className="text-[10px] text-slate-500 uppercase font-black">Fielding</span>
               <div className="text-sm font-black capitalize text-amber-700 mt-0.5">{simulatedPull.fielding}</div>
             </div>
             <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs">

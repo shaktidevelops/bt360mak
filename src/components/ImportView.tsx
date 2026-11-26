@@ -34,7 +34,8 @@ import {
   FolderUp,
   Layers,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Zap
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { 
@@ -339,7 +340,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
         parseBattrickData(detail.html);
         setActiveImportTab('paste');
         setStatusMessage({
-          text: `⚡ 1-Click Browser Import received from ${detail.url || 'Battrick'}! Review the parsed match below and click "Apply & Synchronize" to record.`,
+          text: `1-Click Browser Import received from ${detail.url || 'Battrick'}! Review the parsed match below and click "Apply & Synchronize" to record.`,
           type: 'info'
         });
       }
@@ -420,7 +421,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
       setShowResetModal(false);
 
       setStatusMessage({
-        text: '✨ 100% Fresh Start Complete! All past matches, dummy statistics, and records have been deleted. You can now import your authentic HTML files from the start.',
+        text: '100% Fresh Start Complete! All past matches, dummy statistics, and records have been deleted. You can now import your authentic HTML files from the start.',
         type: 'success'
       });
     } catch (err: any) {
@@ -432,7 +433,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
 
   // Delete all imported matches and reset career stats to zero
   const handleDeleteAllMatchesAndStats = async () => {
-    if (!window.confirm("⚠️ Are you sure you want to delete ALL imported matches and reset all player career stats (First Class, One Day, BT20) and clubhouse milestones back to 0? This action cannot be undone.")) {
+    if (!window.confirm("Are you sure you want to delete ALL imported matches and reset all player career stats (First Class, One Day, BT20) and clubhouse milestones back to 0? This action cannot be undone.")) {
       return;
     }
     setIsSyncing(true);
@@ -467,7 +468,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
       }
 
       setStatusMessage({
-        text: '🗑️ All imported matches have been completely deleted! Player career stats (FC, OD, T20) and clubhouse records have been reset to zero.',
+        text: 'All imported matches have been completely deleted! Player career stats (FC, OD, T20) and clubhouse records have been reset to zero.',
         type: 'success'
       });
     } catch (err: any) {
@@ -893,7 +894,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
       });
 
       setStatusMessage({
-        text: `🎉 Bulk Ingestion Complete! Successfully processed ${totalFiles} files. ${allMatches.length} matches registered with authentic dates and IDs, and all player career stats recalculated.`,
+        text: `Bulk Ingestion Complete! Successfully processed ${totalFiles} files. ${allMatches.length} matches registered with authentic dates and IDs, and all player career stats recalculated.`,
         type: 'success'
       });
 
@@ -1046,8 +1047,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
           its_points: its,
           fan_club_members: fan,
           coach_quality: 'Competent',
-          fan_mood: 'Over the Moon 🚀',
-          sponsor_confidence: 'Ecstatic 💎',
+          fan_mood: 'Over the Moon',
+          sponsor_confidence: 'Ecstatic',
           division_fc: 'VIII.17 (#1)',
           division_od: 'V.62 (#2)',
           division_t20: 'VII.241 (#1)'
@@ -1149,7 +1150,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
 
         const firstMatch = parseResult.matches[0];
         setStatusMessage({
-          text: `✅ Match #${firstMatch.id} (${firstMatch.match_type} vs ${firstMatch.opponent_club}) successfully ingested! Authentic Match Date: ${firstMatch.match_date} • Player stats & club records dynamically recomputed. Box cleared and ready for your next match!`,
+          text: `Match #${firstMatch.id} (${firstMatch.match_type} vs ${firstMatch.opponent_club}) successfully ingested! Authentic Match Date: ${firstMatch.match_date} • Player stats & club records dynamically recomputed. Box cleared and ready for your next match!`,
           type: 'success'
         });
 
@@ -1215,7 +1216,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
         });
 
         setStatusMessage({
-          text: `✅ Successfully imported ${formatted.length} Battrick players into live squad & database! Box cleared and ready for next import!`,
+          text: `Successfully imported ${formatted.length} Battrick players into live squad & database! Box cleared and ready for next import!`,
           type: 'success'
         });
         setRawText('');
@@ -1246,7 +1247,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
         });
 
         setStatusMessage({
-          text: `✅ Successfully updated club finances & closing balance to £${parseResult.clubUpdates?.bank_balance?.toLocaleString()}!`,
+          text: `Successfully updated club finances & closing balance to £${parseResult.clubUpdates?.bank_balance?.toLocaleString()}!`,
           type: 'success'
         });
         setRawText('');
@@ -1276,7 +1277,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
         });
 
         setStatusMessage({
-          text: `✅ Prabhas Coastal Oval seating tiers & 10,000 capacity synchronized!`,
+          text: `Prabhas Coastal Oval seating tiers & 10,000 capacity synchronized!`,
           type: 'success'
         });
         setRawText('');
@@ -1301,7 +1302,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
         });
 
         setStatusMessage({
-          text: `✅ Training nets matrix successfully updated!`,
+          text: `Training nets matrix successfully updated!`,
           type: 'success'
         });
         setRawText('');
@@ -1327,7 +1328,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
         });
 
         setStatusMessage({
-          text: `✅ Club standings and ITS bank updated!`,
+          text: `Club standings and ITS bank updated!`,
           type: 'success'
         });
         setRawText('');
@@ -1419,8 +1420,8 @@ Coach Quality: Competent`;
       <div className="sovereign-card p-6 rounded-2xl border-emerald-500/40 relative overflow-hidden shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-2xl cricket-ball flex items-center justify-center text-2xl text-white shadow-md shrink-0">
-              📥
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-700 to-teal-800 flex items-center justify-center text-white shadow-md shrink-0">
+              <Upload className="w-7 h-7" />
             </div>
             <div>
               <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-700">
@@ -1990,8 +1991,8 @@ Coach Quality: Competent`;
           <div className="sovereign-card p-6 rounded-2xl border-emerald-500/40 shadow-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white text-xl shadow-md shrink-0">
-                  ⚡
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-700 to-teal-800 flex items-center justify-center text-white text-xl shadow-md shrink-0">
+                  <Zap className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900">
@@ -2040,9 +2041,9 @@ Coach Quality: Competent`;
                   href={`javascript:(function(){try{var h=document.documentElement.outerHTML;var u=window.location.href;var t='${bookmarkletTarget === 'local' ? (typeof window !== 'undefined' ? window.location.origin + '/' : 'http://localhost:5173/') : 'https://shaktidevelops.github.io/bt360mak/'}';var w=window.open(t+'?source=bookmarklet','bt360_importer');if(w){window.addEventListener('message',function hdl(e){if(e.data==='BT360_READY'){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');window.removeEventListener('message',hdl);}});setTimeout(function(){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');},1500);}if(navigator.clipboard){navigator.clipboard.writeText(h).catch(function(){});}}catch(err){alert('BT360 Bookmarklet: '+err.message);}})();`}
                   onClick={(e) => {
                     e.preventDefault();
-                    alert("👆 Don't click here! Drag this button up into your browser's Bookmarks Bar (press Ctrl+Shift+B if bookmarks bar is hidden). Then click it when viewing any Battrick page!");
+                    alert("Note: Drag this button up into your browser's Bookmarks Bar (press Ctrl+Shift+B if bookmarks bar is hidden). Then click it when viewing any Battrick page!");
                   }}
-                  className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-base shadow-2xl cursor-grab transition-all hover:scale-105 select-none border-2 border-emerald-300"
+                  className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-800 hover:to-teal-900 text-white font-black text-base shadow-lg cursor-grab transition-all hover:scale-105 select-none border border-emerald-500"
                   title="Drag this button to your Bookmarks Toolbar"
                 >
                   <Download className="w-5 h-5 text-amber-300" />
@@ -2119,7 +2120,7 @@ Coach Quality: Competent`;
                 <button
                   onClick={() => {
                     const tUrl = bookmarkletTarget === 'local' ? (typeof window !== 'undefined' ? window.location.origin + '/' : 'http://localhost:5173/') : 'https://shaktidevelops.github.io/bt360mak/';
-                    const script = `// ==UserScript==\n// @name         BT360MAK Battrick 1-Click Importer\n// @namespace    https://shaktidevelops.github.io/bt360mak/\n// @version      1.0\n// @description  Adds 1-click button to send match scorecards & squad data directly to BT360MAK\n// @match        *://*.battrick.org/*\n// @grant        none\n// ==/UserScript==\n(function(){\n  'use strict';\n  const btn = document.createElement('button');\n  btn.innerHTML = '📥 Send to BT360';\n  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:999999;background:#059669;color:#fff;padding:12px 18px;border-radius:12px;font-weight:900;font-size:13px;border:2px solid #34d399;box-shadow:0 8px 24px rgba(0,0,0,0.3);cursor:pointer;font-family:sans-serif;';\n  btn.onclick = function() {\n    const html = document.documentElement.outerHTML;\n    const target = '${tUrl}';\n    const win = window.open(target + '?source=userscript', 'bt360_importer');\n    if (win) {\n      setTimeout(() => {\n        win.postMessage({ type: 'BT360_ONE_CLICK_IMPORT', html: html, url: location.href }, '*');\n      }, 1500);\n    }\n  };\n  document.body.appendChild(btn);\n})();`;
+                    const script = `// ==UserScript==\n// @name         BT360MAK Battrick 1-Click Importer\n// @namespace    https://shaktidevelops.github.io/bt360mak/\n// @version      1.0\n// @description  Adds 1-click button to send match scorecards & squad data directly to BT360MAK\n// @match        *://*.battrick.org/*\n// @grant        none\n// ==/UserScript==\n(function(){\n  'use strict';\n  const btn = document.createElement('button');\n  btn.innerHTML = 'Send to BT360';\n  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:999999;background:#059669;color:#fff;padding:12px 18px;border-radius:12px;font-weight:900;font-size:13px;border:2px solid #34d399;box-shadow:0 8px 24px rgba(0,0,0,0.3);cursor:pointer;font-family:sans-serif;';\n  btn.onclick = function() {\n    const html = document.documentElement.outerHTML;\n    const target = '${tUrl}';\n    const win = window.open(target + '?source=userscript', 'bt360_importer');\n    if (win) {\n      setTimeout(() => {\n        win.postMessage({ type: 'BT360_ONE_CLICK_IMPORT', html: html, url: location.href }, '*');\n      }, 1500);\n    }\n  };\n  document.body.appendChild(btn);\n})();`;
                     navigator.clipboard.writeText(script);
                     setCopiedUserscript(true);
                     setTimeout(() => setCopiedUserscript(false), 2500);

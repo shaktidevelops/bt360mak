@@ -9,7 +9,10 @@ import {
   ArrowDown, 
   Zap, 
   Dices,
-  Users
+  Users,
+  Trophy,
+  Flame,
+  Compass
 } from 'lucide-react';
 import { formatBowlingType, getBowlingTypeFullName, formatBattingHand, getBattingHandFullName } from '../lib/cricketFormatters';
 
@@ -413,7 +416,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
           <div>
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-700">
               <Swords className="w-4 h-4 text-emerald-600" />
-              <span>{mode === 'best-xi' ? '🛡️ Sovereign Best XI Lineup & Orders' : '⚔️ 22-Yd Pitch & Match Tactics Command'}</span>
+              <span>{mode === 'best-xi' ? 'Best XI Lineup & Orders' : '22-Yd Pitch & Match Tactics Command'}</span>
             </div>
             <h2 className="text-3xl font-black text-slate-900 mt-1 flex items-center gap-3">
               <span>{mode === 'best-xi' ? 'Best XI Match Lineup' : 'Tactics & Ground Command'}</span>
@@ -468,26 +471,26 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
             <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-xs">
               <button
                 onClick={() => autoOptimizeForFormat('FC')}
-                className="btn-cricket-emerald flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shadow-xs"
+                className="btn-cricket-emerald flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shadow-xs"
                 title="Optimize XI for First Class: high concentration, patient batting, 3-seam/2-spin battery"
               >
-                <span>🏆</span>
+                <Trophy className="w-3.5 h-3.5 text-white" />
                 <span>Auto FC XI</span>
               </button>
               <button
                 onClick={() => autoOptimizeForFormat('OD')}
-                className="btn-cricket-teal flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shadow-xs"
+                className="btn-cricket-teal flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shadow-xs"
                 title="Optimize XI for One Day: balanced run scoring, powerplay & death bowlers"
               >
-                <span>⚡</span>
+                <Zap className="w-3.5 h-3.5 text-white" />
                 <span>Auto OD XI</span>
               </button>
               <button
                 onClick={() => autoOptimizeForFormat('T20')}
-                className="btn-cricket-amber flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shadow-xs"
+                className="btn-cricket-amber flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer shadow-xs"
                 title="Optimize XI for BT20: explosive boundary hitters & express strike bowling"
               >
-                <span>🔥</span>
+                <Flame className="w-3.5 h-3.5 text-white" />
                 <span>Auto T20 XI</span>
               </button>
             </div>
@@ -812,7 +815,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                     className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer z-20"
                   >
                     <div className="w-8 h-8 rounded-full cricket-ball text-white text-[11px] font-mono font-black flex items-center justify-center border-2 border-white shadow-lg group-hover:scale-125 transition-transform">
-                      {idx === 0 ? 'WK' : idx === 7 ? '⚡' : idx + 1}
+                      {idx === 0 ? 'WK' : idx + 1}
                     </div>
                     <div className="mt-1 px-2 py-0.5 rounded-md bg-[#04120e]/90 text-white font-black text-[10px] whitespace-nowrap border border-emerald-500/40 shadow">
                       {pos.name}
@@ -940,7 +943,6 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                 </div>
                 <h3 className="text-2xl font-black text-slate-900 mt-1 flex items-center gap-2">
                   <span>{pitchProfiles[pitch].name}</span>
-                  <span className="text-lg">🏏</span>
                 </h3>
                 <p className="text-xs text-slate-600 mt-1 max-w-xl">
                   Inspect the physical surface dynamics, bounce multipliers, spin coefficients, and tactical toss directives for this pitch.
@@ -1039,7 +1041,8 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                 <div className="p-4 rounded-xl sovereign-card border border-emerald-400 shadow-xs">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-black uppercase text-amber-700 flex items-center gap-1.5">
-                      <span>🪙</span> Toss Directive
+                      <Compass className="w-3.5 h-3.5 text-amber-700" />
+                      <span>Toss Directive</span>
                     </span>
                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-black">
                       Recommended: {pitchProfiles[pitch].tossRecommendation}
@@ -1053,7 +1056,8 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                 {/* Recommended Bowlers */}
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                   <span className="text-xs font-black uppercase text-teal-700 flex items-center gap-1.5 mb-1">
-                    <span>⚡</span> Prime Bowler Arsenal
+                    <Target className="w-3.5 h-3.5 text-teal-700" />
+                    <span>Prime Bowler Arsenal</span>
                   </span>
                   <div className="text-sm font-black text-slate-900 mt-1">
                     {pitchProfiles[pitch].recommendedBowlers}

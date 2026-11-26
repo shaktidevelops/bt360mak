@@ -17,7 +17,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onResetAllData }) =>
   };
 
   const handleReset = () => {
-    if (window.confirm("⚠️ 100% FRESH START CONFIRMATION:\n\nAre you sure you want to completely wipe all project data (all matches, statistics, records, finances, and import history) to make it 100% fresh?\n\nYou can then upload your own team's HTML files from the start.")) {
+    if (window.confirm("100% FRESH START CONFIRMATION:\n\nAre you sure you want to completely wipe all project data (all matches, statistics, records, finances, and import history) to make it 100% fresh?\n\nYou can then upload your own team's HTML files from the start.")) {
       onResetAllData?.();
       setResetDone(true);
       setTimeout(() => setResetDone(false), 5000);
@@ -143,7 +143,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onResetAllData }) =>
 
         {resetDone && (
           <div className="p-3 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold">
-            ✨ Project data wiped clean! All matches and stats reset to 0. 100% fresh slate active.
+            Project data wiped clean! All matches and stats reset to 0. 100% fresh slate active.
           </div>
         )}
       </div>

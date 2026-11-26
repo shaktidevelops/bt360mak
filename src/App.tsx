@@ -58,7 +58,16 @@ export function App() {
   const [squad, setSquad] = useState<Player[]>(() => {
     try {
       const saved = localStorage.getItem('bt360_squad');
-      return saved ? JSON.parse(saved) : fallbackSquad;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // If parsed contains legacy dummy players (e.g. Bhadraksh Hemalatha or ID 6099466), clean slate
+        if (Array.isArray(parsed) && parsed.some((p: Player) => p.id === '6099466' || p.id === 'BT-6099466' || p.name === 'Bhadraksh Hemalatha')) {
+          localStorage.setItem('bt360_squad', '[]');
+          return [];
+        }
+        return parsed;
+      }
+      return fallbackSquad;
     } catch {
       return fallbackSquad;
     }
@@ -145,70 +154,19 @@ export function App() {
 
     const fetchLiveClubData = async () => {
       try {
-        const savedSquad = localStorage.getItem('bt360_squad');
-        if (savedSquad === '[]') {
-          // User explicitly initiated a 100% fresh start; do not resurrect old dummy data
-          return;
-        }
-
         const { data: clubData } = await supabase.from('clubs').select('*').eq('id', '13108').single();
         if (clubData) setClub(clubData);
 
-        const { data: squadData } = await supabase.from('players').select('*').eq('club_id', '13108');
-        if (squadData && squadData.length > 0) {
-          const cleanSquad = squadData.map(p => ({
-            ...p,
-            id: String(p.id).replace(/^BT-/, ''),
-            club_id: String(p.club_id).replace(/^BT-/, '')
-          }));
-          setSquad(cleanSquad);
-        }
-
-        const { data: logsData } = await supabase.from('training_logs').select('*').eq('club_id', '13108');
-        if (logsData && logsData.length > 0) {
-          const cleanLogs = logsData.map(l => ({
-            ...l,
-            player_id: String(l.player_id).replace(/^BT-/, '')
-          }));
-          setTrainingLogs(cleanLogs);
-        }
-
-        const { data: netsData } = await supabase.from('nets_matrix').select('*').eq('club_id', '13108');
-        if (netsData && netsData.length > 0) {
-          const cleanNets = netsData.map(n => ({
-            ...n,
-            player_id: n.player_id ? String(n.player_id).replace(/^BT-/, '') : null
-          }));
-          setNets(cleanNets);
-        }
-
-        // Only load matches from Supabase if the user has not established their local storage state,
-        // and filter out empty seed rows lacking scorecardData.
-        const localMatches = localStorage.getItem('bt360_matches');
-        if (localMatches === null) {
-          const { data: matchesData } = await supabase.from('matches').select('*').eq('club_id', '13108');
-          if (matchesData && matchesData.length > 0) {
-            const valid = matchesData.filter(m => m.scorecardData);
-            if (valid.length > 0) setMatches(valid);
-          }
-        }
-
         const { data: tiersData } = await supabase.from('stadium_tiers').select('*').eq('club_id', '13108');
         if (tiersData && tiersData.length > 0) setStadiumTiers(tiersData);
-
-        const { data: finData } = await supabase.from('financial_ledger').select('*').eq('club_id', '13108');
-        if (finData && finData.length > 0) setFinances(finData);
 
         const { data: staffData } = await supabase.from('staff_members').select('*').eq('club_id', '13108');
         if (staffData && staffData.length > 0) setStaff(staffData);
 
         const { data: calData } = await supabase.from('calendar_events').select('*').eq('club_id', '13108');
         if (calData && calData.length > 0) setCalendar(calData);
-
-        const { data: recData } = await supabase.from('cricket_records').select('*').eq('club_id', '13108');
-        if (recData && recData.length > 0) setRecords(recData);
       } catch (err) {
-        console.warn('Supabase live query fallback to verified club records:', err);
+        console.warn('Supabase live query notice:', err);
       }
     };
 

@@ -10,8 +10,6 @@ import {
   Check, 
   Trophy, 
   Shield, 
-  Flame, 
-  Target,
   Sparkles
 } from 'lucide-react';
 import { formatBowlingType, getBowlingTypeFullName, formatBattingHand, getBattingHandFullName } from '../lib/cricketFormatters';
@@ -724,14 +722,14 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
       </div>
 
       {/* CAREER STATISTICS SECTION: DOMESTIC & FRIENDLY TABS */}
-      <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-6">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
           <div>
-            <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-emerald-800" />
-              <span>Career Statistics (ESPNcricinfo Specification)</span>
+              <span>Career Statistics</span>
             </h3>
-            <p className="text-xs text-slate-600 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               Comprehensive breakdown for First Class, List A, and T20 with Season & Career rows
             </p>
           </div>
@@ -763,23 +761,22 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
           </div>
         </div>
 
-        {/* BATTING & FIELDING TABLE (15 Columns) */}
+        {/* BATTING & FIELDING TABLE (ESPNcricinfo Specification) */}
         <div>
-          <div className="flex items-center justify-between mb-2.5">
-            <h4 className="text-xs font-black uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
-              <Flame className="w-3.5 h-3.5 text-emerald-700" />
-              <span>BATTING & FIELDING &bull; {competitionTab === 'domestic' ? 'DOMESTIC' : 'FRIENDLY'}</span>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+              BATTING & FIELDING
             </h4>
-            <span className="text-[10px] text-slate-500 font-mono">
-              Season 69 &bull; Career Total
+            <span className="text-[11px] text-slate-500">
+              {competitionTab === 'domestic' ? 'Domestic (FC / List A / T20)' : 'Friendly (FC / List A / T20)'}
             </span>
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] font-bold border-b border-slate-200">
-                  <th className="py-2.5 px-3">Format</th>
+                <tr className="bg-slate-50/80 text-slate-500 text-xs font-semibold border-b border-slate-200">
+                  <th className="py-2.5 px-3.5">Format</th>
                   <th className="py-2.5 px-3">Span</th>
                   <th className="py-2.5 px-2 text-center">Mat</th>
                   <th className="py-2.5 px-2 text-center">Inns</th>
@@ -787,7 +784,7 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
                   <th className="py-2.5 px-3 text-right">Runs</th>
                   <th className="py-2.5 px-3 text-center">HS</th>
                   <th className="py-2.5 px-3 text-right">Ave</th>
-                  <th className="py-2.5 px-2 text-right">BF</th>
+                  <th className="py-2.5 px-2.5 text-right">BF</th>
                   <th className="py-2.5 px-3 text-right">SR</th>
                   <th className="py-2.5 px-2 text-center">100s</th>
                   <th className="py-2.5 px-2 text-center">50s</th>
@@ -797,7 +794,7 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
                   <th className="py-2.5 px-2 text-center">St</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-mono text-xs">
+              <tbody className="divide-y divide-slate-100 font-sans tabular-nums text-xs">
                 {[
                   { format: 'First Class', span: 'Season 69', st: formatStats.fc_season, isSeason: true },
                   { format: 'First Class', span: 'Career', st: formatStats.fc_career },
@@ -810,31 +807,31 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
                     key={idx} 
                     className={`transition-colors ${
                       row.isSeason 
-                        ? 'bg-slate-50/60 hover:bg-slate-100/70' 
-                        : 'bg-white hover:bg-emerald-50/40'
+                        ? 'bg-slate-50/50 hover:bg-slate-100/60' 
+                        : 'bg-white hover:bg-slate-50/80'
                     }`}
                   >
-                    <td className="py-2.5 px-3 font-sans font-bold text-slate-900">
+                    <td className="py-2.5 px-3.5 font-bold text-slate-900">
                       {row.format}
                     </td>
-                    <td className="py-2.5 px-3 font-sans text-slate-600 font-semibold text-[11px]">
+                    <td className="py-2.5 px-3 text-slate-500 font-medium text-[11px]">
                       {row.span}
                     </td>
                     <td className="py-2.5 px-2 text-center text-slate-700">{row.st.matches}</td>
                     <td className="py-2.5 px-2 text-center text-slate-700">{row.st.innings}</td>
                     <td className="py-2.5 px-2 text-center text-slate-700">{row.st.notOuts ?? 0}</td>
-                    <td className="py-2.5 px-3 text-right font-black text-slate-900">
+                    <td className="py-2.5 px-3 text-right font-bold text-slate-900">
                       {row.st.runs}
                     </td>
-                    <td className="py-2.5 px-3 text-center font-bold text-slate-800">{row.st.highestScore || '-'}</td>
-                    <td className="py-2.5 px-3 text-right font-bold text-amber-800">
+                    <td className="py-2.5 px-3 text-center text-slate-800 font-medium">{row.st.highestScore || '-'}</td>
+                    <td className="py-2.5 px-3 text-right text-slate-800">
                       {row.st.average > 0 ? row.st.average.toFixed(2) : (row.st.innings > 0 ? '0.00' : '-')}
                     </td>
-                    <td className="py-2.5 px-2 text-right text-slate-700">{row.st.ballsFaced ?? 0}</td>
+                    <td className="py-2.5 px-2.5 text-right text-slate-700">{row.st.ballsFaced ?? 0}</td>
                     <td className="py-2.5 px-3 text-right text-slate-700">
                       {row.st.strikeRate > 0 ? row.st.strikeRate.toFixed(2) : '-'}
                     </td>
-                    <td className="py-2.5 px-2 text-center text-amber-700 font-bold">{row.st.centuries}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.centuries}</td>
                     <td className="py-2.5 px-2 text-center text-slate-700">{row.st.fifties}</td>
                     <td className="py-2.5 px-2 text-center text-slate-700">{row.st.fours}</td>
                     <td className="py-2.5 px-2 text-center text-slate-700">{row.st.sixes}</td>
@@ -847,40 +844,39 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
           </div>
         </div>
 
-        {/* BOWLING TABLE (14 Columns) */}
+        {/* BOWLING TABLE (ESPNcricinfo Specification) */}
         <div className="pt-2">
-          <div className="flex items-center justify-between mb-2.5">
-            <h4 className="text-xs font-black uppercase tracking-wider text-teal-900 flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5 text-teal-700" />
-              <span>BOWLING &bull; {competitionTab === 'domestic' ? 'DOMESTIC' : 'FRIENDLY'}</span>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+              BOWLING
             </h4>
-            <span className="text-[10px] text-slate-500 font-mono">
-              Season 69 &bull; Career Total
+            <span className="text-[11px] text-slate-500">
+              {competitionTab === 'domestic' ? 'Domestic (FC / List A / T20)' : 'Friendly (FC / List A / T20)'}
             </span>
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] font-bold border-b border-slate-200">
-                  <th className="py-2.5 px-3">Format</th>
+                <tr className="bg-slate-50/80 text-slate-500 text-xs font-semibold border-b border-slate-200">
+                  <th className="py-2.5 px-3.5">Format</th>
                   <th className="py-2.5 px-3">Span</th>
                   <th className="py-2.5 px-2 text-center">Mat</th>
                   <th className="py-2.5 px-2 text-center">Inns</th>
-                  <th className="py-2.5 px-2 text-right">Balls</th>
+                  <th className="py-2.5 px-2.5 text-right">Balls</th>
                   <th className="py-2.5 px-3 text-right">Runs</th>
-                  <th className="py-2.5 px-2 text-right">Wkts</th>
+                  <th className="py-2.5 px-2.5 text-right">Wkts</th>
                   <th className="py-2.5 px-3 text-center">BBI</th>
                   <th className="py-2.5 px-3 text-center">BBM</th>
                   <th className="py-2.5 px-3 text-right">Ave</th>
                   <th className="py-2.5 px-3 text-right">Econ</th>
-                  <th className="py-2.5 px-2 text-right">SR</th>
+                  <th className="py-2.5 px-2.5 text-right">SR</th>
                   <th className="py-2.5 px-2 text-center">4w</th>
                   <th className="py-2.5 px-2 text-center">5w</th>
                   <th className="py-2.5 px-2 text-center">10w</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-mono text-xs">
+              <tbody className="divide-y divide-slate-100 font-sans tabular-nums text-xs">
                 {[
                   { format: 'First Class', span: 'Season 69', st: formatStats.fc_season, isSeason: true },
                   { format: 'First Class', span: 'Career', st: formatStats.fc_career },
@@ -893,37 +889,37 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
                     key={idx} 
                     className={`transition-colors ${
                       row.isSeason 
-                        ? 'bg-slate-50/60 hover:bg-slate-100/70' 
-                        : 'bg-white hover:bg-teal-50/40'
+                        ? 'bg-slate-50/50 hover:bg-slate-100/60' 
+                        : 'bg-white hover:bg-slate-50/80'
                     }`}
                   >
-                    <td className="py-2.5 px-3 font-sans font-bold text-slate-900">
+                    <td className="py-2.5 px-3.5 font-bold text-slate-900">
                       {row.format}
                     </td>
-                    <td className="py-2.5 px-3 font-sans text-slate-600 font-semibold text-[11px]">
+                    <td className="py-2.5 px-3 text-slate-500 font-medium text-[11px]">
                       {row.span}
                     </td>
                     <td className="py-2.5 px-2 text-center text-slate-700">{row.st.matches}</td>
                     <td className="py-2.5 px-2 text-center text-slate-700">{row.st.inningsBowled ?? (row.st.oversBowled > 0 ? row.st.matches : 0)}</td>
-                    <td className="py-2.5 px-2 text-right text-slate-700">{row.st.ballsBowled ?? Math.round(row.st.oversBowled * 6)}</td>
+                    <td className="py-2.5 px-2.5 text-right text-slate-700">{row.st.ballsBowled ?? Math.round(row.st.oversBowled * 6)}</td>
                     <td className="py-2.5 px-3 text-right text-slate-700">{row.st.runsConceded ?? 0}</td>
-                    <td className="py-2.5 px-2 text-right font-black text-teal-800">
+                    <td className="py-2.5 px-2.5 text-right font-bold text-slate-900">
                       {row.st.wickets}
                     </td>
-                    <td className="py-2.5 px-3 text-center font-bold text-slate-800">{row.st.bestBowling || '-'}</td>
-                    <td className="py-2.5 px-3 text-center font-bold text-slate-700">{row.st.bestBowlingMatch || row.st.bestBowling || '-'}</td>
-                    <td className="py-2.5 px-3 text-right font-bold text-amber-800">
+                    <td className="py-2.5 px-3 text-center text-slate-800 font-medium">{row.st.bestBowling || '-'}</td>
+                    <td className="py-2.5 px-3 text-center text-slate-800 font-medium">{row.st.bestBowlingMatch || row.st.bestBowling || '-'}</td>
+                    <td className="py-2.5 px-3 text-right text-slate-800">
                       {row.st.bowlingAverage > 0 ? row.st.bowlingAverage.toFixed(2) : (row.st.wickets > 0 ? '0.00' : '-')}
                     </td>
                     <td className="py-2.5 px-3 text-right text-slate-700">
                       {row.st.economy > 0 ? row.st.economy.toFixed(2) : '-'}
                     </td>
-                    <td className="py-2.5 px-2 text-right text-slate-700">
+                    <td className="py-2.5 px-2.5 text-right text-slate-700">
                       {(row.st.bowlingStrikeRate && row.st.bowlingStrikeRate > 0) ? row.st.bowlingStrikeRate.toFixed(1) : '-'}
                     </td>
                     <td className="py-2.5 px-2 text-center text-slate-700">{row.st.fourWickets ?? 0}</td>
-                    <td className="py-2.5 px-2 text-center text-amber-700 font-bold">{row.st.fiveWickets ?? 0}</td>
-                    <td className="py-2.5 px-2 text-center text-teal-700 font-bold">{row.st.tenWickets ?? 0}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.fiveWickets ?? 0}</td>
+                    <td className="py-2.5 px-2 text-center text-slate-700">{row.st.tenWickets ?? 0}</td>
                   </tr>
                 ))}
               </tbody>
@@ -933,25 +929,25 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
       </div>
 
       {/* RECENT MATCHES OF {PLAYER.NAME} (Exact match with ESPNcricinfo user reference image) */}
-      <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-4">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-          <h3 className="text-base font-black text-slate-900 tracking-tight">
+          <h3 className="text-base font-bold text-slate-900 tracking-tight">
             Recent Matches of {player.name}
           </h3>
-          <span className="text-xs font-mono font-bold text-slate-500">
+          <span className="text-xs text-slate-500 font-medium">
             {playerRecentMatches.length} Recorded Match Appearances
           </span>
         </div>
 
         {playerRecentMatches.length === 0 ? (
-          <div className="p-8 text-center bg-slate-50 rounded-xl border border-slate-200 text-slate-600 text-xs leading-relaxed">
+          <div className="p-8 text-center bg-slate-50 rounded-xl border border-slate-200 text-slate-500 text-xs leading-relaxed">
             No recent matches recorded for this player yet. Upload match scorecards via Import Hub or the 1-Click Browser Button to populate live match form and bowling figures.
           </div>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-xs">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-100 text-slate-600 uppercase tracking-wider text-[11px] font-bold border-b border-slate-200">
+                <tr className="bg-slate-50/80 text-slate-500 text-xs font-semibold border-b border-slate-200">
                   <th className="py-3 px-4">Match</th>
                   <th className="py-3 px-3 text-center">Bat</th>
                   <th className="py-3 px-3 text-center">Bowl</th>
@@ -960,25 +956,25 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
                   <th className="py-3 px-4 text-right">Format</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-mono text-xs">
+              <tbody className="divide-y divide-slate-100 font-sans tabular-nums text-xs">
                 {playerRecentMatches.map((m, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4 font-sans font-bold text-slate-900 hover:text-emerald-800 underline cursor-pointer">
+                  <tr key={idx} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900 underline underline-offset-2 hover:text-emerald-700 cursor-pointer">
                       {m.matchTitle}
                     </td>
-                    <td className="py-3 px-3 text-center font-bold text-slate-900">
+                    <td className="py-3 px-3 text-center text-slate-900 font-medium">
                       {m.batScore}
                     </td>
-                    <td className="py-3 px-3 text-center text-slate-700">
+                    <td className="py-3 px-3 text-center text-slate-900">
                       {m.bowlFigures}
                     </td>
-                    <td className="py-3 px-3 text-slate-600 text-[11px]">
+                    <td className="py-3 px-3 text-slate-600 text-xs">
                       {m.date}
                     </td>
-                    <td className="py-3 px-3 font-sans font-bold text-slate-900">
+                    <td className="py-3 px-3 font-bold text-slate-900">
                       {m.ground}
                     </td>
-                    <td className="py-3 px-4 text-right text-slate-600 text-[11px]">
+                    <td className="py-3 px-4 text-right text-slate-900 text-xs font-normal">
                       {m.format}
                     </td>
                   </tr>

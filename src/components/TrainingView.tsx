@@ -312,7 +312,7 @@ export const TrainingView: React.FC<TrainingViewProps> = ({
                   <td className="py-2.5 px-3 text-center text-slate-700">{log.weeks_taken} Wks</td>
                   <td className="py-2.5 px-3 text-center">
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">
-                      POPPED ✅
+                      POPPED
                     </span>
                   </td>
                 </tr>

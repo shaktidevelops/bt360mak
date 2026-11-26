@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Player } from '../types/database';
-import { Search, Sparkles, Users, UserSquare2, LayoutGrid, Table, ArrowUpDown, Upload } from 'lucide-react';
+import { Search, Sparkles, Users, UserSquare2, LayoutGrid, Table, ArrowUpDown, Upload, Shield, Target, Flame, Zap } from 'lucide-react';
 import { formatBowlingType, getBowlingTypeFullName, formatBattingHand, getBattingHandFullName } from '../lib/cricketFormatters';
 
 interface SquadViewProps {
@@ -211,7 +211,7 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                   className="py-4 px-4 min-w-[280px] sticky left-24 z-40 bg-slate-100 shadow-[4px_0_8px_rgba(0,0,0,0.08)] cursor-pointer hover:text-emerald-700 transition-colors whitespace-nowrap"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>🏏 Player Name & Role</span>
+                    <span>Player Name & Role</span>
                     <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                   </div>
                 </th>
@@ -231,10 +231,10 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                   </div>
                 </th>
                 <th className="py-4 px-2 w-20 text-center whitespace-nowrap">Subskill</th>
-                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Batting 🏏</th>
-                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Bowling 🔴</th>
-                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Keeping 🧤</th>
-                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Fielding ⚡</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Batting</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Bowling</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Keeping</th>
+                <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Fielding</th>
                 <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Consistency</th>
                 <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Concentration</th>
                 <th className="py-4 px-2 text-center w-28 whitespace-nowrap">Stamina</th>
@@ -256,7 +256,6 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                 const isKeeper = player.tactical_role?.includes('Keeper') || getScore(player.keeping) >= 7;
                 const isBowler = player.tactical_role?.includes('Bowler') || player.tactical_role?.includes('Spinner') || getScore(player.bowling) >= 7;
                 const isBatter = player.tactical_role?.includes('Batter') || getScore(player.batting) >= 7;
-                const roleIcon = isKeeper ? '🧤' : isBowler ? '🔴' : isBatter ? '🏏' : '⚡';
 
                 return (
                   <tr key={player.id} className="group odd:bg-white even:bg-slate-50/70 hover:bg-emerald-50/60 transition-colors">
@@ -268,7 +267,9 @@ export const SquadView: React.FC<SquadViewProps> = ({ squad, onViewDossier, onNa
                     {/* Sticky Column 2: Name, Wonderkid Tag, Tactical Role */}
                     <td className="py-4 px-4 whitespace-nowrap sticky left-24 z-20 bg-white group-odd:bg-white group-even:bg-slate-50 group-hover:bg-emerald-50 shadow-[4px_0_8px_rgba(0,0,0,0.08)]">
                       <div className="flex items-center gap-2 font-black text-slate-900 text-[13px] font-sans">
-                        <span>{roleIcon}</span>
+                        <span className="p-1 rounded-md bg-slate-100 text-slate-700 shrink-0">
+                          {isKeeper ? <Shield className="w-3.5 h-3.5 text-blue-700" /> : isBowler ? <Target className="w-3.5 h-3.5 text-teal-700" /> : isBatter ? <Flame className="w-3.5 h-3.5 text-amber-700" /> : <Zap className="w-3.5 h-3.5 text-emerald-700" />}
+                        </span>
                         <span>{player.name}</span>
                         {player.is_wonderkid && (
                           <span className="flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-black font-mono shadow-xs">
