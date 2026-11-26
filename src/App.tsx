@@ -44,12 +44,19 @@ import {
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<TabType>('overview');
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string>('6099466');
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | undefined>(undefined);
 
   const [club, setClub] = useState<Club>(() => {
     try {
       const saved = localStorage.getItem('bt360_club');
-      return saved ? JSON.parse(saved) : fallbackClub;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.fan_mood) parsed.fan_mood = String(parsed.fan_mood).replace(/[^\x20-\x7E]/g, '').trim();
+        if (parsed.sponsor_confidence) parsed.sponsor_confidence = String(parsed.sponsor_confidence).replace(/[^\x20-\x7E]/g, '').trim();
+        if (parsed.morale) parsed.morale = String(parsed.morale).replace(/[^\x20-\x7E]/g, '').trim();
+        return parsed;
+      }
+      return fallbackClub;
     } catch {
       return fallbackClub;
     }

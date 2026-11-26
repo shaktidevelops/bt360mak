@@ -128,13 +128,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         <div className="p-3.5 rounded-2xl sovereign-card min-w-0" title={`£${totalMarketVal.toLocaleString()}`}>
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Squad Val</span>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Squad Value</span>
             <Users className="w-4 h-4 text-teal-600 shrink-0" />
           </div>
           <div className="text-sm sm:text-base xl:text-[17px] font-black font-mono text-teal-700 mt-1 whitespace-nowrap">
             £{totalMarketVal.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-500 mt-0.5 truncate">14 Active Squad</div>
+          <div className="text-xs text-slate-500 mt-0.5 truncate">{squad.length} Active Squad</div>
         </div>
 
         <div className="p-3.5 rounded-2xl sovereign-card-gold min-w-0" title={`${wonderkids.length} Wonderkid Trainees`}>
