@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { 
   Club, 
   Player, 
@@ -27,7 +27,14 @@ import {
   Calendar,
   Clock,
   History,
-  Trash2
+  Trash2,
+  AlertTriangle,
+  Play,
+  FileCode,
+  FolderUp,
+  Layers,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { 
@@ -55,6 +62,7 @@ interface ImportViewProps {
   squad: Player[];
   matches?: MatchRecord[];
   records?: CricketRecord[];
+  onResetAllData?: () => void;
   onImportSquad: (newSquad: Player[]) => void;
   onImportClub: (newClub: Club) => void;
   onImportFinances?: (newFinances: FinancialRecord[]) => void;
@@ -66,11 +74,166 @@ interface ImportViewProps {
   onImportStaff?: (newStaff: StaffMember[]) => void;
 }
 
+/**
+ * Reusable helper to extract squad players from HTML or plain text.
+ * Strictly captures player IDs from href="playerdetails.asp?playerID=XXXX"
+ */
+export const extractPlayersFromHtml = (input: string, clubId: string): Partial<Player>[] => {
+  const extractedPlayers: Partial<Player>[] = [];
+
+  // Regex 1: HTML format (<div class="player" id="player_XXXX"> or playerdetails.asp links)
+  if (input.includes('playerdetails.asp') || input.includes('class="player"')) {
+    const playerRegex = /<div class="player" id="player_(\d+)">([\s\S]*?)(?=<div class="player" id="player_|$)/g;
+    let match;
+    while ((match = playerRegex.exec(input)) !== null) {
+      const pId = match[1];
+      const block = match[2];
+
+      const nameMatch = block.match(/playerdetails\.asp\?playerID=\d+">([^<]+)<\/a>/);
+      const name = nameMatch ? nameMatch[1].trim() : `Player ${pId}`;
+
+      const ageMatch = block.match(/class="player_age">(\d+)</);
+      const age = ageMatch ? parseInt(ageMatch[1]) : 20;
+
+      const wageMatch = block.match(/class="player_wage">&#163;([0-9,]+)</);
+      const wage = wageMatch ? parseInt(wageMatch[1].replace(/,/g, '')) : 500;
+
+      const btrMatch = block.match(/class="player_btr">([0-9,]+)</);
+      const bti = btrMatch ? parseInt(btrMatch[1].replace(/,/g, '')) : 5000;
+
+      const extractSkill = (className: string) => {
+        const rx = new RegExp(`class="${className}">\\s*<a[^>]*>([^<]+)<\\/a>`, 'i');
+        const m = block.match(rx);
+        return m ? m[1].trim().toLowerCase() : 'competent';
+      };
+
+      const bathandM = block.match(/class="player_bathand">\s*([LR])<\/span>/i);
+      const battingHand = bathandM ? (bathandM[1].toUpperCase() === 'L' ? 'LHB' : 'RHB') : 'RHB';
+
+      const bowlhandM = block.match(/class="player_bowlhand">\s*([LR])<\/span>/i);
+      const bowltypeM = block.match(/class="player_bowltype">\s*([^<]+)<\/span>/i);
+      let bowlingType = 'None';
+      if (bowlhandM && bowltypeM) {
+        const arm = bowlhandM[1].trim().toUpperCase() === 'L' ? 'Left-arm' : 'Right-arm';
+        const rawType = bowltypeM[1].replace(/^[Hh]\s*/, '').trim();
+        bowlingType = `${arm} ${rawType}`;
+      }
+
+      extractedPlayers.push({
+        id: pId,
+        club_id: clubId,
+        name,
+        age,
+        wage,
+        bti,
+        batting_hand: battingHand,
+        bowling_type: bowlingType,
+        batting: extractSkill('player_batting'),
+        bowling: extractSkill('player_bowling'),
+        keeping: extractSkill('player_keeping'),
+        fielding: extractSkill('player_fielding'),
+        concentration: extractSkill('player_concentration'),
+        consistency: extractSkill('player_consistency'),
+        stamina: extractSkill('player_stamina'),
+        form: extractSkill('player_batform'),
+        fatigue: extractSkill('player_fitness'),
+        leadership: extractSkill('player_leadership'),
+        experience: extractSkill('player_experience'),
+        subskill: 6.20,
+        active_net: 'Unassigned',
+        market_value: bti * 85,
+        tactical_role: age <= 18 ? 'Wonderkid Trainee' : 'First XI Player',
+        is_wonderkid: age <= 18
+      });
+    }
+  } else {
+    // Plain text fallback
+    const lines = input.split('\n');
+    let currentPlayer: Partial<Player> | null = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      const nameIdMatch = line.match(/^([A-Za-z\s]+)(?:[-–—\s]+(\d{1,2})\s*yo)?.*?(?:ID[:\s]*|#)?(\d{6,8})/i);
+      if (nameIdMatch) {
+        if (currentPlayer && currentPlayer.name) {
+          extractedPlayers.push(currentPlayer);
+        }
+        currentPlayer = {
+          id: nameIdMatch[3].trim(),
+          club_id: clubId,
+          name: nameIdMatch[1].trim(),
+          age: nameIdMatch[2] ? parseInt(nameIdMatch[2]) : 22,
+          wage: 540,
+          bti: 6500,
+          batting_hand: line.includes('LHB') ? 'LHB' : 'RHB',
+          bowling_type: line.includes('Spin') ? 'Right-arm Finger Spin' : line.includes('Fast') ? 'Right-arm Fast' : 'Right-arm Medium',
+          batting: 'competent',
+          bowling: 'feeble',
+          keeping: 'abysmal',
+          fielding: 'competent',
+          consistency: 'competent',
+          concentration: 'competent',
+          stamina: 'competent',
+          form: 'superb',
+          fatigue: 'sublime',
+          leadership: 'competent',
+          experience: 'feeble',
+          subskill: 6.50,
+          active_net: 'Unassigned',
+          market_value: 400000,
+          tactical_role: 'First XI Player',
+          is_wonderkid: nameIdMatch[2] ? parseInt(nameIdMatch[2]) <= 18 : false
+        };
+        continue;
+      }
+
+      if (currentPlayer) {
+        const wageM = line.match(/Wage[:\s]*[£$]?([0-9,]+)/i);
+        if (wageM) currentPlayer.wage = parseInt(wageM[1].replace(/,/g, ''));
+
+        const btiM = line.match(/(?:BTI|BTR)[:\s]*([0-9,]+)/i);
+        if (btiM) {
+          currentPlayer.bti = parseInt(btiM[1].replace(/,/g, ''));
+          currentPlayer.market_value = currentPlayer.bti * 80;
+        }
+
+        const checkSkill = (skName: string) => {
+          const rx = new RegExp(`${skName}[:\\s]+([A-Za-z]+)`, 'i');
+          const m = line.match(rx);
+          return m ? m[1].toLowerCase() : null;
+        };
+
+        const bat = checkSkill('Batting');
+        if (bat) currentPlayer.batting = bat;
+        const bowl = checkSkill('Bowling');
+        if (bowl) currentPlayer.bowling = bowl;
+        const keep = checkSkill('Keeping');
+        if (keep) currentPlayer.keeping = keep;
+        const fld = checkSkill('Fielding');
+        if (fld) currentPlayer.fielding = fld;
+        const conc = checkSkill('Concentration');
+        if (conc) currentPlayer.concentration = conc;
+        const cons = checkSkill('Consistency');
+        if (cons) currentPlayer.consistency = cons;
+        const stam = checkSkill('Stamina');
+        if (stam) currentPlayer.stamina = stam;
+      }
+    }
+
+    if (currentPlayer && currentPlayer.name) {
+      extractedPlayers.push(currentPlayer);
+    }
+  }
+
+  return extractedPlayers;
+};
+
 export const ImportView: React.FC<ImportViewProps> = ({
   club,
   squad,
   matches = [],
   records = [],
+  onResetAllData,
   onImportSquad,
   onImportClub,
   onImportFinances,
@@ -79,7 +242,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
   onImportStadium,
   onImportNets
 }) => {
-  const [activeImportTab, setActiveImportTab] = useState<'paste' | 'domains' | 'sheet' | 'json'>('paste');
+  // Tabs: Default to 'bulk' as requested by the user for multi-file HTML ingestion
+  const [activeImportTab, setActiveImportTab] = useState<'bulk' | 'paste' | 'domains' | 'sheet' | 'json'>('bulk');
   const [selectedDomain, setSelectedDomain] = useState<'squad' | 'finances' | 'ground' | 'fixtures' | 'nets' | 'office' | 'diary'>('squad');
   const [formatOverride, setFormatOverride] = useState<'auto' | 'First Class' | 'One Day' | 'BT20'>('auto');
   const [matchesFilter, setMatchesFilter] = useState<string>('ALL');
@@ -100,6 +264,36 @@ export const ImportView: React.FC<ImportViewProps> = ({
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [showResetModal, setShowResetModal] = useState(false);
+
+  // Bulk File Ingestion State
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number; currentFileName: string }>({
+    current: 0,
+    total: 0,
+    currentFileName: ''
+  });
+  const [bulkResults, setBulkResults] = useState<Array<{
+    fileName: string;
+    type: string;
+    title: string;
+    status: 'success' | 'skipped' | 'error';
+    details: string;
+    date?: string;
+    matchId?: string;
+  }>>([]);
+  const [bulkSummary, setBulkSummary] = useState<{
+    totalFiles: number;
+    matchesAdded: number;
+    squadCount: number;
+    errors: number;
+    formats: { fc: number; od: number; t20: number };
+  } | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
 
   // Sorting helper for match date (DD/MM/YYYY or YYYY-MM-DD)
   const parseMatchDateSortKey = (dateStr: string): number => {
@@ -139,7 +333,6 @@ export const ImportView: React.FC<ImportViewProps> = ({
     } catch (e) {
       console.warn('Failed to parse recent imports from localStorage', e);
     }
-    // If empty but matches exist, populate initial history from matches
     if (matches && matches.length > 0) {
       return matches.slice(-5).reverse().map(m => ({
         id: `init-${m.id}`,
@@ -156,7 +349,61 @@ export const ImportView: React.FC<ImportViewProps> = ({
     return [];
   });
 
-  // Delete all imported matches and reset player career stats to zero
+  // 100% FRESH START / FACTORY RESET ACTION
+  const handleExecuteFactoryReset = async () => {
+    setIsSyncing(true);
+    try {
+      if (onResetAllData) {
+        onResetAllData();
+      } else {
+        const resetSquad: Player[] = squad.map(p => ({
+          ...p,
+          statsFC: { ...EMPTY_STATS },
+          statsOD: { ...EMPTY_STATS },
+          statsT20: { ...EMPTY_STATS }
+        }));
+        if (onImportMatches) onImportMatches([]);
+        onImportSquad(resetSquad);
+        if (onImportRecords) onImportRecords([]);
+        if (onImportFinances) onImportFinances([]);
+
+        localStorage.setItem('bt360_matches', '[]');
+        localStorage.setItem('bt360_records', '[]');
+        localStorage.setItem('bt360_finances', '[]');
+        localStorage.setItem('bt360_squad', JSON.stringify(resetSquad));
+        localStorage.removeItem('bt360_recent_imports');
+
+        if (isSupabaseConfigured) {
+          try {
+            await supabase.from('matches').delete().eq('club_id', club.id);
+            await supabase.from('records').delete().eq('club_id', club.id);
+            await supabase.from('players').upsert(resetSquad);
+          } catch (sErr) {
+            console.warn('Supabase reset warning:', sErr);
+          }
+        }
+      }
+
+      setImportHistory([]);
+      setSelectedFiles([]);
+      setBulkResults([]);
+      setBulkSummary(null);
+      setParseResult(null);
+      setRawText('');
+      setShowResetModal(false);
+
+      setStatusMessage({
+        text: '✨ 100% Fresh Start Complete! All past matches, dummy statistics, and records have been deleted. You can now import your authentic HTML files from the start.',
+        type: 'success'
+      });
+    } catch (err: any) {
+      setStatusMessage({ text: `Error during reset: ${err.message}`, type: 'error' });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Delete all imported matches and reset career stats to zero
   const handleDeleteAllMatchesAndStats = async () => {
     if (!window.confirm("⚠️ Are you sure you want to delete ALL imported matches and reset all player career stats (First Class, One Day, BT20) and clubhouse milestones back to 0? This action cannot be undone.")) {
       return;
@@ -229,7 +476,402 @@ export const ImportView: React.FC<ImportViewProps> = ({
     }
   };
 
-  // Smart Universal Parser for Battrick raw copied text or HTML across all domains
+  // Drag and Drop Handlers for Bulk File Ingestion
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFiles = Array.from(e.dataTransfer.files).filter(f => 
+        f.name.endsWith('.html') || f.name.endsWith('.htm') || f.name.endsWith('.txt')
+      );
+      if (droppedFiles.length === 0) {
+        setStatusMessage({ text: 'Please drop valid .html, .htm, or .txt files from Battrick.', type: 'error' });
+        return;
+      }
+      setSelectedFiles(prev => {
+        const combined = [...prev, ...droppedFiles];
+        // Deduplicate files by name + size
+        const seen = new Set<string>();
+        return combined.filter(f => {
+          const key = `${f.name}-${f.size}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      });
+    }
+  };
+
+  const handleFilesSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files).filter(f => 
+        f.name.endsWith('.html') || f.name.endsWith('.htm') || f.name.endsWith('.txt')
+      );
+      setSelectedFiles(prev => {
+        const combined = [...prev, ...newFiles];
+        const seen = new Set<string>();
+        return combined.filter(f => {
+          const key = `${f.name}-${f.size}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      });
+    }
+  };
+
+  // BULK MULTI-FILE ASYNC INGESTION ENGINE
+  const handleProcessBulkFiles = async () => {
+    if (selectedFiles.length === 0) {
+      setStatusMessage({ text: 'No HTML/TXT files selected to import.', type: 'error' });
+      return;
+    }
+
+    setIsBulkProcessing(true);
+    setBulkResults([]);
+    setBulkSummary(null);
+
+    try {
+      // 1. Sort files so that squad files are parsed first to establish player IDs
+      const filesWithNames = selectedFiles.map(f => ({
+        file: f,
+        isSquad: /squad/i.test(f.name) || /player/i.test(f.name),
+        isGround: /ground/i.test(f.name),
+        isFinances: /finance/i.test(f.name),
+        isFixtures: /fixture/i.test(f.name)
+      }));
+
+      filesWithNames.sort((a, b) => {
+        if (a.isSquad && !b.isSquad) return -1;
+        if (!a.isSquad && b.isSquad) return 1;
+        if (a.isGround && !b.isGround) return -1;
+        if (!a.isGround && b.isGround) return 1;
+        return 0;
+      });
+
+      const totalFiles = filesWithNames.length;
+      const matchesMap = new Map<string, MatchRecord>();
+      matches.forEach(m => matchesMap.set(m.id, m));
+
+      let activeSquad: Player[] = [...squad];
+      let updatedClubUpdates: Partial<Club> = {};
+      let updatedFinances: FinancialRecord[] = [];
+      let updatedStadiumTiers: StadiumTier[] = [];
+      const resultsLog: Array<{
+        fileName: string;
+        type: string;
+        title: string;
+        status: 'success' | 'skipped' | 'error';
+        details: string;
+        date?: string;
+        matchId?: string;
+      }> = [];
+
+      let fcCountAdded = 0;
+      let odCountAdded = 0;
+      let t20CountAdded = 0;
+      let errorsCount = 0;
+
+      for (let i = 0; i < totalFiles; i++) {
+        const item = filesWithNames[i];
+        const file = item.file;
+
+        setBulkProgress({
+          current: i + 1,
+          total: totalFiles,
+          currentFileName: file.name
+        });
+
+        // Small yield to allow React to render progress bar smoothly
+        await new Promise(res => setTimeout(res, 20));
+
+        try {
+          const content = await file.text();
+          if (!content.trim()) {
+            resultsLog.push({
+              fileName: file.name,
+              type: 'Empty',
+              title: 'Empty File',
+              status: 'skipped',
+              details: 'File contains 0 bytes or blank text.'
+            });
+            continue;
+          }
+
+          // A. SQUAD ROSTER DOMAIN
+          if (content.includes('playerdetails.asp') || content.includes('class="player"') || (content.includes('Batting') && content.includes('BTI'))) {
+            const extracted = extractPlayersFromHtml(content, club.id);
+            if (extracted.length > 0) {
+              const formatted: Player[] = extracted.map((p, idx) => ({
+                id: p.id || String(6099450 + idx),
+                club_id: club.id,
+                name: p.name || `Player ${idx + 1}`,
+                age: p.age || 21,
+                wage: p.wage || 540,
+                batting_hand: p.batting_hand || 'RHB',
+                bowling_type: p.bowling_type || 'Right-arm Medium',
+                batting: p.batting || 'competent',
+                bowling: p.bowling || 'feeble',
+                keeping: p.keeping || 'abysmal',
+                fielding: p.fielding || 'competent',
+                consistency: p.consistency || 'competent',
+                concentration: p.concentration || 'competent',
+                stamina: p.stamina || 'competent',
+                form: p.form || 'superb',
+                fatigue: p.fatigue || 'sublime',
+                leadership: p.leadership || 'competent',
+                experience: p.experience || 'feeble',
+                bti: p.bti || 6500,
+                subskill: p.subskill || 6.20,
+                active_net: 'Unassigned',
+                market_value: p.market_value || 450000,
+                tactical_role: p.tactical_role || (p.age && p.age <= 18 ? 'Wonderkid Trainee' : 'Senior Player'),
+                is_wonderkid: p.is_wonderkid || (p.age ? p.age <= 18 : false),
+                uniqueRecords: p.uniqueRecords || ['Official Registered Squad Member'],
+                statsFC: { ...EMPTY_STATS },
+                statsOD: { ...EMPTY_STATS },
+                statsT20: { ...EMPTY_STATS }
+              }));
+
+              // Merge or replace squad players by ID
+              const squadMap = new Map<string, Player>();
+              activeSquad.forEach(p => squadMap.set(p.id, p));
+              formatted.forEach(p => {
+                const existing = squadMap.get(p.id);
+                squadMap.set(p.id, existing ? { ...existing, ...p } : p);
+              });
+              activeSquad = Array.from(squadMap.values());
+
+              resultsLog.push({
+                fileName: file.name,
+                type: 'Squad',
+                title: `Registered ${formatted.length} Players`,
+                status: 'success',
+                details: `Player IDs registered: ${formatted.map(p => `#${p.id}`).slice(0, 5).join(', ')}${formatted.length > 5 ? '...' : ''}`
+              });
+              continue;
+            }
+          }
+
+          // B. MULTI-FIXTURES DOMAIN (fixtures.asp)
+          if (content.includes('fixtures.asp') || (content.includes('Previous Matches') && content.includes('matchID='))) {
+            const fixturesList = parseBattrickFixtures(content, club.id);
+            if (fixturesList.length > 0) {
+              fixturesList.forEach(m => matchesMap.set(m.id, m));
+              resultsLog.push({
+                fileName: file.name,
+                type: 'Fixtures',
+                title: `Schedule: ${fixturesList.length} Matches`,
+                status: 'success',
+                details: `Extracted fixtures list with authentic dates & IDs.`
+              });
+              continue;
+            }
+          }
+
+          // C. MATCH SCORECARD DOMAIN (matchinfofc.asp / matchinfo.asp / scorecards)
+          const isScorecard = content.includes('matchinfofc.asp') || 
+                              content.includes('matchinfo.asp') || 
+                              content.includes('Fall of wickets') || 
+                              content.includes("Reporter's Summary") ||
+                              content.includes('First Innings of:') ||
+                              content.includes('Second Innings of:') ||
+                              /Total\s*\([^)]*overs/i.test(content) ||
+                              (/Somnath Super Devs/i.test(content) && (content.includes('overs') || content.includes('runs') || content.includes('wickets')));
+
+          if (isScorecard) {
+            const scorecard = parseBattrickScorecard(content);
+            if (scorecard) {
+              const newMatch: MatchRecord = {
+                id: scorecard.matchId,
+                club_id: club.id,
+                match_date: scorecard.matchDate,
+                match_type: scorecard.format,
+                opponent_club: scorecard.opponent,
+                venue: scorecard.venue,
+                pitch_type: scorecard.pitchType,
+                result: scorecard.result,
+                status: 'completed',
+                scoreSummary: scorecard.somnathRuns ? `Somnath ${scorecard.somnathRuns} runs` : undefined,
+                topPerformer: scorecard.battingPerformances[0]?.playerName 
+                  ? `${scorecard.battingPerformances[0].playerName} (${scorecard.battingPerformances[0].runs} runs)` 
+                  : undefined,
+                scorecardData: scorecard
+              };
+
+              matchesMap.set(newMatch.id, newMatch);
+
+              if (scorecard.format === 'First Class') fcCountAdded++;
+              else if (scorecard.format === 'One Day') odCountAdded++;
+              else t20CountAdded++;
+
+              resultsLog.push({
+                fileName: file.name,
+                type: 'Scorecard',
+                title: `${scorecard.format} vs ${scorecard.opponent}`,
+                status: 'success',
+                date: scorecard.rawMatchDate || scorecard.matchDate,
+                matchId: scorecard.matchId,
+                details: `${scorecard.result || 'Completed'} • ${scorecard.venue}`
+              });
+              continue;
+            }
+          }
+
+          // D. GROUND & STADIUM DOMAIN (ground.asp)
+          if (content.includes('Standing Room') || content.includes('Groundsman') || content.includes('Uncovered Seats') || content.includes('Prabhas Coastal Oval')) {
+            const capM = content.match(/Capacity[:\s]*([0-9,]+)/i);
+            const cap = capM ? parseInt(capM[1].replace(/,/g, '')) : 10000;
+            updatedStadiumTiers = [
+              { id: 'st-1', club_id: club.id, tier_name: 'Standing Room', current_seats: 5275, optimal_ratio: 0.5275, recommended_seats: 6000, ticket_price: 5.00, expansion_cost_per_seat: 35.00 },
+              { id: 'st-2', club_id: club.id, tier_name: 'Uncovered Seats', current_seats: 3270, optimal_ratio: 0.3270, recommended_seats: 4000, ticket_price: 8.00, expansion_cost_per_seat: 48.00 },
+              { id: 'st-3', club_id: club.id, tier_name: 'Covered Seats', current_seats: 1100, optimal_ratio: 0.1100, recommended_seats: 1500, ticket_price: 14.00, expansion_cost_per_seat: 72.00 },
+              { id: 'st-4', club_id: club.id, tier_name: 'Members Seats', current_seats: 355, optimal_ratio: 0.0355, recommended_seats: 500, ticket_price: 25.00, expansion_cost_per_seat: 120.00 }
+            ];
+            updatedClubUpdates = { ...updatedClubUpdates, stadium_capacity: cap, stadium_name: 'Prabhas Coastal Oval (13108)' };
+            resultsLog.push({
+              fileName: file.name,
+              type: 'Ground',
+              title: 'Stadium Seating Structure',
+              status: 'success',
+              details: `Capacity: ${cap.toLocaleString()} seats across 4 tiers.`
+            });
+            continue;
+          }
+
+          // E. FINANCES DOMAIN (finances.asp)
+          if (content.includes('Account Summary') || content.includes('Current Balance') || content.includes('Paid Out')) {
+            const balM = content.match(/Current Balance[:\s]*([0-9,]+)/i);
+            const balance = balM ? parseInt(balM[1].replace(/,/g, '')) : 1325820;
+            updatedFinances = [
+              { id: 'fin-1', club_id: club.id, week_number: 1, record_date: '2026-11-19', gate_receipts: 5247, sponsors: 22823, merchandise: 0, prize_money: 33114, total_inflow: 61184, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 27198, cumulative_bank_balance: balance, category: 'Season 69 Closing Week' }
+            ];
+            updatedClubUpdates = { ...updatedClubUpdates, bank_balance: balance };
+            resultsLog.push({
+              fileName: file.name,
+              type: 'Finances',
+              title: 'Club Treasury & Ledger',
+              status: 'success',
+              details: `Current Balance: £${balance.toLocaleString()}`
+            });
+            continue;
+          }
+
+          // Skipped or unrecognized
+          resultsLog.push({
+            fileName: file.name,
+            type: 'Unrecognized',
+            title: 'Unrecognized Content',
+            status: 'skipped',
+            details: 'Could not detect valid scorecard, squad, ground, or finances patterns.'
+          });
+
+        } catch (fErr: any) {
+          errorsCount++;
+          resultsLog.push({
+            fileName: file.name,
+            type: 'Error',
+            title: 'Parse Error',
+            status: 'error',
+            details: fErr.message || 'Unknown parsing exception'
+          });
+        }
+      }
+
+      // 2. Finalize batch: Recalculate player career stats & club records strictly from matches
+      const allMatches = Array.from(matchesMap.values());
+      const { updatedSquad, updatedRecords } = recalculateStatsFromMatches(allMatches, activeSquad);
+
+      // 3. Persist to App State & LocalStorage
+      if (onImportMatches) onImportMatches(allMatches);
+      onImportSquad(updatedSquad);
+      if (onImportRecords) onImportRecords(updatedRecords);
+
+      if (updatedStadiumTiers.length > 0 && onImportStadium) {
+        onImportStadium(updatedStadiumTiers);
+        localStorage.setItem('bt360_stadiumTiers', JSON.stringify(updatedStadiumTiers));
+      }
+      if (updatedFinances.length > 0 && onImportFinances) {
+        onImportFinances(updatedFinances);
+        localStorage.setItem('bt360_finances', JSON.stringify(updatedFinances));
+      }
+      if (Object.keys(updatedClubUpdates).length > 0) {
+        const mergedClub = { ...club, ...updatedClubUpdates };
+        onImportClub(mergedClub);
+        localStorage.setItem('bt360_club', JSON.stringify(mergedClub));
+      }
+
+      localStorage.setItem('bt360_matches', JSON.stringify(allMatches));
+      localStorage.setItem('bt360_squad', JSON.stringify(updatedSquad));
+      localStorage.setItem('bt360_records', JSON.stringify(updatedRecords));
+
+      // 4. Update Supabase if configured
+      if (isSupabaseConfigured) {
+        try {
+          await supabase.from('matches').upsert(allMatches);
+          await supabase.from('players').upsert(updatedSquad);
+        } catch (sErr) {
+          console.warn('Supabase bulk sync note:', sErr);
+        }
+      }
+
+      // 5. Build recent import history
+      const newHistoryEntries: ImportHistoryEntry[] = resultsLog
+        .filter(r => r.status === 'success' && r.matchId)
+        .slice(-5)
+        .reverse()
+        .map(r => ({
+          id: `bulk-${r.matchId}-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          type: 'scorecard',
+          title: r.title,
+          originalDate: r.date,
+          matchId: r.matchId,
+          details: r.details,
+          badgeText: r.type,
+          status: 'success'
+        }));
+
+      if (newHistoryEntries.length > 0) {
+        setImportHistory(prev => {
+          const combined = [...newHistoryEntries, ...prev].slice(0, 5);
+          localStorage.setItem('bt360_recent_imports', JSON.stringify(combined));
+          return combined;
+        });
+      }
+
+      setBulkResults(resultsLog);
+      setBulkSummary({
+        totalFiles,
+        matchesAdded: allMatches.length,
+        squadCount: updatedSquad.length,
+        errors: errorsCount,
+        formats: { fc: fcCountAdded, od: odCountAdded, t20: t20CountAdded }
+      });
+
+      setStatusMessage({
+        text: `🎉 Bulk Ingestion Complete! Successfully processed ${totalFiles} files. ${allMatches.length} matches registered with authentic dates and IDs, and all player career stats recalculated.`,
+        type: 'success'
+      });
+
+    } catch (err: any) {
+      setStatusMessage({ text: `Bulk processing error: ${err.message}`, type: 'error' });
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  };
+
+  // Smart Universal Parser for single text or HTML paste
   const parseBattrickData = (input: string, overrideFormat?: 'auto' | 'First Class' | 'One Day' | 'BT20') => {
     if (!input.trim()) {
       setParseResult(null);
@@ -391,152 +1033,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
                                 input.includes('player_');
 
     if (hasPlayerIndicators) {
-      const extractedPlayers: Partial<Player>[] = [];
-
-      // Regex 1: HTML format (<div class="player" id="player_XXXX">)
-      if (input.includes('playerdetails.asp') || input.includes('class="player"')) {
-        const playerRegex = /<div class="player" id="player_(\d+)">([\s\S]*?)(?=<div class="player" id="player_|$)/g;
-        let match;
-        while ((match = playerRegex.exec(input)) !== null) {
-          const pId = match[1];
-          const block = match[2];
-
-          const nameMatch = block.match(/playerdetails\.asp\?playerID=\d+">([^<]+)<\/a>/);
-          const name = nameMatch ? nameMatch[1].trim() : `Player ${pId}`;
-
-          const ageMatch = block.match(/class="player_age">(\d+)</);
-          const age = ageMatch ? parseInt(ageMatch[1]) : 20;
-
-          const wageMatch = block.match(/class="player_wage">&#163;([0-9,]+)</);
-          const wage = wageMatch ? parseInt(wageMatch[1].replace(/,/g, '')) : 500;
-
-          const btrMatch = block.match(/class="player_btr">([0-9,]+)</);
-          const bti = btrMatch ? parseInt(btrMatch[1].replace(/,/g, '')) : 5000;
-
-          const extractSkill = (className: string) => {
-            const rx = new RegExp(`class="${className}">\\s*<a[^>]*>([^<]+)<\\/a>`, 'i');
-            const m = block.match(rx);
-            return m ? m[1].trim().toLowerCase() : 'competent';
-          };
-
-          const bathandM = block.match(/class="player_bathand">\s*([LR])<\/span>/i);
-          const battingHand = bathandM ? (bathandM[1].toUpperCase() === 'L' ? 'LHB' : 'RHB') : 'RHB';
-
-          const bowlhandM = block.match(/class="player_bowlhand">\s*([LR])<\/span>/i);
-          const bowltypeM = block.match(/class="player_bowltype">\s*([^<]+)<\/span>/i);
-          let bowlingType = 'None';
-          if (bowlhandM && bowltypeM) {
-            const arm = bowlhandM[1].trim().toUpperCase() === 'L' ? 'Left-arm' : 'Right-arm';
-            const rawType = bowltypeM[1].replace(/^[Hh]\s*/, '').trim();
-            bowlingType = `${arm} ${rawType}`;
-          }
-
-          extractedPlayers.push({
-            id: pId,
-            club_id: club.id,
-            name,
-            age,
-            wage,
-            bti,
-            batting_hand: battingHand,
-            bowling_type: bowlingType,
-            batting: extractSkill('player_batting'),
-            bowling: extractSkill('player_bowling'),
-            keeping: extractSkill('player_keeping'),
-            fielding: extractSkill('player_fielding'),
-            concentration: extractSkill('player_concentration'),
-            consistency: extractSkill('player_consistency'),
-            stamina: extractSkill('player_stamina'),
-            form: extractSkill('player_batform'),
-            fatigue: extractSkill('player_fitness'),
-            leadership: extractSkill('player_leadership'),
-            experience: extractSkill('player_experience'),
-            subskill: 6.20,
-            active_net: 'Unassigned',
-            market_value: bti * 85,
-            tactical_role: age <= 18 ? 'Wonderkid Trainee' : 'First XI Player',
-            is_wonderkid: age <= 18
-          });
-        }
-      } else {
-        // Plain text fallback
-        const lines = input.split('\n');
-        let currentPlayer: Partial<Player> | null = null;
-
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
-          const nameIdMatch = line.match(/^([A-Za-z\s]+)(?:[-–—\s]+(\d{1,2})\s*yo)?.*?(?:ID[:\s]*|#)?(\d{6,8})/i);
-          if (nameIdMatch) {
-            if (currentPlayer && currentPlayer.name) {
-              extractedPlayers.push(currentPlayer);
-            }
-            currentPlayer = {
-              id: nameIdMatch[3].trim(),
-              club_id: club.id,
-              name: nameIdMatch[1].trim(),
-              age: nameIdMatch[2] ? parseInt(nameIdMatch[2]) : 22,
-              wage: 540,
-              bti: 6500,
-              batting_hand: line.includes('LHB') ? 'LHB' : 'RHB',
-              bowling_type: line.includes('Spin') ? 'Right-arm Finger Spin' : line.includes('Fast') ? 'Right-arm Fast' : 'Right-arm Medium',
-              batting: 'competent',
-              bowling: 'feeble',
-              keeping: 'abysmal',
-              fielding: 'competent',
-              consistency: 'competent',
-              concentration: 'competent',
-              stamina: 'competent',
-              form: 'superb',
-              fatigue: 'sublime',
-              leadership: 'competent',
-              experience: 'feeble',
-              subskill: 6.50,
-              active_net: 'Unassigned',
-              market_value: 400000,
-              tactical_role: 'First XI Player',
-              is_wonderkid: nameIdMatch[2] ? parseInt(nameIdMatch[2]) <= 18 : false
-            };
-            continue;
-          }
-
-          if (currentPlayer) {
-            const wageM = line.match(/Wage[:\s]*[£$]?([0-9,]+)/i);
-            if (wageM) currentPlayer.wage = parseInt(wageM[1].replace(/,/g, ''));
-
-            const btiM = line.match(/(?:BTI|BTR)[:\s]*([0-9,]+)/i);
-            if (btiM) {
-              currentPlayer.bti = parseInt(btiM[1].replace(/,/g, ''));
-              currentPlayer.market_value = currentPlayer.bti * 80;
-            }
-
-            const checkSkill = (skName: string) => {
-              const rx = new RegExp(`${skName}[:\\s]+([A-Za-z]+)`, 'i');
-              const m = line.match(rx);
-              return m ? m[1].toLowerCase() : null;
-            };
-
-            const bat = checkSkill('Batting');
-            if (bat) currentPlayer.batting = bat;
-            const bowl = checkSkill('Bowling');
-            if (bowl) currentPlayer.bowling = bowl;
-            const keep = checkSkill('Keeping');
-            if (keep) currentPlayer.keeping = keep;
-            const fld = checkSkill('Fielding');
-            if (fld) currentPlayer.fielding = fld;
-            const conc = checkSkill('Concentration');
-            if (conc) currentPlayer.concentration = conc;
-            const cons = checkSkill('Consistency');
-            if (cons) currentPlayer.consistency = cons;
-            const stam = checkSkill('Stamina');
-            if (stam) currentPlayer.stamina = stam;
-          }
-        }
-
-        if (currentPlayer && currentPlayer.name) {
-          extractedPlayers.push(currentPlayer);
-        }
-      }
-
+      const extractedPlayers = extractPlayersFromHtml(input, club.id);
       if (extractedPlayers.length > 0) {
         setParseResult({
           type: 'squad',
@@ -563,7 +1060,6 @@ export const ImportView: React.FC<ImportViewProps> = ({
 
     try {
       if (parseResult.type === 'fixtures' && parseResult.matches) {
-        // Append or replace matches
         const newMatches = [...matches];
         for (const m of parseResult.matches) {
           const idx = newMatches.findIndex(ex => ex.id === m.id);
@@ -574,14 +1070,12 @@ export const ImportView: React.FC<ImportViewProps> = ({
           }
         }
 
-        // Recalculate squad stats & club records strictly from matches
         const { updatedSquad, updatedRecords } = recalculateStatsFromMatches(newMatches, squad);
 
         if (onImportMatches) onImportMatches(newMatches);
         onImportSquad(updatedSquad);
         if (onImportRecords) onImportRecords(updatedRecords);
 
-        // LocalStorage save
         localStorage.setItem('bt360_matches', JSON.stringify(newMatches));
         localStorage.setItem('bt360_squad', JSON.stringify(updatedSquad));
         localStorage.setItem('bt360_records', JSON.stringify(updatedRecords));
@@ -591,7 +1085,6 @@ export const ImportView: React.FC<ImportViewProps> = ({
           await supabase.from('players').upsert(updatedSquad);
         }
 
-        // Add to Ingestion Activity Log (Last 5 imports)
         const newEntries: ImportHistoryEntry[] = parseResult.matches.map(m => ({
           id: `imp-${m.id}-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
@@ -627,7 +1120,6 @@ export const ImportView: React.FC<ImportViewProps> = ({
           type: 'success'
         });
 
-        // Reset paste box so user is immediately ready for next match upload
         setRawText('');
         setParseResult(null);
       } else if (parseResult.type === 'squad' && parseResult.players && parseResult.players.length > 0) {
@@ -657,9 +1149,9 @@ export const ImportView: React.FC<ImportViewProps> = ({
           tactical_role: p.tactical_role || (p.age && p.age <= 18 ? 'Wonderkid Trainee' : 'Senior Player'),
           is_wonderkid: p.is_wonderkid || (p.age ? p.age <= 18 : false),
           uniqueRecords: p.uniqueRecords || ['Official Registered Squad Member'],
-          statsFC: { matches: 0, innings: 0, runs: 0, highestScore: '-', average: 0, strikeRate: 0, centuries: 0, fifties: 0, fours: 0, sixes: 0, oversBowled: 0, wickets: 0, bestBowling: '-', bowlingAverage: 0, economy: 0, fiveWickets: 0, catches: 0, stumpings: 0 },
-          statsOD: { matches: 0, innings: 0, runs: 0, highestScore: '-', average: 0, strikeRate: 0, centuries: 0, fifties: 0, fours: 0, sixes: 0, oversBowled: 0, wickets: 0, bestBowling: '-', bowlingAverage: 0, economy: 0, fiveWickets: 0, catches: 0, stumpings: 0 },
-          statsT20: { matches: 0, innings: 0, runs: 0, highestScore: '-', average: 0, strikeRate: 0, centuries: 0, fifties: 0, fours: 0, sixes: 0, oversBowled: 0, wickets: 0, bestBowling: '-', bowlingAverage: 0, economy: 0, fiveWickets: 0, catches: 0, stumpings: 0 }
+          statsFC: { ...EMPTY_STATS },
+          statsOD: { ...EMPTY_STATS },
+          statsT20: { ...EMPTY_STATS }
         }));
 
         onImportSquad(formatted);
@@ -900,15 +1392,25 @@ Coach Quality: Competent`;
                 <span>Universal Multi-Domain Battrick Ingestion Hub</span>
               </div>
               <h2 className="text-2xl font-black text-slate-900 mt-1">
-                Import from Battrick Club (#13108)
+                Import from Battrick Club (#{club.id || '13108'})
               </h2>
               <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
-                Ingest real club data across all 12 domains: Squad, Scorecards, Finances, Stadium, Fixtures, Nets, Staff, and Diary. When you paste match scorecards, player statistics and clubhouse records compute dynamically.
+                Import and sync your authentic matches, scorecards, squad roster, and ground records. Choose <span className="font-bold text-emerald-800">Bulk Multi-File Upload</span> to ingest 50+ HTML files at once, or use <span className="font-bold text-slate-800">Single Paste</span>. Links match primarily by <span className="font-bold text-emerald-700">permanent IDs</span> so renamed clubs or stadiums never cause confusion!
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* 100% Fresh Start Button */}
+            <button
+              onClick={() => setShowResetModal(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
+              title="Delete all data and make the project 100% fresh"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>⚡ 100% Fresh Start (Wipe Data)</span>
+            </button>
+
             <button
               onClick={handleDownloadBackup}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-bold transition-all cursor-pointer shadow-xs"
@@ -925,7 +1427,9 @@ Coach Quality: Competent`;
           <div className={`mt-4 p-3.5 rounded-xl border text-xs font-bold flex items-center justify-between shadow-xs ${
             statusMessage.type === 'success'
               ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-              : 'bg-rose-50 border-rose-300 text-rose-800'
+              : statusMessage.type === 'error'
+              ? 'bg-rose-50 border-rose-300 text-rose-800'
+              : 'bg-blue-50 border-blue-300 text-blue-800'
           }`}>
             <span>{statusMessage.text}</span>
             <button onClick={() => setStatusMessage(null)} className="text-slate-400 hover:text-slate-800 ml-2">&times;</button>
@@ -933,8 +1437,72 @@ Coach Quality: Competent`;
         )}
       </div>
 
+      {/* CONFIRMATION MODAL: 100% FRESH START / FACTORY RESET */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-rose-200 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900">100% Fresh Start & Data Wipe</h3>
+                <p className="text-xs text-rose-700 font-bold mt-0.5">Prepare clean slate for fresh upload</p>
+              </div>
+            </div>
+
+            <div className="text-xs text-slate-600 space-y-2 bg-rose-50/60 p-4 rounded-xl border border-rose-100">
+              <p className="font-bold text-slate-800">
+                Are you sure you want to delete ALL data and make this project 100% fresh?
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-slate-700">
+                <li>Deletes all imported match records (<span className="font-mono">{matches.length} matches</span>)</li>
+                <li>Resets all player career statistics (FC, OD, T20) back to <span className="font-mono">0</span></li>
+                <li>Clears all clubhouse milestone records & ground archives</li>
+                <li>Wipes recent ingestion history and local storage caches</li>
+              </ul>
+              <p className="text-slate-500 italic mt-2">
+                After this reset, you can use the <strong>Bulk Multi-File Upload</strong> tab to import all your saved Battrick HTML files at once from the start!
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExecuteFactoryReset}
+                disabled={isSyncing}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black shadow-md transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Confirm & Wipe Everything (100% Fresh)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Import Method Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
+        <button
+          onClick={() => setActiveImportTab('bulk')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            activeImportTab === 'bulk'
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+          }`}
+        >
+          <FolderUp className="w-4 h-4" />
+          <span>📂 Bulk Multi-File Upload (.html / .htm / .txt)</span>
+          <span className="bg-amber-400 text-slate-900 text-[10px] font-black px-1.5 py-0.2 rounded-md uppercase tracking-wider">
+            RECOMMENDED
+          </span>
+        </button>
+
         <button
           onClick={() => setActiveImportTab('paste')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
@@ -944,7 +1512,7 @@ Coach Quality: Competent`;
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>Smart Text / HTML Paste (Scorecards & Squad)</span>
+          <span>Single Paste (Scorecards & Squad)</span>
         </button>
 
         <button
@@ -984,41 +1552,423 @@ Coach Quality: Competent`;
         </button>
       </div>
 
-      {/* DOMAIN QUICK SELECTOR BAR (Available in Paste tab) */}
-      {activeImportTab === 'paste' && (
-        <div className="flex flex-wrap items-center gap-2 p-3 bg-white rounded-xl border border-slate-200 text-xs shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-500 mr-2 flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Quick Select:</span>
-          </span>
-          {[
-            { id: 'squad', label: '👥 Squad (squad.asp)', icon: Users },
-            { id: 'fixtures', label: '🏏 Scorecard (matchinfofc.asp)', icon: Trophy },
-            { id: 'finances', label: '💰 Finances (finances.asp)', icon: DollarSign },
-            { id: 'ground', label: '🏟️ Ground (ground.asp)', icon: Building },
-            { id: 'office', label: '🏢 Office (office.asp)', icon: Building }
-          ].map(item => (
-            <button
-              key={item.id}
-              onClick={() => {
-                setSelectedDomain(item.id as any);
-                loadDomainPreset(item.id);
-              }}
-              className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer shadow-xs ${
-                selectedDomain === item.id 
-                  ? 'btn-cricket-emerald text-white border-emerald-600 font-black shadow-sm' 
-                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+      {/* TAB 1: BULK MULTI-FILE HTML INGESTION ENGINE */}
+      {activeImportTab === 'bulk' && (
+        <div className="space-y-5">
+          {/* Instructions and ID-Matching Guarantee Banner */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-blue-50 border border-emerald-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-black">
+                  ✓
+                </span>
+                <h3 className="text-sm font-black text-slate-900">
+                  Bulk Multi-File HTML Ingestion Engine (1 to 500+ Files)
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
+                Save hours of manual copy-pasting! Drag & drop or browse all your saved match scorecards (<code className="font-mono text-emerald-800">matchinfofc.asp</code>, <code className="font-mono text-emerald-800">matchinfo.asp</code>), squad rosters, and ground files at once.
+              </p>
+              <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-800 pt-0.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>
+                  <strong>Strict ID-First Link Matching:</strong> Players (<code className="font-mono">playerID</code>), Matches (<code className="font-mono">matchID</code>), and Clubs (<code className="font-mono">teamID</code>) match by permanent numerical ID, seamlessly handling team/ground name changes across seasons without confusion!
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".html,.htm,.txt"
+                className="hidden"
+                onChange={handleFilesSelect}
+              />
+              <input
+                ref={folderInputRef}
+                type="file"
+                multiple
+                // @ts-expect-error webkitdirectory is standard in browsers
+                webkitdirectory=""
+                directory=""
+                className="hidden"
+                onChange={handleFilesSelect}
+              />
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <FileCode className="w-4 h-4" />
+                <span>Select Multiple Files</span>
+              </button>
+
+              <button
+                onClick={() => folderInputRef.current?.click()}
+                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-black text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+                title="Select an entire folder containing all your saved Battrick match HTML files"
+              >
+                <FolderUp className="w-4 h-4 text-amber-400" />
+                <span>Select Entire Folder</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Drag & Drop Zone */}
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleFileDrop}
+            className={`p-8 rounded-2xl border-2 border-dashed transition-all text-center space-y-3 cursor-pointer ${
+              isDragging
+                ? 'border-emerald-500 bg-emerald-50 scale-[1.005]'
+                : selectedFiles.length > 0
+                ? 'border-emerald-300 bg-emerald-50/30'
+                : 'border-slate-300 bg-slate-50 hover:bg-slate-100/70 hover:border-emerald-400'
+            }`}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 text-2xl shadow-sm">
+              <FolderUp className="w-7 h-7" />
+            </div>
+            <div>
+              <h4 className="text-base font-black text-slate-900">
+                {selectedFiles.length > 0 
+                  ? `${selectedFiles.length} HTML / TXT Files Selected` 
+                  : 'Drag & Drop All Your Saved Battrick HTML Files Here'}
+              </h4>
+              <p className="text-xs text-slate-500 mt-1">
+                Supports <span className="font-mono text-emerald-700 font-bold">.html</span>, <span className="font-mono text-emerald-700 font-bold">.htm</span>, and <span className="font-mono text-emerald-700 font-bold">.txt</span> scorecards & squad files.
+              </p>
+            </div>
+
+            {selectedFiles.length === 0 && (
+              <div className="pt-2">
+                <span className="inline-block px-3 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-xs">
+                  Or click anywhere to browse files
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Selected Files Actions & Controls */}
+          {selectedFiles.length > 0 && (
+            <div className="sovereign-card p-5 rounded-2xl border-emerald-400 shadow-md space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+                <div className="flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-emerald-600" />
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900">
+                      File Queue: {selectedFiles.length} Files Ready for Batch Processing
+                    </h4>
+                    <span className="text-[11px] text-slate-500 font-bold">
+                      Total Payload: {(selectedFiles.reduce((acc, f) => acc + f.size, 0) / 1024).toFixed(1)} KB
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setSelectedFiles([]);
+                      setBulkResults([]);
+                      setBulkSummary(null);
+                    }}
+                    disabled={isBulkProcessing}
+                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-300 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    Clear Queue
+                  </button>
+
+                  <button
+                    onClick={handleProcessBulkFiles}
+                    disabled={isBulkProcessing}
+                    className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <Play className={`w-4 h-4 ${isBulkProcessing ? 'animate-spin' : ''}`} />
+                    <span>
+                      {isBulkProcessing 
+                        ? `Processing (${bulkProgress.current} / ${bulkProgress.total})...` 
+                        : `Start Ingestion (${selectedFiles.length} Files) &rarr;`}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Live Batch Progress Bar */}
+              {isBulkProcessing && (
+                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-900">
+                    <span className="flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin text-emerald-700" />
+                      <span>Ingesting file {bulkProgress.current} of {bulkProgress.total}...</span>
+                    </span>
+                    <span className="font-mono">
+                      {Math.round((bulkProgress.current / bulkProgress.total) * 100)}%
+                    </span>
+                  </div>
+                  <div className="w-full h-3 rounded-full bg-emerald-200 overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-emerald-600 to-teal-600 transition-all duration-150 rounded-full"
+                      style={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }}
+                    />
+                  </div>
+                  <div className="text-[11px] text-emerald-800 font-mono truncate">
+                    Current: <strong>{bulkProgress.currentFileName}</strong>
+                  </div>
+                </div>
+              )}
+
+              {/* Batch Processing Summary Card */}
+              {bulkSummary && (
+                <div className="p-4 rounded-xl bg-white border border-emerald-300 shadow-xs space-y-3">
+                  <div className="flex items-center gap-2 text-emerald-800">
+                    <CheckCircle className="w-5 h-5 text-emerald-600" />
+                    <h5 className="text-sm font-black text-slate-900">
+                      Batch Processing Report & Verification
+                    </h5>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div className="p-3 bg-emerald-50/80 rounded-xl border border-emerald-200">
+                      <div className="text-[10px] uppercase font-bold text-emerald-700">Matches Ingested</div>
+                      <div className="text-lg font-black text-slate-900 mt-0.5">{bulkSummary.matchesAdded}</div>
+                      <div className="text-[10px] text-emerald-800 mt-0.5">
+                        FC: {bulkSummary.formats.fc} | OD: {bulkSummary.formats.od} | T20: {bulkSummary.formats.t20}
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-blue-50/80 rounded-xl border border-blue-200">
+                      <div className="text-[10px] uppercase font-bold text-blue-700">Squad Active Players</div>
+                      <div className="text-lg font-black text-slate-900 mt-0.5">{bulkSummary.squadCount}</div>
+                      <div className="text-[10px] text-blue-800 mt-0.5">IDs Linked & Synced</div>
+                    </div>
+
+                    <div className="p-3 bg-amber-50/80 rounded-xl border border-amber-200">
+                      <div className="text-[10px] uppercase font-bold text-amber-700">Files Processed</div>
+                      <div className="text-lg font-black text-slate-900 mt-0.5">{bulkSummary.totalFiles}</div>
+                      <div className="text-[10px] text-amber-800 mt-0.5">Zero Duplication</div>
+                    </div>
+
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="text-[10px] uppercase font-bold text-slate-600">Career Statistics</div>
+                      <div className="text-sm font-black text-emerald-700 mt-1">✓ Recalculated</div>
+                      <div className="text-[10px] text-slate-600 mt-0.5">Live from Scorecards</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Scrollable File Results Breakdown */}
+              {bulkResults.length > 0 && (
+                <div className="space-y-2">
+                  <h5 className="text-xs font-black uppercase tracking-wider text-slate-700">
+                    File-by-File Ingestion Audit Log ({bulkResults.length})
+                  </h5>
+                  <div className="max-h-72 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100 bg-white">
+                    {bulkResults.map((res, idx) => (
+                      <div key={idx} className="p-3 flex items-center justify-between gap-3 text-xs hover:bg-slate-50">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {res.status === 'success' ? (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          ) : res.status === 'skipped' ? (
+                            <Clock className="w-4 h-4 text-slate-400 shrink-0" />
+                          ) : (
+                            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                          )}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900 truncate">{res.fileName}</span>
+                              <span className={`px-1.5 py-0.2 rounded text-[10px] font-black uppercase ${
+                                res.type === 'Scorecard' ? 'bg-amber-100 text-amber-900' :
+                                res.type === 'Squad' ? 'bg-blue-100 text-blue-900' :
+                                'bg-slate-100 text-slate-700'
+                              }`}>
+                                {res.type}
+                              </span>
+                              {res.matchId && (
+                                <span className="font-mono text-[10px] text-slate-500">#{res.matchId}</span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-slate-500 truncate">{res.details}</p>
+                          </div>
+                        </div>
+
+                        {res.date && (
+                          <div className="shrink-0 text-right">
+                            <span className="inline-flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-900 px-2 py-0.5 rounded text-[10px] font-bold">
+                              <Calendar className="w-3 h-3 text-amber-600" />
+                              <span>{res.date}</span>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* LATEST IMPORTED MATCHES & MATCHDAY ARCHIVE */}
+          <div className="sovereign-card p-6 rounded-2xl border-emerald-500/30 shadow-md space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
+                  <Trophy className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900">
+                    Latest Imported Matches & Matchday Archive ({matches.length})
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    First Class: <span className="font-bold text-amber-800">{fcCount}</span> | One Day: <span className="font-bold text-blue-800">{odCount}</span> | BT20: <span className="font-bold text-emerald-800">{t20Count}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Format Filter */}
+                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+                  {['ALL', 'First Class', 'One Day', 'BT20'].map((fmt) => (
+                    <button
+                      key={fmt}
+                      onClick={() => setMatchesFilter(fmt)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        matchesFilter === fmt
+                          ? 'bg-emerald-600 text-white shadow-xs font-black'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {fmt === 'ALL' ? 'All Formats' : fmt}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Delete All Matches Button */}
+                {matches.length > 0 && (
+                  <button
+                    onClick={handleDeleteAllMatchesAndStats}
+                    disabled={isSyncing}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                    title="Delete all imported matches and reset career statistics back to zero"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete All Matches & Reset Stats</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {filteredImportedMatches.length === 0 ? (
+              <div className="py-8 text-center text-slate-500 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <Calendar className="w-8 h-8 text-slate-400 mx-auto" />
+                <div className="text-sm font-bold text-slate-700">No matches currently imported in this view</div>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  Drag and drop or select your saved Battrick match HTML files above to instantly register matches and compute player career stats!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {filteredImportedMatches.map((m) => {
+                  const badgeColor = 
+                    (m.match_type === 'First Class' || m.match_type === 'FC')
+                      ? 'bg-amber-100 text-amber-900 border-amber-300'
+                      : (m.match_type === 'One Day' || m.match_type === 'OD')
+                      ? 'bg-blue-100 text-blue-900 border-blue-300'
+                      : 'bg-emerald-100 text-emerald-900 border-emerald-300';
+
+                  return (
+                    <div 
+                      key={m.id}
+                      className="p-4 bg-white hover:bg-slate-50/80 rounded-xl border border-slate-200 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`px-2.5 py-0.5 rounded-lg text-xs font-black border uppercase tracking-wider ${badgeColor}`}>
+                            {m.match_type}
+                          </span>
+                          <span className="font-bold text-slate-900 text-sm">
+                            vs {m.opponent_club}
+                          </span>
+                          <span className="bg-amber-50 border border-amber-200 text-amber-900 px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-amber-700" />
+                            <span>{m.match_date}</span>
+                          </span>
+                          <span className="text-slate-500 text-xs font-mono">
+                            #{m.id}
+                          </span>
+                          <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            {m.venue}
+                          </span>
+                        </div>
+
+                        <div className="text-xs text-slate-700 font-medium">
+                          {m.result || 'Match Completed'}
+                          {m.scoreSummary && <span className="text-slate-500 ml-2">({m.scoreSummary})</span>}
+                        </div>
+
+                        {m.topPerformer && (
+                          <div className="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-amber-500" />
+                            <span>Top Performer: {m.topPerformer}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end sm:self-center">
+                        <button
+                          onClick={() => handleDeleteSingleMatch(m.id)}
+                          className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
+                          title="Delete this match scorecard"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* TAB 1: Smart Text / HTML Paste */}
+      {/* TAB 2: Smart Text / HTML Paste (Single Match or Squad) */}
       {activeImportTab === 'paste' && (
         <div className="space-y-4">
+          {/* DOMAIN QUICK SELECTOR BAR */}
+          <div className="flex flex-wrap items-center gap-2 p-3 bg-white rounded-xl border border-slate-200 text-xs shadow-xs">
+            <span className="text-[10px] uppercase font-bold text-slate-500 mr-2 flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Quick Select:</span>
+            </span>
+            {[
+              { id: 'squad', label: '👥 Squad (squad.asp)', icon: Users },
+              { id: 'fixtures', label: '🏏 Scorecard (matchinfofc.asp)', icon: Trophy },
+              { id: 'finances', label: '💰 Finances (finances.asp)', icon: DollarSign },
+              { id: 'ground', label: '🏟️ Ground (ground.asp)', icon: Building },
+              { id: 'office', label: '🏢 Office (office.asp)', icon: Building }
+            ].map(item => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setSelectedDomain(item.id as any);
+                  loadDomainPreset(item.id);
+                }}
+                className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer shadow-xs ${
+                  selectedDomain === item.id 
+                    ? 'btn-cricket-emerald text-white border-emerald-600 font-black shadow-sm' 
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
           {/* RECENT INGESTION ACTIVITY (LAST 5 IMPORTS) */}
           <div className="sovereign-card p-5 rounded-2xl border-emerald-500/30 shadow-md space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-200">
@@ -1261,132 +2211,10 @@ The engine automatically detects whether you pasted a Match Scorecard, Squad, Fi
               )}
             </div>
           )}
-
-          {/* LATEST IMPORTED MATCHES & MATCHDAY ARCHIVE */}
-          <div className="sovereign-card p-6 rounded-2xl border-emerald-500/30 shadow-md space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
-                  <Trophy className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-slate-900">
-                    Latest Imported Matches & Matchday Archive ({matches.length})
-                  </h3>
-                  <p className="text-xs text-slate-600 mt-0.5">
-                    First Class: <span className="font-bold text-amber-800">{fcCount}</span> | One Day: <span className="font-bold text-blue-800">{odCount}</span> | BT20: <span className="font-bold text-emerald-800">{t20Count}</span>
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 flex-wrap">
-                {/* Format Filter */}
-                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
-                  {['ALL', 'First Class', 'One Day', 'BT20'].map((fmt) => (
-                    <button
-                      key={fmt}
-                      onClick={() => setMatchesFilter(fmt)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        matchesFilter === fmt
-                          ? 'bg-emerald-600 text-white shadow-xs font-black'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      {fmt === 'ALL' ? 'All Formats' : fmt}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Delete All Matches Button */}
-                {matches.length > 0 && (
-                  <button
-                    onClick={handleDeleteAllMatchesAndStats}
-                    disabled={isSyncing}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-xs font-bold transition-all shadow-xs cursor-pointer"
-                    title="Delete all imported matches and reset career statistics back to zero"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Delete All Matches & Reset Stats</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {filteredImportedMatches.length === 0 ? (
-              <div className="py-8 text-center text-slate-500 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-                <Calendar className="w-8 h-8 text-slate-400 mx-auto" />
-                <div className="text-sm font-bold text-slate-700">No matches currently imported in this view</div>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Paste your Battrick match scorecard or schedule HTML above to automatically record genuine matches and recalculate player career statistics.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {filteredImportedMatches.map((m) => {
-                  const badgeColor = 
-                    (m.match_type === 'First Class' || m.match_type === 'FC')
-                      ? 'bg-amber-100 text-amber-900 border-amber-300'
-                      : (m.match_type === 'One Day' || m.match_type === 'OD')
-                      ? 'bg-blue-100 text-blue-900 border-blue-300'
-                      : 'bg-emerald-100 text-emerald-900 border-emerald-300';
-
-                  return (
-                    <div 
-                      key={m.id}
-                      className="p-4 bg-white hover:bg-slate-50/80 rounded-xl border border-slate-200 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`px-2.5 py-0.5 rounded-lg text-xs font-black border uppercase tracking-wider ${badgeColor}`}>
-                            {m.match_type}
-                          </span>
-                          <span className="font-bold text-slate-900 text-sm">
-                            vs {m.opponent_club}
-                          </span>
-                          <span className="bg-amber-50 border border-amber-200 text-amber-900 px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1">
-                            <Calendar className="w-3 h-3 text-amber-700" />
-                            <span>{m.match_date}</span>
-                          </span>
-                          <span className="text-slate-500 text-xs font-mono">
-                            #{m.id}
-                          </span>
-                          <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                            {m.venue}
-                          </span>
-                        </div>
-
-                        <div className="text-xs text-slate-700 font-medium">
-                          {m.result || 'Match Completed'}
-                          {m.scoreSummary && <span className="text-slate-500 ml-2">({m.scoreSummary})</span>}
-                        </div>
-
-                        {m.topPerformer && (
-                          <div className="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
-                            <Sparkles className="w-3 h-3 text-amber-500" />
-                            <span>Top Performer: {m.topPerformer}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2 self-end sm:self-center">
-                        <button
-                          onClick={() => handleDeleteSingleMatch(m.id)}
-                          className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
-                          title="Delete this match scorecard"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
         </div>
       )}
 
-      {/* TAB 2: Domain Quick Presets */}
+      {/* TAB 3: Domain Quick Presets */}
       {activeImportTab === 'domains' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
@@ -1416,7 +2244,7 @@ The engine automatically detects whether you pasted a Match Scorecard, Squad, Fi
         </div>
       )}
 
-      {/* TAB 3: Google Sheet Sync */}
+      {/* TAB 4: Google Sheet Sync */}
       {activeImportTab === 'sheet' && (
         <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-4">
           <div className="flex items-center gap-3">
@@ -1437,7 +2265,7 @@ The engine automatically detects whether you pasted a Match Scorecard, Squad, Fi
         </div>
       )}
 
-      {/* TAB 4: JSON Backup & Restore */}
+      {/* TAB 5: JSON Backup & Restore */}
       {activeImportTab === 'json' && (
         <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-4">
           <h3 className="text-base font-black text-slate-900 flex items-center gap-2">

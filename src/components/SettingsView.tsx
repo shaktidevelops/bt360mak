@@ -1,14 +1,27 @@
 import React, { useState } from 'react';
-import { Database, Terminal, Copy, ShieldCheck } from 'lucide-react';
+import { Database, Terminal, Copy, ShieldCheck, Trash2 } from 'lucide-react';
 import { isSupabaseConfigured } from '../lib/supabase';
 
-export const SettingsView: React.FC = () => {
+interface SettingsViewProps {
+  onResetAllData?: () => void;
+}
+
+export const SettingsView: React.FC<SettingsViewProps> = ({ onResetAllData }) => {
   const [copied, setCopied] = useState(false);
+  const [resetDone, setResetDone] = useState(false);
 
   const copySetupPath = () => {
     navigator.clipboard.writeText('supabase/COMPLETE_SETUP.sql');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleReset = () => {
+    if (window.confirm("⚠️ 100% FRESH START CONFIRMATION:\n\nAre you sure you want to completely wipe all project data (all matches, statistics, records, finances, and import history) to make it 100% fresh?\n\nYou can then upload your own team's HTML files from the start.")) {
+      onResetAllData?.();
+      setResetDone(true);
+      setTimeout(() => setResetDone(false), 5000);
+    }
   };
 
   return (
@@ -100,6 +113,39 @@ export const SettingsView: React.FC = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* 100% Fresh Start / Factory Reset Control */}
+      <div className="sovereign-card p-6 rounded-2xl border-rose-300 bg-rose-50/20 space-y-4 shadow-md">
+        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-rose-700">
+          <Trash2 className="w-4 h-4 text-rose-600" />
+          <span>Reset Project & Clean Slate</span>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-base font-extrabold text-slate-900">
+              Factory Reset & 100% Fresh Start
+            </h3>
+            <p className="text-xs text-slate-600 mt-1 max-w-xl leading-relaxed">
+              Deletes all imported matches, resets all player career statistics back to zero, wipes clubhouse records, finances, and cached imports so you can upload your team's files from scratch.
+            </p>
+          </div>
+
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs transition-all cursor-pointer shadow-md shrink-0 self-start sm:self-auto"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>100% Fresh Start (Wipe Data)</span>
+          </button>
+        </div>
+
+        {resetDone && (
+          <div className="p-3 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold">
+            ✨ Project data wiped clean! All matches and stats reset to 0. 100% fresh slate active.
+          </div>
+        )}
       </div>
     </div>
   );

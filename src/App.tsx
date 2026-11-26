@@ -29,6 +29,7 @@ import {
   fallbackRecords
 } from './lib/mockData';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { EMPTY_STATS } from './lib/matchStatsEngine';
 import { 
   Club, 
   Player, 
@@ -209,6 +210,47 @@ export function App() {
     fetchLiveClubData();
   }, []);
 
+  const handleFactoryReset = async () => {
+    try {
+      localStorage.removeItem('bt360_matches');
+      localStorage.removeItem('bt360_records');
+      localStorage.removeItem('bt360_finances');
+      localStorage.removeItem('bt360_recent_imports');
+      localStorage.removeItem('bt360_squad');
+      localStorage.removeItem('bt360_nets');
+      localStorage.removeItem('bt360_stadiumTiers');
+      localStorage.removeItem('bt360_club');
+
+      localStorage.setItem('bt360_matches', '[]');
+      localStorage.setItem('bt360_records', '[]');
+      localStorage.setItem('bt360_finances', '[]');
+
+      const resetSquad: Player[] = squad.map(p => ({
+        ...p,
+        statsFC: { ...EMPTY_STATS },
+        statsOD: { ...EMPTY_STATS },
+        statsT20: { ...EMPTY_STATS }
+      }));
+
+      setMatches([]);
+      setRecords([]);
+      setFinances([]);
+      setSquad(resetSquad);
+
+      if (isSupabaseConfigured) {
+        try {
+          await supabase.from('matches').delete().eq('club_id', club.id);
+          await supabase.from('cricket_records').delete().eq('club_id', club.id);
+          await supabase.from('players').upsert(resetSquad);
+        } catch (sErr) {
+          console.warn('Supabase reset error', sErr);
+        }
+      }
+    } catch (err) {
+      console.warn('Reset error:', err);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col cricket-stadium-canvas text-slate-900">
       {/* Immersive Cricket Sport Header */}
@@ -308,7 +350,7 @@ export function App() {
           )}
 
           {currentTab === 'database' && (
-            <SettingsView />
+            <SettingsView onResetAllData={handleFactoryReset} />
           )}
 
           {currentTab === 'import' && (
@@ -317,6 +359,7 @@ export function App() {
               squad={squad} 
               matches={matches}
               records={records}
+              onResetAllData={handleFactoryReset}
               onImportSquad={(newSquad) => {
                 setSquad(newSquad);
               }}

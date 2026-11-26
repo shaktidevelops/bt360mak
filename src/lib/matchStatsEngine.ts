@@ -131,7 +131,8 @@ export function extractBattrickDate(input: string): { isoDate: string; rawDate: 
  */
 export function parseBattrickScorecard(
   input: string,
-  formatOverride?: 'First Class' | 'One Day' | 'BT20'
+  formatOverride?: 'First Class' | 'One Day' | 'BT20',
+  targetClubId: string = '13108'
 ): ParsedScorecard | null {
   if (!input || input.length < 50) return null;
 
@@ -141,15 +142,19 @@ export function parseBattrickScorecard(
     .replace(/<div\s+id=["']menubarwrapper["'][\s\S]*?<\/div>\s*<\/div>/gi, '')
     .replace(/<div\s+id=["']menubar["'][\s\S]*?<\/div>/gi, '');
 
-  // 1. Match ID
+  // 1. Match ID (matches across all Battrick URL parameters, inputs, and text patterns)
   const idMatch = cleanContent.match(/matchID=(\d+)/i) || 
+                  cleanContent.match(/matchinfofc\.asp\?matchID=(\d+)/i) ||
+                  cleanContent.match(/matchinfo\.asp\?matchID=(\d+)/i) ||
+                  cleanContent.match(/matchcommsfc\.asp\?matchID=(\d+)/i) ||
+                  cleanContent.match(/name=["']matchID["'][^>]*value=["'](\d+)["']/i) ||
                   cleanContent.match(/v\s+[A-Za-z0-9\s]+\((\d{6,9})\)/i) || 
                   cleanContent.match(/Match\s*#?(\d{6,9})/i);
   const matchId = idMatch ? idMatch[1] : `M-${Date.now().toString().slice(-6)}`;
 
-  // 2. Batting Card Parsing
+  // 2. Batting Card Parsing (Matches playerdetails link by exact playerID)
   const battingPerformances: ParsedPlayerBatting[] = [];
-  const batRegex = /<tr>\s*<td[^>]*>\s*<a href="playerdetails\.asp\?playerID=(\d+)"[^>]*>\s*([^<]+)\s*<\/a>(?:\s*<\/a>)?\s*<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>/gi;
+  const batRegex = /<tr>\s*<td[^>]*>\s*<a[^>]*href=["'][^"']*playerdetails\.asp\?playerID=(\d+)["'][^>]*>\s*([^<]+)\s*<\/a>(?:\s*<\/a>)?\s*<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>/gi;
   let batMatch;
   while ((batMatch = batRegex.exec(cleanContent)) !== null) {
     const isNotOut = /not\s*out/i.test(batMatch[3] + batMatch[4]);
@@ -185,9 +190,9 @@ export function parseBattrickScorecard(
     }
   }
 
-  // 3. Bowling Card Parsing
+  // 3. Bowling Card Parsing (Matches playerdetails link by exact playerID)
   const bowlingPerformances: ParsedPlayerBowling[] = [];
-  const bowlRegex = /<tr>\s*<td[^>]*>\s*<a href="playerdetails\.asp\?playerID=(\d+)"[^>]*>\s*([^<]+)\s*<\/a>(?:\s*<\/a>)?\s*<\/td>\s*<td[^>]*>\s*(\d+(?:\.\d+)?)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>/gi;
+  const bowlRegex = /<tr>\s*<td[^>]*>\s*<a[^>]*href=["'][^"']*playerdetails\.asp\?playerID=(\d+)["'][^>]*>\s*([^<]+)\s*<\/a>(?:\s*<\/a>)?\s*<\/td>\s*<td[^>]*>\s*(\d+(?:\.\d+)?)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>\s*(\d+)\s*<\/td>/gi;
   let bowlMatch;
   while ((bowlMatch = bowlRegex.exec(cleanContent)) !== null) {
     bowlingPerformances.push({
@@ -267,35 +272,63 @@ export function parseBattrickScorecard(
     }
   }
 
-  // 5. Opponent & Venue (Proper Home / Away recognition)
+  // 5. Opponent & Venue with ID-First Matching (impervious to team or ground name changes)
   let opponent = 'Opposition XI';
   let isHome = false;
 
-  const titleVsMatch = 
-    cleanContent.match(/<h2[^>]*>([A-Za-z0-9\s\.\-_]+?)\s+v(?:s)?\s+([A-Za-z0-9\s\.\-_]+?)(?:\s*\(\d+\))?<\/h2>/i) ||
-    cleanContent.match(/<div id="pagetitle">([^<]+?)\s+v(?:s)?\s+([^<]+?)(?:&#187;|<|\s+FC|\s+OD|\s+BT20)/i) ||
-    cleanContent.match(/<title>Battrick\s*-\s*([A-Za-z0-9\s\.\-_]+?)\s+v(?:s)?\s+([A-Za-z0-9\s\.\-_]+?)<\/title>/i) ||
-    cleanContent.match(/^([A-Za-z0-9\s\.\-_]+?)\s+v(?:s)?\s+([A-Za-z0-9\s\.\-_]+?)(?:\s*\(\d+\)|\s+Date)/im);
+  const cleanClubId = String(targetClubId).replace(/^BT-/, '').trim();
+  const teamLinkMatches = [...cleanContent.matchAll(/<a[^>]*href=["'][^"']*clubdetails\.asp\?teamID=(\d+)["'][^>]*>([^<]+)<\/a>/gi)];
 
-  if (titleVsMatch) {
-    const t1 = titleVsMatch[1].replace(/Battrick\s*&#187;\s*/i, '').trim();
-    const t2 = titleVsMatch[2].replace(/\(\d+\)/, '').trim();
-    if (/Somnath Super Devs/i.test(t1)) {
-      opponent = t2;
+  if (teamLinkMatches.length >= 2) {
+    const t1Id = teamLinkMatches[0][1].trim();
+    const t1Name = teamLinkMatches[0][2].replace(/&#187;/g, '').trim();
+    const t2Id = teamLinkMatches[1][1].trim();
+    const t2Name = teamLinkMatches[1][2].replace(/&#187;/g, '').trim();
+
+    if (t1Id === cleanClubId) {
       isHome = true;
-    } else if (/Somnath Super Devs/i.test(t2)) {
-      opponent = t1;
+      opponent = t2Name;
+    } else if (t2Id === cleanClubId) {
       isHome = false;
+      opponent = t1Name;
+    } else if (t1Name.toLowerCase().includes('somnath')) {
+      isHome = true;
+      opponent = t2Name;
+    } else if (t2Name.toLowerCase().includes('somnath')) {
+      isHome = false;
+      opponent = t1Name;
     } else {
-      opponent = t2;
+      opponent = t2Name;
+    }
+  } else {
+    // Fallback title regex
+    const titleVsMatch = 
+      cleanContent.match(/<h2[^>]*>([A-Za-z0-9\s\.\-_]+?)\s+v(?:s)?\s+([A-Za-z0-9\s\.\-_]+?)(?:\s*\(\d+\))?<\/h2>/i) ||
+      cleanContent.match(/<div id="pagetitle">([^<]+?)\s+v(?:s)?\s+([^<]+?)(?:&#187;|<|\s+FC|\s+OD|\s+BT20)/i) ||
+      cleanContent.match(/<title>Battrick\s*-\s*([A-Za-z0-9\s\.\-_]+?)\s+v(?:s)?\s+([A-Za-z0-9\s\.\-_]+?)<\/title>/i) ||
+      cleanContent.match(/^([A-Za-z0-9\s\.\-_]+?)\s+v(?:s)?\s+([A-Za-z0-9\s\.\-_]+?)(?:\s*\(\d+\)|\s+Date)/im);
+
+    if (titleVsMatch) {
+      const t1 = titleVsMatch[1].replace(/Battrick\s*&#187;\s*/i, '').trim();
+      const t2 = titleVsMatch[2].replace(/\(\d+\)/, '').trim();
+      if (t1.toLowerCase().includes('somnath')) {
+        opponent = t2;
+        isHome = true;
+      } else if (t2.toLowerCase().includes('somnath')) {
+        opponent = t1;
+        isHome = false;
+      } else {
+        opponent = t2;
+      }
     }
   }
 
   const groundMatch = 
+    cleanContent.match(/Ground[:\s]*(?:<\/b>)?\s*<\/td>\s*<td[^>]*>\s*<a[^>]*href=["'][^"']*grounddetails\.asp\?groundID=(\d+)["'][^>]*>([^<]+)<\/a>/i) ||
     cleanContent.match(/Ground[:\s]*(?:<\/b>)?\s*<\/td>\s*<td[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i) ||
     cleanContent.match(/Ground[:\s]*(?:<\/b>)?\s*<\/td>\s*<td[^>]*>([^<]+)<\/td>/i) ||
     cleanContent.match(/Ground[:\s]+([^\n\r<]+)/i);
-  let groundName = groundMatch ? groundMatch[1].trim() : '';
+  let groundName = groundMatch ? (groundMatch[2] || groundMatch[1]).trim() : '';
   if (/Prabhas Coastal Oval/i.test(groundName) || /Prabhas Coastal Oval/i.test(cleanContent)) {
     isHome = true;
   }
@@ -392,20 +425,41 @@ export function parseBattrickFixtures(input: string, clubId: string = '13108'): 
     }
 
     let opponent = 'Opposition XI';
-    const teamsText = liContent.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-    const vsM = teamsText.match(/Somnath Super Devs\s+v(?:s)?\s+([A-Za-z0-9\s]+?)(?:\s+Won|\s+Lost|\s+Reporter|\s+Match|\s*$)/i) ||
-                teamsText.match(/([A-Za-z0-9\s]+?)\s+v(?:s)?\s+Somnath Super Devs/i);
-    if (vsM) {
-      opponent = vsM[1].trim();
+    let isHome = false;
+    const cleanClubId = String(clubId).replace(/^BT-/, '').trim();
+    const teamLinks = [...liContent.matchAll(/<a[^>]*href=["'][^"']*clubdetails\.asp\?teamID=(\d+)["'][^>]*>([^<]+)<\/a>/gi)];
+
+    if (teamLinks.length >= 2) {
+      if (teamLinks[0][1] === cleanClubId) {
+        opponent = teamLinks[1][2].trim();
+        isHome = true;
+      } else if (teamLinks[1][1] === cleanClubId) {
+        opponent = teamLinks[0][2].trim();
+        isHome = false;
+      } else {
+        opponent = teamLinks[1][2].trim();
+      }
+    } else {
+      const teamsText = liContent.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+      const vsM = teamsText.match(/([A-Za-z0-9\s]+?)\s+v(?:s)?\s+([A-Za-z0-9\s]+?)(?:\s+Won|\s+Lost|\s+Reporter|\s+Match|\s*$)/i);
+      if (vsM) {
+        if (vsM[1].toLowerCase().includes('somnath')) {
+          opponent = vsM[2].trim();
+          isHome = true;
+        } else if (vsM[2].toLowerCase().includes('somnath')) {
+          opponent = vsM[1].trim();
+          isHome = false;
+        } else {
+          opponent = vsM[2].trim();
+        }
+      }
     }
 
     let result = 'Match Concluded';
-    if (liContent.includes('class="won"')) result = 'Somnath Super Devs Won';
+    if (liContent.includes('class="won"')) result = isHome ? 'Home Team Won' : 'Away Team Won';
     else if (liContent.includes('class="lost"')) result = `${opponent} Won`;
     else if (liContent.includes('class="draw"')) result = 'Match Drawn';
     else if (liContent.includes('class="tied"')) result = 'Match Tied';
-
-    const isHome = teamsText.includes('Somnath Super Devs v');
 
     matches.push({
       id: matchId,
