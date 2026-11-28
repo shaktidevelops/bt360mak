@@ -160,15 +160,21 @@ export const extractPlayersFromHtml = (input: string, clubId: string): Partial<P
         if (currentPlayer && currentPlayer.name) {
           extractedPlayers.push(currentPlayer);
         }
+        const wageInLine = line.match(/Wage[:\s]*[£$]?([0-9,]+)/i);
+        const btiInLine = line.match(/(?:BTI|BTR)[:\s]*([0-9,]+)/i);
+        const initialWage = wageInLine ? parseInt(wageInLine[1].replace(/,/g, '')) : 540;
+        const initialBti = btiInLine ? parseInt(btiInLine[1].replace(/,/g, '')) : 6500;
+        const styleM = line.match(/(?:Right-arm|Left-arm)\s+(?:Fast-Medium|Fast|Medium|Finger Spin|Wrist Spin)/i);
+
         currentPlayer = {
           id: nameIdMatch[3].trim(),
           club_id: clubId,
           name: nameIdMatch[1].trim(),
           age: nameIdMatch[2] ? parseInt(nameIdMatch[2]) : 22,
-          wage: 540,
-          bti: 6500,
+          wage: initialWage,
+          bti: initialBti,
           batting_hand: line.includes('LHB') ? 'LHB' : 'RHB',
-          bowling_type: line.includes('Spin') ? 'Right-arm Finger Spin' : line.includes('Fast') ? 'Right-arm Fast' : 'Right-arm Medium',
+          bowling_type: styleM ? styleM[0] : (line.includes('Spin') ? 'Right-arm Finger Spin' : line.includes('Fast') ? 'Right-arm Fast' : 'Right-arm Medium'),
           batting: 'competent',
           bowling: 'feeble',
           keeping: 'abysmal',
@@ -182,7 +188,7 @@ export const extractPlayersFromHtml = (input: string, clubId: string): Partial<P
           experience: 'feeble',
           subskill: 6.50,
           active_net: 'Unassigned',
-          market_value: 400000,
+          market_value: initialBti * 80,
           tactical_role: 'First XI Player',
           is_wonderkid: nameIdMatch[2] ? parseInt(nameIdMatch[2]) <= 18 : false
         };
@@ -1287,9 +1293,9 @@ export const ImportView: React.FC<ImportViewProps> = ({
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
           type: 'squad',
           title: `Squad Roster Ingestion (${formatted.length} Players)`,
-          details: 'Official 14-man squad roster registered with authentic skills & BTI',
+          details: `Squad roster of ${formatted.length} player${formatted.length !== 1 ? 's' : ''} registered with authentic skills & BTI`,
           badgeText: 'Squad Roster',
-          statsCalculated: 'All 14 Player Dossiers Synced',
+          statsCalculated: `All ${formatted.length} Player Dossier${formatted.length !== 1 ? 's' : ''} Synced`,
           status: 'success'
         };
         setImportHistory(prev => {

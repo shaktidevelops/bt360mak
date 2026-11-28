@@ -163,6 +163,12 @@ export function App() {
 
   // LocalStorage synchronizers
   useEffect(() => {
+    document.title = club.name && club.name !== 'Awaiting Club Import'
+      ? `BT360MAK - ${club.name}`
+      : 'BT360MAK - Battrick Sovereign Intelligence Suite';
+  }, [club.name]);
+
+  useEffect(() => {
     try {
       localStorage.setItem('bt360_squad', JSON.stringify(squad));
     } catch (e) {
