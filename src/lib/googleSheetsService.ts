@@ -22,6 +22,7 @@ import {
 
 export const DEFAULT_SPREADSHEET_ID = '1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E';
 export const DEFAULT_APPS_SCRIPT_PROJECT_ID = '1tS9xWWXRBTlrsysAeF82qyrrFDPfHrchSpYNGmAhSZZD_D-f4nGmP7kz';
+export const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwv2J4_o84OolvO43bhWnwU-FTQPl-W61JaUDRwxwg2fX4TVmp_YtSBoQSJLRngzEuJDg/exec';
 
 export const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${DEFAULT_SPREADSHEET_ID}/edit`;
 export const APPS_SCRIPT_EDITOR_URL = `https://script.google.com/d/${DEFAULT_APPS_SCRIPT_PROJECT_ID}/edit`;
@@ -38,7 +39,7 @@ export function getAppsScriptUrl(): string {
   } catch (e) {
     // ignore
   }
-  return import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL || '';
+  return import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL || DEFAULT_WEB_APP_URL;
 }
 
 /**
