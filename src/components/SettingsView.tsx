@@ -79,7 +79,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onResetAllData }) =>
         </h3>
 
         <p className="text-xs text-slate-600 leading-relaxed">
-          The BT360MAK platform operates seamlessly. It uses a high-speed in-memory database with verified Somnath Super Devs club records, and automatically syncs with Supabase PostgreSQL when tables are initialized.
+          The BT360MAK platform operates seamlessly. It uses a high-speed in-memory database with your verified club records, and automatically syncs with Supabase PostgreSQL when tables are initialized.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
@@ -101,7 +101,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onResetAllData }) =>
             <div>
               <div className="text-xs font-bold text-slate-900">Consolidated 1-Click Database Setup Script</div>
               <div className="text-[11px] text-slate-500 mt-0.5">
-                Contains all 9 relational tables, performance indexes, and initial Somnath Super Devs seed.
+                Contains all 9 relational tables, performance indexes, and schema definitions.
               </div>
             </div>
             <button

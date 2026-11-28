@@ -16,6 +16,7 @@ import {
   Database,
   Upload 
 } from 'lucide-react';
+import { Club } from '../types/database';
 
 export type TabType = 
   | 'overview' 
@@ -39,11 +40,13 @@ interface SidebarProps {
   onSelectTab: (tab: TabType) => void;
   squadCount?: number;
   popsCount?: number;
+  club?: Club;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
   currentTab, 
-  onSelectTab
+  onSelectTab,
+  club
 }) => {
   const clubhouseItems = [
     { id: 'overview' as TabType, label: 'Overview', icon: LayoutDashboard },
@@ -131,12 +134,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-1.5 font-bold text-emerald-800">
             <span className="w-2 h-2 rounded-full cricket-ball shrink-0"></span>
-            <span>Prabhas Oval</span>
+            <span className="truncate">{club?.stadium_name && club.stadium_name !== 'Unassigned Ground' ? club.stadium_name : 'Home Ground'}</span>
           </div>
-          <span className="text-[10px] text-amber-800 font-mono font-bold">10,000 Cap</span>
+          <span className="text-[10px] text-amber-800 font-mono font-bold shrink-0">
+            {club?.stadium_capacity && club.stadium_capacity > 0 ? `${club.stadium_capacity.toLocaleString()} Cap` : '0 Cap'}
+          </span>
         </div>
         <p className="text-[11px] text-slate-600 leading-tight">
-          Hard Turf Strip &bull; 781 Members &bull; Superb Academy
+          {club?.pitch_condition || 'Standard Pitch'} &bull; {club?.fan_club_members && club.fan_club_members > 0 ? `${club.fan_club_members.toLocaleString()} Members` : '0 Members'} &bull; {club?.youth_academy_level || 'Academy'}
         </p>
       </div>
     </aside>

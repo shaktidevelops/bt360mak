@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FinancialRecord } from '../types/database';
+import { FinancialRecord, Club } from '../types/database';
 import { 
   CircleDollarSign, 
   TrendingUp, 
@@ -13,9 +13,10 @@ import {
 
 interface FinancesViewProps {
   finances: FinancialRecord[];
+  club?: Club;
 }
 
-export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
+export const FinancesView: React.FC<FinancesViewProps> = ({ finances, club }) => {
   const [selectedWeek, setSelectedWeek] = useState<string>('ALL');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [wageAdjustment, setWageAdjustment] = useState<number>(0);
@@ -28,23 +29,23 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
   });
 
   const latestRecord = finances[0] || {
-    id: 'fin-1',
-    club_id: '13108',
+    id: 'fin-clean',
+    club_id: club?.id || 'Unassigned',
     week_number: 1,
-    record_date: '2026-11-18',
-    gate_receipts: 126546,
-    sponsors: 22823,
-    merchandise: 15128,
-    prize_money: 33114,
-    total_inflow: 197611,
-    player_wages: 7034,
-    staff_wages: 15650,
-    stadium_upkeep: 14702,
-    youth_academy: 36000,
-    total_outflow: 73386,
-    net_weekly_pnl: 124225,
-    cumulative_bank_balance: 1320573,
-    category: 'Home Match Week'
+    record_date: new Date().toISOString().split('T')[0],
+    gate_receipts: 0,
+    sponsors: 0,
+    merchandise: 0,
+    prize_money: 0,
+    total_inflow: 0,
+    player_wages: club?.weekly_wage_bill || 0,
+    staff_wages: 0,
+    stadium_upkeep: 0,
+    youth_academy: 0,
+    total_outflow: club?.weekly_wage_bill || 0,
+    net_weekly_pnl: -(club?.weekly_wage_bill || 0),
+    cumulative_bank_balance: club?.bank_balance || 0,
+    category: 'Awaiting Financial Ingestion'
   };
 
   const projectedWeeklyProfit = latestRecord.net_weekly_pnl - wageAdjustment;
@@ -71,10 +72,10 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
               <span>Commercial Intelligence & Financial Treasury</span>
             </div>
             <h2 className="text-2xl font-black text-slate-900 mt-1">
-              Somnath Super Devs Financial Control Center
+              {club?.name && club.name !== 'Awaiting Club Import' ? `${club.name} Financial Control Center` : 'Club Financial Control Center'}
             </h2>
             <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
-              52-week cashflow audit, wage cap compliance, Prabhas Oval gate receipts, and revenue stream distribution for active domestic campaigns.
+              52-week cashflow audit, wage cap compliance, gate receipts, and revenue stream distribution for active domestic campaigns.
             </p>
           </div>
 
@@ -299,7 +300,7 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ finances }) => {
           <div className="space-y-3 text-xs">
             <div>
               <div className="flex justify-between font-semibold text-slate-700 mb-1">
-                <span>Gate Receipts (Prabhas Coastal Oval)</span>
+                <span>Gate Receipts ({club?.stadium_name && club.stadium_name !== 'Unassigned Ground' ? club.stadium_name : 'Home Arena'})</span>
                 <span className="font-mono">£{latestRecord.gate_receipts.toLocaleString()} ({gatePct}%)</span>
               </div>
               <div className="w-full h-2 rounded-full bg-slate-200">

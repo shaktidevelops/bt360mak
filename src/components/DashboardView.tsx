@@ -65,31 +65,47 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700">
               <span className="w-2.5 h-2.5 rounded-full cricket-ball shrink-0"></span>
-              <span>Prabhas Coastal Arena &bull; Season 69 Command</span>
+              <span>
+                {club.stadium_name && club.stadium_name !== 'Unassigned Ground' 
+                  ? `${club.stadium_name} • Command Center` 
+                  : 'Battrick Sovereign Hub • Ready for Ingestion'}
+              </span>
             </div>
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2 flex-wrap">
-              <span>Welcome back, Lead Tactician {club.manager}</span>
+              <span>
+                {club.name && club.name !== 'Awaiting Club Import' 
+                  ? `Welcome back, Manager ${club.manager || ''}` 
+                  : 'Welcome to BT360MAK Command Center'}
+              </span>
             </h2>
             <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
-              Somnath Super Devs (#{club.id}) operational status verified. Fan club morale is <strong className="text-amber-800 font-bold">{club.fan_mood}</strong> ({club.fan_club_members} members), treasury capital stands at <strong className="text-emerald-800 font-bold">£{club.bank_balance.toLocaleString()}</strong>, and team morale is <strong className="text-teal-800 font-bold">{club.morale}</strong>.
+              {club.name && club.name !== 'Awaiting Club Import' ? (
+                <>
+                  {club.name} {club.id !== 'Unassigned' ? `(#${club.id})` : ''} operational status verified. Fan club stands at <strong className="text-amber-800 font-bold">{club.fan_club_members || 0} members</strong> ({club.fan_mood || 'Calm'}), treasury capital stands at <strong className="text-emerald-800 font-bold">£{(club.bank_balance || 0).toLocaleString()}</strong>, and team morale is <strong className="text-teal-800 font-bold">{club.morale || 'Balanced'}</strong>.
+                </>
+              ) : (
+                <>
+                  Club database is 100% clean and ready for your authentic Battrick data. Ingest your squad roster (<code className="text-emerald-800 font-mono font-bold">squad.asp</code>), match scorecards (<code className="text-emerald-800 font-mono font-bold">matchinfofc.asp</code>), finances, and ground files in the Import Hub to activate live club operations and tactical analytics.
+                </>
+              )}
             </p>
 
             <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-xs">
               <span className="px-2.5 py-1 rounded-lg bg-white text-emerald-800 border border-emerald-200 shadow-xs flex items-center gap-1.5 font-bold">
                 <Building2 className="w-3.5 h-3.5 text-emerald-700" />
-                <span>10,000 Capacity Arena</span>
+                <span>{club.stadium_capacity > 0 ? `${club.stadium_capacity.toLocaleString()} Capacity Arena` : '0 Capacity Arena'}</span>
               </span>
               <span className="px-2.5 py-1 rounded-lg bg-white text-amber-800 border border-amber-200 shadow-xs flex items-center gap-1.5 font-bold">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                <span>70 ITS Banked (2 Pulls Ready)</span>
+                <span>{club.its_points > 0 ? `${club.its_points} ITS Banked` : '0 ITS Reserve'}</span>
               </span>
               <span className="px-2.5 py-1 rounded-lg bg-white text-teal-800 border border-teal-200 shadow-xs flex items-center gap-1.5 font-bold">
                 <TrendingUp className="w-3.5 h-3.5 text-teal-600" />
-                <span>Form Average: {club.form_avg}</span>
+                <span>Form Average: {club.form_avg || '—'}</span>
               </span>
               <span className="px-2.5 py-1 rounded-lg bg-white text-slate-700 border border-slate-200 shadow-xs flex items-center gap-1.5 font-bold">
                 <Users className="w-3.5 h-3.5 text-slate-600" />
-                <span>{squad.length} Senior Players</span>
+                <span>{squad.length} Active Players</span>
               </span>
             </div>
           </div>
@@ -156,7 +172,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="text-sm sm:text-base xl:text-[17px] font-black font-mono text-slate-900 mt-1 whitespace-nowrap">
             {club.stadium_capacity.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-500 mt-0.5 truncate">Prabhas Oval</div>
+          <div className="text-xs text-slate-500 mt-0.5 truncate">
+            {club.stadium_name && club.stadium_name !== 'Unassigned Ground' ? club.stadium_name : 'No Ground Assigned'}
+          </div>
         </div>
 
         <div className="p-3.5 rounded-2xl sovereign-card min-w-0" title={`Form Average: ${club.form_avg}`}>
@@ -170,15 +188,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="text-xs text-slate-500 mt-0.5 truncate">High Cohesion</div>
         </div>
 
-        <div className="p-3.5 rounded-2xl sovereign-card-gold min-w-0" title="70 ITS Level 20 Banked">
+        <div className="p-3.5 rounded-2xl sovereign-card-gold min-w-0" title={`${club.its_points || 0} ITS Banked`}>
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider">ITS Reserve</span>
             <Zap className="w-4 h-4 text-amber-600 shrink-0" />
           </div>
           <div className="text-sm sm:text-base xl:text-[17px] font-black font-mono text-amber-800 mt-1 whitespace-nowrap">
-            70 ITS
+            {club.its_points || 0} ITS
           </div>
-          <div className="text-xs text-amber-700 mt-0.5 truncate">Lvl 20 &bull; 2 Pulls</div>
+          <div className="text-xs text-amber-700 mt-0.5 truncate">
+            {club.its_points > 0 ? `${Math.floor(club.its_points / 35)} Pulls Ready` : '0 Pulls Ready'}
+          </div>
         </div>
       </div>
 
@@ -192,7 +212,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div>
               <span className="text-[11px] uppercase font-bold text-amber-700 tracking-wider">Next Match Fixture &bull; Pitch Analysis</span>
               <h3 className="text-lg lg:text-xl font-bold text-slate-900 flex items-center gap-2">
-                <span>First Class Division VIII.17 &bull; Season Schedule Ready</span>
+                <span>
+                  {club.division_fc && club.division_fc !== '—' 
+                    ? `First Class Division ${club.division_fc} • Fixtures Ready`
+                    : 'Schedule Awaiting Fixture Ingestion'}
+                </span>
               </h3>
             </div>
           </div>
@@ -209,7 +233,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <MapPin className="w-3.5 h-3.5 text-cyan-600" />
               <span>Venue & 22-Yd Pitch Surface</span>
             </span>
-            <div className="text-sm font-bold text-slate-900 mt-1">Prabhas Coastal Oval (Hard & Fast)</div>
+            <div className="text-sm font-bold text-slate-900 mt-1">
+              {club.stadium_name && club.stadium_name !== 'Unassigned Ground' 
+                ? `${club.stadium_name} (${club.pitch_condition || 'Standard'})`
+                : 'No Ground Registered'}
+            </div>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed">
               True bounce and carry. Express pace bowling boosted (+25%), seam movement active (+10%). Top-order concentration thrives.
             </p>
@@ -372,7 +400,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase text-amber-700">
               <Award className="w-4 h-4 text-amber-600" />
-              <span>Somnath Super Devs Superb Academy Prodigies</span>
+              <span>{club.name && club.name !== 'Awaiting Club Import' ? `${club.name} Academy Prodigies` : 'Club Academy Prodigies'}</span>
             </div>
             <h3 className="text-xl font-bold text-slate-900 mt-1">
               Active Wonderkids Fast-Track Pipeline ({wonderkids.length})

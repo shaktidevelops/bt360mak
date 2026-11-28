@@ -22,10 +22,6 @@ import {
   fallbackTrainingLogs, 
   fallbackNets, 
   fallbackMatches, 
-  fallbackStadiumTiers, 
-  fallbackFinances,
-  fallbackStaff,
-  fallbackCalendar,
   fallbackRecords
 } from './lib/mockData';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
@@ -51,6 +47,11 @@ export function App() {
       const saved = localStorage.getItem('bt360_club');
       if (saved) {
         const parsed = JSON.parse(saved);
+        // If legacy demo club (Somnath Super Devs or 13108) is found in localStorage, wipe to clean slate
+        if (parsed.name === 'Somnath Super Devs' || parsed.id === '13108') {
+          localStorage.removeItem('bt360_club');
+          return fallbackClub;
+        }
         if (parsed.fan_mood) parsed.fan_mood = String(parsed.fan_mood).replace(/[^\x20-\x7E]/g, '').trim();
         if (parsed.sponsor_confidence) parsed.sponsor_confidence = String(parsed.sponsor_confidence).replace(/[^\x20-\x7E]/g, '').trim();
         if (parsed.morale) parsed.morale = String(parsed.morale).replace(/[^\x20-\x7E]/g, '').trim();
@@ -103,23 +104,53 @@ export function App() {
   const [stadiumTiers, setStadiumTiers] = useState<StadiumTier[]>(() => {
     try {
       const saved = localStorage.getItem('bt360_stadiumTiers');
-      return saved ? JSON.parse(saved) : fallbackStadiumTiers;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.some((t: StadiumTier) => t.club_id === '13108')) {
+          localStorage.removeItem('bt360_stadiumTiers');
+          return [];
+        }
+        return parsed;
+      }
+      return [];
     } catch {
-      return fallbackStadiumTiers;
+      return [];
     }
   });
 
   const [finances, setFinances] = useState<FinancialRecord[]>(() => {
     try {
       const saved = localStorage.getItem('bt360_finances');
-      return saved ? JSON.parse(saved) : fallbackFinances;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.some((f: FinancialRecord) => f.club_id === '13108')) {
+          localStorage.removeItem('bt360_finances');
+          return [];
+        }
+        return parsed;
+      }
+      return [];
     } catch {
-      return fallbackFinances;
+      return [];
     }
   });
 
-  const [staff, setStaff] = useState<StaffMember[]>(fallbackStaff);
-  const [calendar, setCalendar] = useState<CalendarEvent[]>(fallbackCalendar);
+  const [staff, setStaff] = useState<StaffMember[]>(() => {
+    try {
+      const saved = localStorage.getItem('bt360_staff');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [calendar, setCalendar] = useState<CalendarEvent[]>(() => {
+    try {
+      const saved = localStorage.getItem('bt360_calendar');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const [records, setRecords] = useState<CricketRecord[]>(() => {
     try {
@@ -155,31 +186,6 @@ export function App() {
     }
   }, [records]);
 
-  // Fetch from Supabase if credentials are provided and tables exist
-  useEffect(() => {
-    if (!isSupabaseConfigured) return;
-
-    const fetchLiveClubData = async () => {
-      try {
-        const { data: clubData } = await supabase.from('clubs').select('*').eq('id', '13108').single();
-        if (clubData) setClub(clubData);
-
-        const { data: tiersData } = await supabase.from('stadium_tiers').select('*').eq('club_id', '13108');
-        if (tiersData && tiersData.length > 0) setStadiumTiers(tiersData);
-
-        const { data: staffData } = await supabase.from('staff_members').select('*').eq('club_id', '13108');
-        if (staffData && staffData.length > 0) setStaff(staffData);
-
-        const { data: calData } = await supabase.from('calendar_events').select('*').eq('club_id', '13108');
-        if (calData && calData.length > 0) setCalendar(calData);
-      } catch (err) {
-        console.warn('Supabase live query notice:', err);
-      }
-    };
-
-    fetchLiveClubData();
-  }, []);
-
   // 1-Click Browser Bookmarklet & Cross-Window Ingest Listener
   useEffect(() => {
     if (window.opener) {
@@ -208,21 +214,28 @@ export function App() {
       localStorage.setItem('bt360_finances', '[]');
       localStorage.setItem('bt360_squad', '[]');
       localStorage.setItem('bt360_recent_imports', '[]');
+      localStorage.setItem('bt360_stadiumTiers', '[]');
+      localStorage.setItem('bt360_staff', '[]');
+      localStorage.setItem('bt360_calendar', '[]');
+      localStorage.setItem('bt360_club', JSON.stringify(fallbackClub));
       localStorage.removeItem('bt360_nets');
-      localStorage.removeItem('bt360_stadiumTiers');
-      localStorage.removeItem('bt360_club');
 
+      setClub(fallbackClub);
       setMatches([]);
       setRecords([]);
       setFinances([]);
       setSquad([]);
       setTrainingLogs([]);
+      setStadiumTiers([]);
+      setStaff([]);
+      setCalendar([]);
+      setNets([]);
 
       if (isSupabaseConfigured) {
         try {
-          await supabase.from('matches').delete().eq('club_id', club.id);
-          await supabase.from('cricket_records').delete().eq('club_id', club.id);
-          await supabase.from('players').delete().eq('club_id', club.id);
+          await supabase.from('matches').delete().neq('id', 'keep_clean');
+          await supabase.from('cricket_records').delete().neq('id', 'keep_clean');
+          await supabase.from('players').delete().neq('id', 'keep_clean');
         } catch (sErr) {
           console.warn('Supabase reset error', sErr);
         }
@@ -244,6 +257,7 @@ export function App() {
           onSelectTab={setCurrentTab}
           squadCount={squad.length}
           popsCount={trainingLogs.length}
+          club={club}
         />
 
         <main className="flex-1 p-5 lg:p-7 w-full min-w-0 max-w-[1600px] mx-auto overflow-y-auto">
@@ -272,15 +286,16 @@ export function App() {
               squad={squad} 
               selectedPlayerId={selectedPlayerId} 
               matches={matches}
+              club={club}
             />
           )}
 
           {currentTab === 'best-xi' && (
-            <TacticsView squad={squad} mode="best-xi" initialTab="lineup" />
+            <TacticsView squad={squad} mode="best-xi" initialTab="lineup" club={club} />
           )}
 
           {currentTab === 'tactics' && (
-            <TacticsView squad={squad} mode="tactics" initialTab="pitch" />
+            <TacticsView squad={squad} mode="tactics" initialTab="pitch" club={club} />
           )}
 
           {currentTab === 'training' && (
@@ -294,6 +309,7 @@ export function App() {
           {currentTab === 'youth' && (
             <YouthView 
               squad={squad} 
+              club={club}
               onPromotePlayer={(newPlayer) => {
                 setSquad(prev => [newPlayer, ...prev]);
                 setSelectedPlayerId(newPlayer.id);
@@ -302,16 +318,17 @@ export function App() {
           )}
 
           {currentTab === 'finances' && (
-            <FinancesView finances={finances} />
+            <FinancesView finances={finances} club={club} />
           )}
 
           {currentTab === 'stadium' && (
-            <StadiumView tiers={stadiumTiers} />
+            <StadiumView tiers={stadiumTiers} club={club} />
           )}
 
           {currentTab === 'fixtures' && (
             <MatchesView 
               matches={matches} 
+              club={club}
               onNavigateToImport={() => setCurrentTab('import')}
             />
           )}
@@ -327,6 +344,7 @@ export function App() {
           {currentTab === 'records' && (
             <RecordsView 
               records={records} 
+              club={club}
               onNavigateToImport={() => setCurrentTab('import')}
             />
           )}

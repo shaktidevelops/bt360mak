@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
-import { Player } from '../types/database';
+import { Player, Club } from '../types/database';
 import { Sparkles, Dices, Award, CheckCircle2, Sliders, UserPlus, Target } from 'lucide-react';
 import { formatBowlingType, formatBattingHand } from '../lib/cricketFormatters';
 
 interface YouthViewProps {
   squad: Player[];
+  club?: Club;
   onPromotePlayer?: (newPlayer: Player) => void;
 }
 
-export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) => {
+export const YouthView: React.FC<YouthViewProps> = ({ squad, club, onPromotePlayer }) => {
   // Official Battrick Rules:
   // - Club bank can hold up to 70 ITS points max
   // - A single youth pull can use a MAXIMUM of 35 ITS points
-  // - Somnath Super Devs has 70 ITS banked (enough for 2 full 35-ITS pulls)
   // - Weekly investment is £36,000/week (Level 20, granting 3 ITS/week)
-  const bankedITS = 70;
+  const bankedITS = club?.its_points ?? 0;
   const MAX_ITS_PER_PULL = 35;
-  const weeklyInvestment = 36000;
+  const weeklyInvestment = club?.youth_investment ?? (club?.its_points && club.its_points > 0 ? 36000 : 0);
 
   // Player Specification for Saturday Youth Pull
   const [traineeRole, setTraineeRole] = useState<'Batter' | 'Spinner' | 'Pacer' | 'Keeper' | 'AllRounder'>('Batter');
@@ -116,7 +116,7 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
 
     const newWonderkid: Player = {
       id: generatedId,
-      club_id: '13108',
+      club_id: club?.id || '',
       name: randomName,
       age: 17,
       wage: calculatedWage,
@@ -166,13 +166,13 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
         <div>
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-700">
             <Sparkles className="w-4 h-4 text-emerald-600" />
-            <span>Somnath Super Devs &bull; Superb Youth Academy (ITS)</span>
+            <span>{club?.name && club.name !== 'Awaiting Club Import' ? club.name : 'Club'} &bull; {club?.youth_academy_level || 'Youth'} Academy (ITS)</span>
           </div>
           <h2 className="text-3xl font-black text-slate-900 mt-1 flex items-center gap-2">
             <span>Saturday Youth Draft & ITS Point Allocator</span>
           </h2>
           <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
-            The lifeblood of your cricket franchise. In Battrick, your club can bank up to <strong className="text-amber-700">70 ITS points</strong> total, with a strict engine cap of <strong className="text-emerald-700">35 ITS points per single youth pull</strong>. With 70 ITS banked, you have enough points for <strong className="text-amber-700">two complete 35-point wonderkid pulls</strong>!
+            The lifeblood of your cricket franchise. In Battrick, your club can bank up to <strong className="text-amber-700">70 ITS points</strong> total, with a strict engine cap of <strong className="text-emerald-700">35 ITS points per single youth pull</strong>. With {bankedITS} ITS banked, you have enough points for <strong className="text-amber-700">{Math.floor(bankedITS / 35)} complete 35-point wonderkid pulls</strong>!
           </p>
         </div>
 
@@ -183,7 +183,7 @@ export const YouthView: React.FC<YouthViewProps> = ({ squad, onPromotePlayer }) 
             <div className="text-2xl font-black font-mono text-amber-700 mt-0.5">
               {bankedITS} / 70 Max
             </div>
-            <span className="text-[10px] text-emerald-700 font-bold">2 Full Pulls Ready</span>
+            <span className="text-[10px] text-emerald-700 font-bold">{Math.floor(bankedITS / 35)} Full Pulls Ready</span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center min-w-[170px] shadow-xs">

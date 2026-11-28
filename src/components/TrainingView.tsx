@@ -28,7 +28,7 @@ export const TrainingView: React.FC<TrainingViewProps> = ({
     ];
 
     return Array.from({ length: 10 }, (_, i) => ({
-      club_id: '13108',
+      club_id: '',
       net_number: i + 1,
       training_type: defaultTypes[i],
       player_id: '',

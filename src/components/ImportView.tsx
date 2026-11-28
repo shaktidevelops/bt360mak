@@ -772,7 +772,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
                               content.includes('First Innings of:') ||
                               content.includes('Second Innings of:') ||
                               /Total\s*\([^)]*overs/i.test(content) ||
-                              (/Somnath Super Devs/i.test(content) && (content.includes('overs') || content.includes('runs') || content.includes('wickets')));
+                              ((content.includes(' v ') || content.includes(' vs ')) && (content.includes('overs') || content.includes('runs') || content.includes('wickets')));
 
           if (isScorecard) {
             const scorecard = parseBattrickScorecard(content);
@@ -814,20 +814,34 @@ export const ImportView: React.FC<ImportViewProps> = ({
           }
 
           // D. GROUND & STADIUM DOMAIN (ground.asp)
-          if (content.includes('Standing Room') || content.includes('Groundsman') || content.includes('Uncovered Seats') || content.includes('Prabhas Coastal Oval')) {
+          if (content.includes('Standing Room') || content.includes('Groundsman') || content.includes('Uncovered Seats')) {
             const capM = content.match(/Capacity[:\s]*([0-9,]+)/i);
-            const cap = capM ? parseInt(capM[1].replace(/,/g, '')) : 10000;
+            const cap = capM ? parseInt(capM[1].replace(/,/g, '')) : (club.stadium_capacity || 10000);
+
+            const stadiumNameM = content.match(/([A-Za-z0-9\s'.-]+(?:Oval|Ground|Stadium|Arena|Park|Field|Gardens|Colosseum))/i);
+            const parsedStadiumName = stadiumNameM ? stadiumNameM[1].trim() : (club.stadium_name !== 'Unassigned Ground' ? club.stadium_name : 'Club Arena');
+
+            const standingM = content.match(/Standing Room[:\s]*([0-9,]+)/i);
+            const uncoveredM = content.match(/Uncovered Seats[:\s]*([0-9,]+)/i);
+            const coveredM = content.match(/Covered Seats[:\s]*([0-9,]+)/i);
+            const membersM = content.match(/Members Seats[:\s]*([0-9,]+)/i);
+
+            const sSeats = standingM ? parseInt(standingM[1].replace(/,/g, '')) : Math.round(cap * 0.5275);
+            const uSeats = uncoveredM ? parseInt(uncoveredM[1].replace(/,/g, '')) : Math.round(cap * 0.3270);
+            const cSeats = coveredM ? parseInt(coveredM[1].replace(/,/g, '')) : Math.round(cap * 0.1100);
+            const mSeats = membersM ? parseInt(membersM[1].replace(/,/g, '')) : Math.round(cap * 0.0355);
+
             updatedStadiumTiers = [
-              { id: 'st-1', club_id: club.id, tier_name: 'Standing Room', current_seats: 5275, optimal_ratio: 0.5275, recommended_seats: 6000, ticket_price: 5.00, expansion_cost_per_seat: 35.00 },
-              { id: 'st-2', club_id: club.id, tier_name: 'Uncovered Seats', current_seats: 3270, optimal_ratio: 0.3270, recommended_seats: 4000, ticket_price: 8.00, expansion_cost_per_seat: 48.00 },
-              { id: 'st-3', club_id: club.id, tier_name: 'Covered Seats', current_seats: 1100, optimal_ratio: 0.1100, recommended_seats: 1500, ticket_price: 14.00, expansion_cost_per_seat: 72.00 },
-              { id: 'st-4', club_id: club.id, tier_name: 'Members Seats', current_seats: 355, optimal_ratio: 0.0355, recommended_seats: 500, ticket_price: 25.00, expansion_cost_per_seat: 120.00 }
+              { id: 'st-1', club_id: club.id, tier_name: 'Standing Room', current_seats: sSeats, optimal_ratio: 0.5275, recommended_seats: Math.round(cap * 0.60), ticket_price: 5.00, expansion_cost_per_seat: 35.00 },
+              { id: 'st-2', club_id: club.id, tier_name: 'Uncovered Seats', current_seats: uSeats, optimal_ratio: 0.3270, recommended_seats: Math.round(cap * 0.25), ticket_price: 8.00, expansion_cost_per_seat: 48.00 },
+              { id: 'st-3', club_id: club.id, tier_name: 'Covered Seats', current_seats: cSeats, optimal_ratio: 0.1100, recommended_seats: Math.round(cap * 0.10), ticket_price: 14.00, expansion_cost_per_seat: 72.00 },
+              { id: 'st-4', club_id: club.id, tier_name: 'Members Seats', current_seats: mSeats, optimal_ratio: 0.0355, recommended_seats: Math.round(cap * 0.05), ticket_price: 25.00, expansion_cost_per_seat: 120.00 }
             ];
-            updatedClubUpdates = { ...updatedClubUpdates, stadium_capacity: cap, stadium_name: 'Prabhas Coastal Oval (13108)' };
+            updatedClubUpdates = { ...updatedClubUpdates, stadium_capacity: cap, stadium_name: parsedStadiumName };
             resultsLog.push({
               fileName: file.name,
               type: 'Ground',
-              title: 'Stadium Seating Structure',
+              title: `${parsedStadiumName} Seating Structure`,
               status: 'success',
               details: `Capacity: ${cap.toLocaleString()} seats across 4 tiers.`
             });
@@ -988,7 +1002,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
                         input.includes('First Innings of:') ||
                         input.includes('Second Innings of:') ||
                         /Total\s*\([^)]*overs/i.test(input) ||
-                        (/Somnath Super Devs/i.test(input) && (input.includes('overs') || input.includes('Date:') || input.includes('runs') || input.includes('wickets')));
+                        ((input.includes(' v ') || input.includes(' vs ')) && (input.includes('overs') || input.includes('Date:') || input.includes('runs') || input.includes('wickets')));
 
     if (isScorecard) {
       const scorecard = parseBattrickScorecard(input, formatArg);
@@ -1043,23 +1057,36 @@ export const ImportView: React.FC<ImportViewProps> = ({
     }
 
     // 3. GROUND & STADIUM DOMAIN (ground.asp)
-    if (input.includes('Standing Room') || input.includes('Groundsman') || input.includes('Uncovered Seats') || input.includes('Prabhas Coastal Oval')) {
+    if (input.includes('Standing Room') || input.includes('Groundsman') || input.includes('Uncovered Seats')) {
       const capM = input.match(/Capacity[:\s]*([0-9,]+)/i);
-      const cap = capM ? parseInt(capM[1].replace(/,/g, '')) : 10000;
+      const cap = capM ? parseInt(capM[1].replace(/,/g, '')) : (club.stadium_capacity || 10000);
+
+      const stadiumNameM = input.match(/([A-Za-z0-9\s'.-]+(?:Oval|Ground|Stadium|Arena|Park|Field|Gardens|Colosseum))/i);
+      const parsedStadiumName = stadiumNameM ? stadiumNameM[1].trim() : (club.stadium_name !== 'Unassigned Ground' ? club.stadium_name : 'Club Arena');
+
+      const standingM = input.match(/Standing Room[:\s]*([0-9,]+)/i);
+      const uncoveredM = input.match(/Uncovered Seats[:\s]*([0-9,]+)/i);
+      const coveredM = input.match(/Covered Seats[:\s]*([0-9,]+)/i);
+      const membersM = input.match(/Members Seats[:\s]*([0-9,]+)/i);
+
+      const sSeats = standingM ? parseInt(standingM[1].replace(/,/g, '')) : Math.round(cap * 0.5275);
+      const uSeats = uncoveredM ? parseInt(uncoveredM[1].replace(/,/g, '')) : Math.round(cap * 0.3270);
+      const cSeats = coveredM ? parseInt(coveredM[1].replace(/,/g, '')) : Math.round(cap * 0.1100);
+      const mSeats = membersM ? parseInt(membersM[1].replace(/,/g, '')) : Math.round(cap * 0.0355);
 
       const tiers: StadiumTier[] = [
-        { id: 'st-1', club_id: club.id, tier_name: 'Standing Room', current_seats: 5275, optimal_ratio: 0.5275, recommended_seats: 6000, ticket_price: 5.00, expansion_cost_per_seat: 35.00 },
-        { id: 'st-2', club_id: club.id, tier_name: 'Uncovered Seats', current_seats: 3270, optimal_ratio: 0.3270, recommended_seats: 4000, ticket_price: 8.00, expansion_cost_per_seat: 48.00 },
-        { id: 'st-3', club_id: club.id, tier_name: 'Covered Seats', current_seats: 1100, optimal_ratio: 0.1100, recommended_seats: 1500, ticket_price: 14.00, expansion_cost_per_seat: 72.00 },
-        { id: 'st-4', club_id: club.id, tier_name: 'Members Seats', current_seats: 355, optimal_ratio: 0.0355, recommended_seats: 500, ticket_price: 25.00, expansion_cost_per_seat: 120.00 }
+        { id: 'st-1', club_id: club.id, tier_name: 'Standing Room', current_seats: sSeats, optimal_ratio: 0.5275, recommended_seats: Math.round(cap * 0.60), ticket_price: 5.00, expansion_cost_per_seat: 35.00 },
+        { id: 'st-2', club_id: club.id, tier_name: 'Uncovered Seats', current_seats: uSeats, optimal_ratio: 0.3270, recommended_seats: Math.round(cap * 0.25), ticket_price: 8.00, expansion_cost_per_seat: 48.00 },
+        { id: 'st-3', club_id: club.id, tier_name: 'Covered Seats', current_seats: cSeats, optimal_ratio: 0.1100, recommended_seats: Math.round(cap * 0.10), ticket_price: 14.00, expansion_cost_per_seat: 72.00 },
+        { id: 'st-4', club_id: club.id, tier_name: 'Members Seats', current_seats: mSeats, optimal_ratio: 0.0355, recommended_seats: Math.round(cap * 0.05), ticket_price: 25.00, expansion_cost_per_seat: 120.00 }
       ];
 
       setParseResult({
         type: 'ground',
         count: tiers.length,
-        title: 'Battrick Stadium & Seating Architecture Detected',
+        title: `${parsedStadiumName} Architecture Detected`,
         stadiumTiers: tiers,
-        clubUpdates: { stadium_capacity: cap, stadium_name: 'Prabhas Coastal Oval (13108)' }
+        clubUpdates: { stadium_capacity: cap, stadium_name: parsedStadiumName }
       });
       return;
     }
@@ -1086,24 +1113,29 @@ export const ImportView: React.FC<ImportViewProps> = ({
     // 5. CLUB OFFICE & DIARY DOMAIN (office.asp / diary.asp / club.asp)
     if (input.includes('Youth Academy Condition') || input.includes('Intensive Training Sessions') || input.includes('Hired 1 fielding coach') || input.includes('General Manager')) {
       const itsM = input.match(/Intensive Training Sessions[:\s]*([0-9]+)/i);
-      const fanM = input.match(/Club Members[:\s]*([0-9]+)/i);
-      const its = itsM ? parseInt(itsM[1]) : 70;
-      const fan = fanM ? parseInt(fanM[1]) : 781;
+      const fanM = input.match(/Club Members[:\s]*([0-9,]+)/i);
+      const coachM = input.match(/Coach Quality[:\s]*([A-Za-z]+)/i);
+      const fanMoodM = input.match(/Fan(?:'s|\s+Club)?\s*Mood[:\s]*([A-Za-z\s]+)/i);
+      const sponsorM = input.match(/Sponsors?[:\s]*([A-Za-z\s]+)/i);
+      const fcM = input.match(/First Class[:\s]*([IVXLCDM0-9.]+(?:\s*\([^)]+\))?)/i);
+      const odM = input.match(/One Day[:\s]*([IVXLCDM0-9.]+(?:\s*\([^)]+\))?)/i);
+      const t20M = input.match(/(?:T20|Twenty20)[:\s]*([IVXLCDM0-9.]+(?:\s*\([^)]+\))?)/i);
+
+      const parsedClubUpdates: Partial<Club> = {};
+      if (itsM) parsedClubUpdates.its_points = parseInt(itsM[1]);
+      if (fanM) parsedClubUpdates.fan_club_members = parseInt(fanM[1].replace(/,/g, ''));
+      if (coachM) parsedClubUpdates.coach_quality = coachM[1].trim();
+      if (fanMoodM) parsedClubUpdates.fan_mood = fanMoodM[1].trim();
+      if (sponsorM) parsedClubUpdates.sponsor_confidence = sponsorM[1].trim();
+      if (fcM) parsedClubUpdates.division_fc = fcM[1].trim();
+      if (odM) parsedClubUpdates.division_od = odM[1].trim();
+      if (t20M) parsedClubUpdates.division_t20 = t20M[1].trim();
 
       setParseResult({
         type: 'office',
         count: 1,
         title: 'Battrick Club Headquarters & Academy Intel Detected',
-        clubUpdates: {
-          its_points: its,
-          fan_club_members: fan,
-          coach_quality: 'Competent',
-          fan_mood: 'Over the Moon',
-          sponsor_confidence: 'Ecstatic',
-          division_fc: 'VIII.17 (#1)',
-          division_od: 'V.62 (#2)',
-          division_t20: 'VII.241 (#1)'
-        }
+        clubUpdates: parsedClubUpdates
       });
       return;
     }
@@ -1316,8 +1348,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
           id: `imp-ground-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
           type: 'ground',
-          title: `Prabhas Coastal Oval Stadium Tiers`,
-          details: `10,000 Capacity Seating Matrix Synchronized`,
+          title: `${parseResult.clubUpdates?.stadium_name || (club.stadium_name !== 'Unassigned Ground' ? club.stadium_name : 'Stadium')} Seating Structure`,
+          details: `${(parseResult.stadiumTiers.reduce((a, b) => a + b.current_seats, 0) || 0).toLocaleString()} Capacity Seating Synchronized`,
           badgeText: 'Ground',
           status: 'success'
         };
@@ -1328,7 +1360,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
         });
 
         setStatusMessage({
-          text: `Prabhas Coastal Oval seating tiers & 10,000 capacity synchronized!`,
+          text: `Stadium seating tiers & capacity synchronized!`,
           type: 'success'
         });
         setRawText('');
@@ -1368,7 +1400,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
           type: 'general',
           title: `Club Standings & ITS Bank`,
-          details: `70 ITS & Level 20 Academy Status Synced`,
+          details: `${parseResult.clubUpdates.its_points ?? club.its_points ?? 0} ITS Banked & Academy Status Synced`,
           badgeText: 'Office',
           status: 'success'
         };
@@ -1408,11 +1440,11 @@ Concentration: competent | Consistency: feeble | Stamina: competent | Form: medi
       setRawText(sample);
       parseBattrickData(sample);
     } else if (domain === 'fixtures') {
-      const sample = `Somnath Super Devs v Whykickamoocows (32232669)
-Date: 10/11/2026 Ground: Prabhas Coastal Oval
-Pitch: Hard & Fast Crowd: 10,000
-Somnath Super Devs won by 9 wickets.
-Somnath Super Devs 406/2 dec
+      const sample = `Metropolitan CC v Northern Lions (32232669)
+Date: 10/11/2026 Ground: Sovereign Arena
+Pitch: Hard & Fast Crowd: 12,000
+Metropolitan CC won by 9 wickets.
+Metropolitan CC 406/2 dec
 I. Baboor not out 166 (182b 16x4 2x6)
 V. Malla not out 90 (94b 8x4 1x6)
 P. Rishi 10-2-35-3`;
@@ -1428,19 +1460,19 @@ Opening Balance: 75,000 | Payments In: 1,744,048 | Payments Out: 493,228 | Profi
       setRawText(sample);
       parseBattrickData(sample);
     } else if (domain === 'ground') {
-      const sample = `Somnath Super Devs - Prabhas Coastal Oval
-Groundsman: Shyamal Dangasela
-Capacity: 10000
-Standing Room: 5275
-Uncovered Seats: 3270
-Covered Seats: 1100
-Members Seats: 355`;
+      const sample = `Metropolitan CC - Sovereign Arena
+Groundsman: Chief Curator
+Capacity: 12000
+Standing Room: 6330
+Uncovered Seats: 3924
+Covered Seats: 1320
+Members Seats: 426`;
       setRawText(sample);
       parseBattrickData(sample);
     } else if (domain === 'office') {
       const sample = `Youth Academy Condition: Masterful
-Intensive Training Sessions: 70
-Club Members: 781
+Intensive Training Sessions: 35
+Club Members: 500
 Coach Quality: Competent`;
       setRawText(sample);
       parseBattrickData(sample);
@@ -2422,8 +2454,8 @@ The engine automatically detects Match Scorecards (FC, OD, BT20), Squad Rosters,
             { id: 'squad', title: 'Squad Roster', file: 'squad.asp', desc: 'All 14 players, 11 skills, wages, BTI, and tactical roles.' },
             { id: 'fixtures', title: 'Match Scorecards', file: 'matchinfofc.asp', desc: 'Real First Class, OD, and BT20 scorecards to recalculate career stats.' },
             { id: 'finances', title: 'Finances & Ledger', file: 'finances.asp', desc: 'Current balance (£1,325,820), gate receipts, staff & player wages.' },
-            { id: 'ground', title: 'Ground & Stadium', file: 'ground.asp', desc: 'Prabhas Coastal Oval 10,000 capacity, seating tiers, pitch condition.' },
-            { id: 'office', title: 'Club Headquarters', file: 'office.asp', desc: 'League standings (#1 in FC & BT20), 70 ITS points, fan club morale.' }
+            { id: 'ground', title: 'Ground & Stadium', file: 'ground.asp', desc: 'Stadium capacity, seating tiers distribution, and pitch condition.' },
+            { id: 'office', title: 'Club Headquarters', file: 'office.asp', desc: 'League standings, ITS points, fan club morale, and youth academy.' }
           ].map(d => (
             <div key={d.id} className="sovereign-card p-5 rounded-2xl border-slate-200 space-y-3">
               <div className="flex items-center justify-between">

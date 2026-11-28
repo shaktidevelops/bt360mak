@@ -32,24 +32,28 @@ export const Header: React.FC<HeaderProps> = ({ club, onOpenImport }) => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-sm sm:text-base font-black tracking-tight text-slate-900 whitespace-nowrap">
-              {club.name}
+              {club.name || 'Awaiting Club Import'}
             </h1>
-            <span className="text-[10px] px-1.5 py-0.5 rounded font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
-              #{club.id}
-            </span>
-            <span className="text-xs font-semibold text-slate-500 hidden xl:inline whitespace-nowrap">
-              &bull; Prabhas Coastal Oval
-            </span>
+            {club.id && club.id !== 'Unassigned' && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                #{club.id}
+              </span>
+            )}
+            {club.stadium_name && club.stadium_name !== 'Unassigned Ground' && (
+              <span className="text-xs font-semibold text-slate-500 hidden xl:inline whitespace-nowrap">
+                &bull; {club.stadium_name}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1.5 font-mono text-[10px]">
             <span className="px-1.5 py-0.5 rounded font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 whitespace-nowrap">
-              FC: {club.division_fc}
+              FC: {club.division_fc || '—'}
             </span>
             <span className="px-1.5 py-0.5 rounded font-bold bg-teal-50 text-teal-800 border border-teal-200 whitespace-nowrap">
-              OD: {club.division_od}
+              OD: {club.division_od || '—'}
             </span>
             <span className="px-1.5 py-0.5 rounded font-bold bg-amber-50 text-amber-900 border border-amber-200 whitespace-nowrap">
-              T20: {club.division_t20}
+              T20: {club.division_t20 || '—'}
             </span>
           </div>
         </div>
@@ -69,21 +73,21 @@ export const Header: React.FC<HeaderProps> = ({ club, onOpenImport }) => {
           <div>
             <div className="text-[9px] text-slate-500 uppercase tracking-wider font-semibold">Treasury</div>
             <div className="text-emerald-700 font-black font-mono text-xs">
-              £{club.bank_balance.toLocaleString()}
+              £{(club.bank_balance ?? 0).toLocaleString()}
             </div>
           </div>
           <div className="h-4 w-px bg-slate-200" />
           <div>
             <div className="text-[9px] text-slate-500 uppercase tracking-wider font-semibold">Fan Mood</div>
             <div className="text-amber-800 font-bold whitespace-nowrap text-xs">
-              {club.fan_mood}
+              {club.fan_mood || '—'}
             </div>
           </div>
           <div className="h-4 w-px bg-slate-200 hidden lg:block" />
           <div className="hidden lg:block">
             <div className="text-[9px] text-slate-500 uppercase tracking-wider font-semibold">Wage Bill</div>
             <div className="font-mono font-bold text-slate-700 text-xs">
-              £{club.weekly_wage_bill.toLocaleString()}
+              £{(club.weekly_wage_bill ?? 0).toLocaleString()}
             </div>
           </div>
         </div>

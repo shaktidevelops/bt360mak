@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { StadiumTier } from '../types/database';
+import { StadiumTier, Club } from '../types/database';
 import { Building2, Hammer, Ticket } from 'lucide-react';
 
 interface StadiumViewProps {
   tiers?: StadiumTier[];
+  club?: Club;
 }
 
-export const StadiumView: React.FC<StadiumViewProps> = () => {
-  const [targetCapacity, setTargetCapacity] = useState<number>(15000);
+export const StadiumView: React.FC<StadiumViewProps> = ({ tiers = [], club }) => {
+  const [targetCapacity, setTargetCapacity] = useState<number>(club?.stadium_capacity && club.stadium_capacity > 0 ? club.stadium_capacity : 10000);
 
   // Standard Battrick Optimal Seating Ratios:
   // Standing: 68%, Uncovered: 23%, Covered: 7%, Members: 2%
@@ -16,11 +17,16 @@ export const StadiumView: React.FC<StadiumViewProps> = () => {
   const targetCovered = Math.round(targetCapacity * 0.07);
   const targetMembers = Math.round(targetCapacity * 0.02);
 
-  const currentStanding = 5275;
-  const currentUncovered = 3270;
-  const currentCovered = 1100;
-  const currentMembers = 355;
-  const currentTotal = 10000;
+  const standingTier = tiers?.find(t => t.tier_name.toLowerCase().includes('standing'));
+  const uncoveredTier = tiers?.find(t => t.tier_name.toLowerCase().includes('uncovered'));
+  const coveredTier = tiers?.find(t => t.tier_name.toLowerCase().includes('covered'));
+  const membersTier = tiers?.find(t => t.tier_name.toLowerCase().includes('member'));
+
+  const currentStanding = standingTier?.current_seats ?? (club?.stadium_capacity ? Math.round(club.stadium_capacity * 0.5275) : 0);
+  const currentUncovered = uncoveredTier?.current_seats ?? (club?.stadium_capacity ? Math.round(club.stadium_capacity * 0.327) : 0);
+  const currentCovered = coveredTier?.current_seats ?? (club?.stadium_capacity ? Math.round(club.stadium_capacity * 0.11) : 0);
+  const currentMembers = membersTier?.current_seats ?? (club?.stadium_capacity ? Math.round(club.stadium_capacity * 0.0355) : 0);
+  const currentTotal = club?.stadium_capacity ?? (currentStanding + currentUncovered + currentCovered + currentMembers);
 
   // Expansion Costs per Seat (£):
   // Standing: £35, Uncovered: £48, Covered: £72, Members: £120
@@ -49,10 +55,10 @@ export const StadiumView: React.FC<StadiumViewProps> = () => {
               <span>Infrastructure Architecture & Stadium Optimization</span>
             </div>
             <h2 className="text-2xl font-black text-slate-900 mt-1">
-              Prabhas Coastal Oval Arena Planner
+              {club?.stadium_name && club.stadium_name !== 'Unassigned Ground' ? `${club.stadium_name} Arena Planner` : 'Stadium Arena Planner'}
             </h2>
             <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
-              Somnath Super Devs home arena. Optimize seating distribution ratios (68% Standing, 23% Uncovered, 7% Covered, 2% Members), ticket pricing models, and ground expansion ROI.
+              {club?.name && club.name !== 'Awaiting Club Import' ? club.name : 'Club'} home arena. Optimize seating distribution ratios (68% Standing, 23% Uncovered, 7% Covered, 2% Members), ticket pricing models, and ground expansion ROI.
             </p>
           </div>
 
@@ -60,12 +66,12 @@ export const StadiumView: React.FC<StadiumViewProps> = () => {
             <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center shadow-xs">
               <span className="text-[10px] uppercase font-bold text-slate-500">Current Capacity</span>
               <div className="text-xl font-black font-mono text-emerald-700">
-                10,000 Seats
+                {currentTotal > 0 ? `${currentTotal.toLocaleString()} Seats` : '0 Seats'}
               </div>
             </div>
             <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center shadow-xs">
               <span className="text-[10px] uppercase font-bold text-slate-500">Pitch Condition</span>
-              <div className="text-sm font-bold text-amber-700">Hard & Fast</div>
+              <div className="text-sm font-bold text-amber-700">{club?.pitch_condition || 'Standard'}</div>
             </div>
           </div>
         </div>
@@ -148,7 +154,7 @@ export const StadiumView: React.FC<StadiumViewProps> = () => {
       <div className="sovereign-card rounded-2xl border-slate-200 p-5 shadow-md">
         <h3 className="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
           <Ticket className="w-5 h-5 text-emerald-600" />
-          <span>Prabhas Coastal Oval Seating Blueprint & Pricing Matrix</span>
+          <span>{club?.stadium_name && club.stadium_name !== 'Unassigned Ground' ? club.stadium_name : 'Stadium'} Seating Blueprint & Pricing Matrix</span>
         </h3>
 
         <div className="overflow-x-auto">

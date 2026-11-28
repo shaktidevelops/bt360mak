@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { CricketRecord } from '../types/database';
+import { CricketRecord, Club } from '../types/database';
 import { Medal, Trophy, Upload, Award } from 'lucide-react';
 
 interface RecordsViewProps {
   records: CricketRecord[];
+  club?: Club;
   onNavigateToImport?: () => void;
 }
 
-export const RecordsView: React.FC<RecordsViewProps> = ({ records, onNavigateToImport }) => {
+export const RecordsView: React.FC<RecordsViewProps> = ({ records, club, onNavigateToImport }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
   const filteredRecords = records.filter(r => {
@@ -25,7 +26,7 @@ export const RecordsView: React.FC<RecordsViewProps> = ({ records, onNavigateToI
             <span>Clubhouse Hall of Fame & Milestone Archives</span>
           </div>
           <h2 className="text-2xl font-black text-slate-900 mt-1">
-            Somnath Super Devs All-Time Cricket Records
+            {club?.name && club.name !== 'Awaiting Club Import' ? `${club.name} All-Time Cricket Records` : 'Club All-Time Cricket Records'}
           </h2>
           <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
             Historical club batting, bowling, partnership, and team records authenticated from Battrick league and friendly scorecards.

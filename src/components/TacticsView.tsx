@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Player } from '../types/database';
+import { Player, Club } from '../types/database';
 import { 
   Swords, 
   Crown, 
@@ -20,6 +20,7 @@ interface TacticsViewProps {
   squad: Player[];
   initialTab?: 'lineup' | 'field' | 'bowling' | 'pitch';
   mode?: 'best-xi' | 'tactics';
+  club?: Club;
 }
 
 export type BattrickPitch = 'Hard' | 'Green' | 'Dusty' | 'Slow' | 'Flat' | 'Uneven';
@@ -44,7 +45,8 @@ function cleanId(id?: string): string {
 export const TacticsView: React.FC<TacticsViewProps> = ({ 
   squad, 
   initialTab = 'lineup',
-  mode = 'best-xi' 
+  mode = 'best-xi',
+  club
 }) => {
   const [pitch, setPitch] = useState<BattrickPitch>('Hard');
   const [matchFormat, setMatchFormat] = useState<'FC' | 'OD' | 'T20'>('FC');
@@ -64,7 +66,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
     recommendedBowlers: string;
   }> = {
     Hard: {
-      name: 'Hard & Fast Turf (Prabhas Coastal Oval)',
+      name: 'Hard & Fast Turf (Home Ground)',
       paceModifier: '+25% Pace Boost',
       seamModifier: '+10% Bounce Carry',
       spinModifier: '-15% Minimal Turn',
@@ -609,7 +611,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
           <div className="sovereign-card p-5 rounded-2xl shadow-md border-slate-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 text-xs">
               <span className="font-black uppercase text-emerald-700">
-                Somnath Super Devs Starting XI Tactical Lineup
+                {club?.name && club.name !== 'Awaiting Club Import' ? `${club.name} Starting XI Tactical Lineup` : 'Club Starting XI Tactical Lineup'}
               </span>
               <span className="text-slate-500">
                 Use <strong className="text-slate-800">▲ / ▼</strong> to reorder batsmen or click <strong className="text-amber-600">C</strong> / <strong className="text-teal-600">WK</strong> to reassign roles
@@ -753,7 +755,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
                   <span>2D Cricket Oval & Field Setup Radar</span>
                 </h3>
                 <p className="text-xs text-slate-600 mt-0.5">
-                  Visual tactical representation of fielders positioned on the Prabhas Coastal Oval ground.
+                  Visual tactical representation of fielders positioned on the {club?.stadium_name && club.stadium_name !== 'Unassigned Ground' ? club.stadium_name : 'cricket'} ground.
                 </p>
               </div>
 
@@ -939,7 +941,7 @@ export const TacticsView: React.FC<TacticsViewProps> = ({
               <div>
                 <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-700">
                   <span className="w-3 h-3 rounded-full cricket-ball"></span>
-                  <span>Prabhas Coastal Oval &bull; 22-Yard Pitch Command</span>
+                  <span>{club?.stadium_name && club.stadium_name !== 'Unassigned Ground' ? club.stadium_name : 'Home Ground'} &bull; 22-Yard Pitch Command</span>
                 </div>
                 <h3 className="text-2xl font-black text-slate-900 mt-1 flex items-center gap-2">
                   <span>{pitchProfiles[pitch].name}</span>

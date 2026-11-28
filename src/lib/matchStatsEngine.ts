@@ -141,7 +141,7 @@ export function extractBattrickDate(input: string): { isoDate: string; rawDate: 
 export function parseBattrickScorecard(
   input: string,
   formatOverride?: 'First Class' | 'One Day' | 'BT20',
-  targetClubId: string = '13108'
+  targetClubId: string = ''
 ): ParsedScorecard | null {
   if (!input || input.length < 50) return null;
 
@@ -300,13 +300,8 @@ export function parseBattrickScorecard(
     } else if (t2Id === cleanClubId) {
       isHome = false;
       opponent = t1Name;
-    } else if (t1Name.toLowerCase().includes('somnath')) {
-      isHome = true;
-      opponent = t2Name;
-    } else if (t2Name.toLowerCase().includes('somnath')) {
-      isHome = false;
-      opponent = t1Name;
     } else {
+      isHome = true;
       opponent = t2Name;
     }
   } else {
@@ -318,17 +313,9 @@ export function parseBattrickScorecard(
       cleanContent.match(/^([A-Za-z0-9\s\.\-_]+?)\s+v(?:s)?\s+([A-Za-z0-9\s\.\-_]+?)(?:\s*\(\d+\)|\s+Date)/im);
 
     if (titleVsMatch) {
-      const t1 = titleVsMatch[1].replace(/Battrick\s*&#187;\s*/i, '').trim();
       const t2 = titleVsMatch[2].replace(/\(\d+\)/, '').trim();
-      if (t1.toLowerCase().includes('somnath')) {
-        opponent = t2;
-        isHome = true;
-      } else if (t2.toLowerCase().includes('somnath')) {
-        opponent = t1;
-        isHome = false;
-      } else {
-        opponent = t2;
-      }
+      opponent = t2;
+      isHome = true;
     }
   }
 
@@ -338,10 +325,7 @@ export function parseBattrickScorecard(
     cleanContent.match(/Ground[:\s]*(?:<\/b>)?\s*<\/td>\s*<td[^>]*>([^<]+)<\/td>/i) ||
     cleanContent.match(/Ground[:\s]+([^\n\r<]+)/i);
   let groundName = groundMatch ? (groundMatch[2] || groundMatch[1]).trim() : '';
-  if (/Prabhas Coastal Oval/i.test(groundName) || /Prabhas Coastal Oval/i.test(cleanContent)) {
-    isHome = true;
-  }
-  const venue = isHome ? `Home (${groundName || 'Prabhas Coastal Oval'})` : `Away (${groundName || 'Away Grounds'})`;
+  const venue = isHome ? `Home (${groundName || 'Home Ground'})` : `Away (${groundName || 'Away Grounds'})`;
 
   // 6. Pitch
   let pitchType = 'Hard & Fast';
@@ -357,9 +341,9 @@ export function parseBattrickScorecard(
 
   // 8. Result
   let result = 'Match Concluded';
-  const resM = cleanContent.match(/<strong>(Somnath Super Devs won[^<]+)<\/strong>/i) ||
-               cleanContent.match(/<strong>([^<]+won by[^<]+)<\/strong>/i) ||
-               cleanContent.match(/(Somnath Super Devs won by [^\n\.]+)/i);
+  const resM = cleanContent.match(/<strong>([^<]+won by[^<]+)<\/strong>/i) ||
+               cleanContent.match(/<strong>([^<]+won[^<]+)<\/strong>/i) ||
+               cleanContent.match(/([^<\n\r]+won by[^\n\.\<]+)/i);
   if (resM) {
     result = resM[1].replace(/&#187;/g, '').trim();
   }
@@ -375,7 +359,6 @@ export function parseBattrickScorecard(
 
   // 10. Team Score
   const totalM = cleanContent.match(/Total\s*\(([^)]+)\)<\/td>\s*<td[^>]*>(\d+)<\/td>/i) ||
-                 cleanContent.match(/Somnath Super Devs\s+(\d+)\/(\d+)/i) ||
                  cleanContent.match(/(\d+)\/(\d+)\s+dec/i);
   let somnathRuns: number | undefined;
   if (totalM) {
@@ -402,7 +385,7 @@ export function parseBattrickScorecard(
 /**
  * Parses full fixtures list from battrick.org/nl/fixtures.asp
  */
-export function parseBattrickFixtures(input: string, clubId: string = '13108'): MatchRecord[] {
+export function parseBattrickFixtures(input: string, clubId: string = ''): MatchRecord[] {
   const matches: MatchRecord[] = [];
   if (!input.includes('fixtures') && !input.includes('Previous Matches') && !input.includes('Upcoming Matches')) {
     return matches;
@@ -476,7 +459,7 @@ export function parseBattrickFixtures(input: string, clubId: string = '13108'): 
       match_date: isoDate,
       match_type: matchType,
       opponent_club: opponent,
-      venue: isHome ? 'Home (Prabhas Coastal Oval)' : 'Away Grounds',
+      venue: isHome ? 'Home Ground' : 'Away Grounds',
       pitch_type: 'Standard',
       result,
       status: 'completed',
@@ -838,7 +821,7 @@ export function recalculateStatsFromMatches(
     records.push({
       category: 'TEAM',
       recordName: 'Highest Team Total',
-      holder: 'Somnath Super Devs',
+      holder: 'Club XI',
       value: `${highestTeamTotal} Runs`,
       matchContext: highestTeamTotalContext,
       date: highestTeamTotalDate

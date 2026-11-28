@@ -17,6 +17,9 @@ export interface Club {
   form_avg: string;
   coach_quality: string;
   its_points: number;
+  pitch_condition?: string;
+  youth_academy_level?: string;
+  youth_investment?: number;
 }
 
 export interface PlayerStats {

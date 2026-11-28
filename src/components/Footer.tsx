@@ -19,9 +19,11 @@ export const Footer: React.FC<FooterProps> = ({ club }) => {
               <span className="font-mono text-[10px] text-emerald-800 font-black bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 shadow-xs whitespace-nowrap">
                 #{club.id}
               </span>
-              <span className="text-[11px] text-slate-600 font-bold whitespace-nowrap hidden sm:inline flex items-center gap-1">
-                &bull; Prabhas Coastal Oval
-              </span>
+              {club.stadium_name && club.stadium_name !== 'Unassigned Ground' && (
+                <span className="text-[11px] text-slate-600 font-bold whitespace-nowrap hidden sm:inline flex items-center gap-1">
+                  &bull; {club.stadium_name}
+                </span>
+              )}
             </div>
             <div className="text-[11px] text-slate-600 mt-1 flex items-center gap-2 flex-wrap font-mono">
               <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 whitespace-nowrap">FC: <strong className="text-emerald-700">{club.division_fc}</strong></span>

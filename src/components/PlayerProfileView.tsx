@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Player, PlayerStats, MatchRecord } from '../types/database';
+import { Player, PlayerStats, MatchRecord, Club } from '../types/database';
 import { 
   Award, 
   TrendingUp, 
@@ -19,6 +19,7 @@ interface PlayerProfileViewProps {
   squad: Player[];
   selectedPlayerId?: string;
   matches?: MatchRecord[];
+  club?: Club;
   onNavigateToImport?: () => void;
 }
 
@@ -300,6 +301,7 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
   squad, 
   selectedPlayerId,
   matches,
+  club,
   onNavigateToImport
 }) => {
   const [currentId, setCurrentId] = useState<string>(cleanId(selectedPlayerId) || cleanId(squad[0]?.id));
@@ -478,14 +480,15 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
 
       // Opponent & Match Title
       const opp = sc.opponent || m.opponent_club || 'Opposition';
-      const matchTitle = `Somnath Super Devs vs ${opp}`;
+      const myTeam = club?.name && club.name !== 'Awaiting Club Import' ? club.name : 'Home XI';
+      const matchTitle = `${myTeam} vs ${opp}`;
 
-      // Ground (Bold column e.g. Centurion, Prabhas Coastal Oval)
-      let ground = 'Prabhas Coastal Oval';
+      // Ground (Bold column e.g. Centurion, Ground Name)
+      let ground = club?.stadium_name && club.stadium_name !== 'Unassigned Ground' ? club.stadium_name : 'Home Ground';
       if (sc.venue) {
         const venueMatch = sc.venue.match(/\(([^)]+)\)/);
         if (venueMatch) ground = venueMatch[1];
-        else ground = sc.venue.replace(/Home\s*|Away\s*/g, '').trim() || 'Prabhas Coastal Oval';
+        else ground = sc.venue.replace(/Home\s*|Away\s*/g, '').trim() || ground;
       }
 
       // Format column (e.g. Test # 2648 or FC # 32510940, List A # 1245, T20 # 312)
@@ -624,7 +627,7 @@ export const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
                   </span>
                 )}
                 <span className="text-xs text-emerald-800 font-semibold">
-                  Somnath Super Devs &bull; Tamil Nadu, IND
+                  {club?.name && club.name !== 'Awaiting Club Import' ? club.name : 'Awaiting Club Import'} &bull; {club?.region || 'Cricket League'}
                 </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1.5 tracking-tight">{player.name}</h2>

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { MatchRecord } from '../types/database';
+import { MatchRecord, Club } from '../types/database';
 import { Trophy, MapPin, Clock, Upload, Calendar } from 'lucide-react';
 
 interface MatchesViewProps {
   matches: MatchRecord[];
+  club?: Club;
   onNavigateToImport?: () => void;
 }
 
-export const MatchesView: React.FC<MatchesViewProps> = ({ matches, onNavigateToImport }) => {
+export const MatchesView: React.FC<MatchesViewProps> = ({ matches, club, onNavigateToImport }) => {
   const [formatFilter, setFormatFilter] = useState<string>('ALL');
 
   const filteredMatches = matches.filter(m => {
@@ -28,7 +29,7 @@ export const MatchesView: React.FC<MatchesViewProps> = ({ matches, onNavigateToI
             <span>Domestic Fixture Schedule & Performance Archives</span>
           </div>
           <h2 className="text-2xl font-black text-slate-900 mt-1">
-            Somnath Super Devs Competitive Match Archives
+            {club?.name && club.name !== 'Awaiting Club Import' ? `${club.name} Competitive Match Archives` : 'Club Competitive Match Archives'}
           </h2>
           <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
             Authenticated First Class, One Day, and BT20 fixture scorecards, pitch surface conditions, and upcoming league matches.
