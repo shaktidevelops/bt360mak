@@ -1,4 +1,4 @@
-import { Player, MatchRecord, CricketRecord, PlayerStats } from '../types/database';
+import { Player, MatchRecord, CricketRecord, PlayerStats, Club, StadiumTier } from '../types/database';
 
 export const EMPTY_STATS: PlayerStats = {
   matches: 0,
@@ -365,6 +365,12 @@ export function parseBattrickScorecard(
     somnathRuns = parseInt(totalM[2] || totalM[1]);
   }
 
+  // CRITICAL: A genuine cricket match scorecard MUST have at least 1 authentic batsman or bowler performance.
+  // If no player performances were extracted, this is NOT a scorecard (e.g. Pavilion, Squad, or Fixtures page).
+  if (battingPerformances.length === 0 && bowlingPerformances.length === 0) {
+    return null;
+  }
+
   return {
     matchId,
     matchDate,
@@ -379,6 +385,182 @@ export function parseBattrickScorecard(
     gateReceipts,
     battingPerformances,
     bowlingPerformances
+  };
+}
+
+export interface ParsedPavilion {
+  clubUpdates: Partial<Club>;
+  stadiumCapacity?: number;
+  stadiumName?: string;
+  bankBalance?: number;
+  stadiumTiers?: StadiumTier[];
+}
+
+/**
+ * Dedicated parser for Battrick's Pavilion / Club Headquarters page (default.asp / office.asp / club.asp)
+ * Extracts Club Name, Club ID, Manager, Region, FC/OD/T20 Divisions, Ground, Capacity,
+ * Bank Balance, Fan Members, Fan Mood, Sponsors, Morale, Youth Academy, and ITS Points.
+ */
+export function parseBattrickPavilion(input: string, fallbackClubId: string = ''): ParsedPavilion | null {
+  if (!input || input.length < 30) return null;
+
+  // Verify that this is genuine Pavilion / Club Office / Headquarters content
+  const isPavilion = 
+    input.includes('default.asp') ||
+    input.includes('office.asp') ||
+    input.includes('club.asp') ||
+    input.includes('Pavilion') ||
+    input.includes('Club Members:') ||
+    input.includes('Youth Academy Condition') ||
+    input.includes('Intensive Training Sessions') ||
+    input.includes("Fan's Mood:") ||
+    input.includes('Fan Club:') ||
+    (input.includes('Manager:') && (input.includes('First Class:') || input.includes('One Day:') || input.includes('Ground:')));
+
+  if (!isPavilion) return null;
+
+  const clubUpdates: Partial<Club> = {};
+
+  // 1. Club Name & ID
+  const pageTitleMatch = input.match(/<div\s+id=["']pagetitle["'][^>]*>([^<]+?)(?:&#187;|&#8250;|>|\s+Pavilion|\s+Office|\s*$)/i);
+  const h2Match = input.match(/<h2[^>]*>(?:Club:\s*)?([A-Za-z0-9\s\.\-_]+?)(?:\s*\((?:#)?(\d+)\))?<\/h2>/i);
+  const clubTextMatch = input.match(/Club:\s*([A-Za-z0-9\s\.\-_]+?)(?:\s*\((?:#)?(\d+)\)|\s*#(\d+)|$)/im);
+  const teamLinkMatch = input.match(/clubdetails\.asp\?teamID=(\d+)["'][^>]*>([^<]+)<\/a>/i);
+
+  if (teamLinkMatch) {
+    clubUpdates.id = teamLinkMatch[1].trim();
+    clubUpdates.name = teamLinkMatch[2].replace(/&#187;/g, '').trim();
+  } else if (pageTitleMatch && pageTitleMatch[1].trim() && !pageTitleMatch[1].toLowerCase().includes('battrick')) {
+    clubUpdates.name = pageTitleMatch[1].trim();
+  } else if (h2Match && h2Match[1].trim()) {
+    clubUpdates.name = h2Match[1].trim();
+    if (h2Match[2]) clubUpdates.id = h2Match[2].trim();
+  } else if (clubTextMatch && clubTextMatch[1].trim()) {
+    clubUpdates.name = clubTextMatch[1].trim();
+    if (clubTextMatch[2] || clubTextMatch[3]) clubUpdates.id = (clubTextMatch[2] || clubTextMatch[3]).trim();
+  }
+
+  // Fallback ID search if not yet found
+  if (!clubUpdates.id) {
+    const idM = input.match(/teamID=(\d+)/i) || 
+                input.match(/clubID=(\d+)/i) ||
+                input.match(/\(#?(\d{4,8})\)/) ||
+                input.match(/(?:Club\s+ID|Team\s+ID)[:\s]*#?(\d{4,8})/i);
+    if (idM) clubUpdates.id = idM[1].trim();
+  }
+
+  // 2. Manager
+  const mgrM = input.match(/Manager[:\s]*(?:<[^>]+>)*\s*([A-Za-z0-9\s\.\-_]+?)(?:<|\n|$)/i);
+  if (mgrM) {
+    const mgrClean = mgrM[1].replace(/<[^>]+>/g, '').trim();
+    if (mgrClean && !mgrClean.toLowerCase().includes('unassigned')) clubUpdates.manager = mgrClean;
+  }
+
+  // 3. Country / Region
+  const regM = input.match(/Region[:\s]*(?:<[^>]+>)*\s*([A-Za-z\s]+?)(?:<|\n|$)/i) ||
+               input.match(/Country[:\s]*(?:<[^>]+>)*\s*([A-Za-z\s]+?)(?:<|\n|$)/i);
+  if (regM) {
+    const regClean = regM[1].replace(/<[^>]+>/g, '').trim();
+    if (regClean) clubUpdates.region = regClean;
+  }
+
+  // 4. Leagues & Divisions
+  const fcM = input.match(/First\s*Class[:\s]*(?:<[^>]+>)*\s*([IVXLCDM0-9.]+(?:\s*\([^)]+\))?)/i) ||
+              input.match(/\bFC[:\s]*(?:<[^>]+>)*\s*([IVXLCDM0-9.]+)/i);
+  if (fcM) clubUpdates.division_fc = fcM[1].trim();
+
+  const odM = input.match(/One\s*Day[:\s]*(?:<[^>]+>)*\s*([IVXLCDM0-9.]+(?:\s*\([^)]+\))?)/i) ||
+              input.match(/\bOD[:\s]*(?:<[^>]+>)*\s*([IVXLCDM0-9.]+)/i);
+  if (odM) clubUpdates.division_od = odM[1].trim();
+
+  const t20M = input.match(/(?:BT20|Twenty20|T20)[:\s]*(?:<[^>]+>)*\s*([IVXLCDM0-9.]+(?:\s*\([^)]+\))?)/i);
+  if (t20M) clubUpdates.division_t20 = t20M[1].trim();
+
+  // 5. Ground & Capacity
+  const groundM = input.match(/Ground[:\s]*(?:<[^>]+>)*\s*<a[^>]*href=["'][^"']*grounddetails\.asp\?groundID=\d+["'][^>]*>([^<]+)<\/a>/i) ||
+                  input.match(/Ground[:\s]*(?:<[^>]+>)*\s*<a[^>]*>([^<]+)<\/a>/i) ||
+                  input.match(/Ground[:\s]*(?:<[^>]+>)*\s*([^<\n\r]+?)(?:<|\n|$)/i);
+  let stadiumName: string | undefined;
+  if (groundM) {
+    stadiumName = groundM[1].replace(/<[^>]+>/g, '').trim();
+    if (stadiumName) clubUpdates.stadium_name = stadiumName;
+  }
+
+  const capM = input.match(/Capacity[:\s]*(?:<[^>]+>)*\s*([0-9,]+)/i);
+  let stadiumCapacity: number | undefined;
+  if (capM) {
+    stadiumCapacity = parseInt(capM[1].replace(/,/g, ''));
+    clubUpdates.stadium_capacity = stadiumCapacity;
+  }
+
+  // 6. Treasury / Current Balance
+  const balM = input.match(/(?:Current\s+)?Balance[:\s]*(?:<[^>]+>)*\s*[£$]?([0-9,]+)/i) ||
+               input.match(/Treasury[:\s]*(?:<[^>]+>)*\s*[£$]?([0-9,]+)/i);
+  let bankBalance: number | undefined;
+  if (balM) {
+    bankBalance = parseInt(balM[1].replace(/,/g, ''));
+    clubUpdates.bank_balance = bankBalance;
+  }
+
+  // 7. Fan Club & Mood
+  const fansM = input.match(/(?:Club\s+Members|Fan\s+Club)[:\s]*(?:<[^>]+>)*\s*([0-9,]+)/i) ||
+                input.match(/Members[:\s]*(?:<[^>]+>)*\s*([0-9,]+)/i);
+  if (fansM) {
+    clubUpdates.fan_club_members = parseInt(fansM[1].replace(/,/g, ''));
+  }
+
+  const moodM = input.match(/Fan(?:'s|\s+Club)?\s*Mood[:\s]*(?:<[^>]+>)*\s*([A-Za-z\s]+?)(?:<|\n|$)/i);
+  if (moodM) {
+    const moodClean = moodM[1].replace(/<[^>]+>/g, '').trim();
+    if (moodClean) clubUpdates.fan_mood = moodClean;
+  }
+
+  // 8. Sponsor Confidence
+  const sponM = input.match(/Sponsors?[:\s]*(?:<[^>]+>)*\s*([A-Za-z\s]+?)(?:<|\n|$)/i);
+  if (sponM) {
+    const sponClean = sponM[1].replace(/<[^>]+>/g, '').trim();
+    if (sponClean) clubUpdates.sponsor_confidence = sponClean;
+  }
+
+  // 9. Morale
+  const moraleM = input.match(/(?:Team\s+)?Morale[:\s]*(?:<[^>]+>)*\s*([A-Za-z\s]+?)(?:<|\n|$)/i);
+  if (moraleM) {
+    const moraleClean = moraleM[1].replace(/<[^>]+>/g, '').trim();
+    if (moraleClean) clubUpdates.morale = moraleClean;
+  }
+
+  // 10. Youth Academy
+  const youthM = input.match(/Youth\s+Academy(?:\s+Condition)?[:\s]*(?:<[^>]+>)*\s*([A-Za-z\s]+?)(?:<|\n|$)/i);
+  if (youthM) {
+    const youthClean = youthM[1].replace(/<[^>]+>/g, '').trim();
+    if (youthClean) clubUpdates.youth_academy_level = youthClean;
+  }
+
+  // 11. ITS Points
+  const itsM = input.match(/Intensive\s+Training\s+Sessions[:\s]*(?:<[^>]+>)*\s*([0-9]+)/i) ||
+               input.match(/\bITS[:\s]*(?:<[^>]+>)*\s*([0-9]+)/i);
+  if (itsM) {
+    clubUpdates.its_points = parseInt(itsM[1]);
+  }
+
+  // 12. Optional Stadium Tiers generation if capacity is found
+  let stadiumTiers: StadiumTier[] | undefined;
+  if (stadiumCapacity && stadiumCapacity > 0) {
+    const cId = clubUpdates.id || fallbackClubId || 'Unassigned';
+    stadiumTiers = [
+      { id: 'st-1', club_id: cId, tier_name: 'Standing Room', current_seats: Math.round(stadiumCapacity * 0.5275), optimal_ratio: 0.5275, recommended_seats: Math.round(stadiumCapacity * 0.60), ticket_price: 5.00, expansion_cost_per_seat: 35.00 },
+      { id: 'st-2', club_id: cId, tier_name: 'Uncovered Seats', current_seats: Math.round(stadiumCapacity * 0.3270), optimal_ratio: 0.3270, recommended_seats: Math.round(stadiumCapacity * 0.25), ticket_price: 8.00, expansion_cost_per_seat: 48.00 },
+      { id: 'st-3', club_id: cId, tier_name: 'Covered Seats', current_seats: Math.round(stadiumCapacity * 0.1100), optimal_ratio: 0.1100, recommended_seats: Math.round(stadiumCapacity * 0.10), ticket_price: 14.00, expansion_cost_per_seat: 72.00 },
+      { id: 'st-4', club_id: cId, tier_name: 'Members Seats', current_seats: Math.round(stadiumCapacity * 0.0355), optimal_ratio: 0.0355, recommended_seats: Math.round(stadiumCapacity * 0.05), ticket_price: 25.00, expansion_cost_per_seat: 120.00 }
+    ];
+  }
+
+  return {
+    clubUpdates,
+    stadiumCapacity,
+    stadiumName,
+    bankBalance,
+    stadiumTiers
   };
 }
 

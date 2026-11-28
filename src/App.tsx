@@ -24,6 +24,7 @@ import {
   fallbackMatches, 
   fallbackRecords
 } from './lib/mockData';
+import { recalculateStatsFromMatches } from './lib/matchStatsEngine';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { 
   Club, 
@@ -95,7 +96,23 @@ export function App() {
   const [matches, setMatches] = useState<MatchRecord[]>(() => {
     try {
       const saved = localStorage.getItem('bt360_matches');
-      return saved ? JSON.parse(saved) : fallbackMatches;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          // Auto-purge any corrupted/phantom matches
+          const valid = parsed.filter((m: MatchRecord) => 
+            m.opponent_club !== 'Opposition XI' && 
+            m.opponent_club !== 'Opposition' &&
+            m.id !== 'M-724157' && 
+            m.id !== 'M-689498' &&
+            m.id !== '724157' && 
+            m.id !== '689498'
+          );
+          localStorage.setItem('bt360_matches', JSON.stringify(valid));
+          return valid;
+        }
+      }
+      return fallbackMatches;
     } catch {
       return fallbackMatches;
     }
@@ -336,6 +353,27 @@ export function App() {
               matches={matches} 
               club={club}
               onNavigateToImport={() => setCurrentTab('import')}
+              onDeleteMatch={(matchId) => {
+                setMatches(prev => {
+                  const remaining = prev.filter(m => m.id !== matchId);
+                  localStorage.setItem('bt360_matches', JSON.stringify(remaining));
+                  const { updatedSquad, updatedRecords } = recalculateStatsFromMatches(remaining, squad);
+                  setSquad(updatedSquad);
+                  setRecords(updatedRecords);
+                  localStorage.setItem('bt360_squad', JSON.stringify(updatedSquad));
+                  localStorage.setItem('bt360_records', JSON.stringify(updatedRecords));
+                  return remaining;
+                });
+              }}
+              onClearMatches={() => {
+                setMatches([]);
+                localStorage.setItem('bt360_matches', '[]');
+                const { updatedSquad, updatedRecords } = recalculateStatsFromMatches([], squad);
+                setSquad(updatedSquad);
+                setRecords(updatedRecords);
+                localStorage.setItem('bt360_squad', JSON.stringify(updatedSquad));
+                localStorage.setItem('bt360_records', JSON.stringify(updatedRecords));
+              }}
             />
           )}
 

@@ -41,6 +41,7 @@ import {
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { 
   parseBattrickScorecard, 
+  parseBattrickPavilion,
   recalculateStatsFromMatches,
   parseBattrickFixtures,
   EMPTY_STATS
@@ -79,49 +80,65 @@ interface ImportViewProps {
 /**
  * Reusable helper to extract squad players from HTML or plain text.
  * Strictly captures player IDs from href="playerdetails.asp?playerID=XXXX"
+ * Supports multiple HTML layouts (divs, table rows, links) and plain text with strict deduplication.
  */
 export const extractPlayersFromHtml = (input: string, clubId: string): Partial<Player>[] => {
   const extractedPlayers: Partial<Player>[] = [];
+  const seenIds = new Set<string>();
 
-  // Regex 1: HTML format (<div class="player" id="player_XXXX"> or playerdetails.asp links)
-  if (input.includes('playerdetails.asp') || input.includes('class="player"')) {
+  const addPlayer = (p: Partial<Player>) => {
+    if (p.id && !seenIds.has(p.id) && p.name) {
+      seenIds.add(p.id);
+      extractedPlayers.push(p);
+    }
+  };
+
+  // Method 1: HTML format (<div class="player" id="player_XXXX">)
+  if (input.includes('class="player"') || input.includes('class="player_')) {
     const playerRegex = /<div class="player" id="player_(\d+)">([\s\S]*?)(?=<div class="player" id="player_|$)/g;
     let match;
     while ((match = playerRegex.exec(input)) !== null) {
       const pId = match[1];
       const block = match[2];
 
-      const nameMatch = block.match(/playerdetails\.asp\?playerID=\d+">([^<]+)<\/a>/);
+      const nameMatch = block.match(/playerdetails\.asp\?playerID=\d+["'][^>]*>([^<]+)<\/a>/i);
       const name = nameMatch ? nameMatch[1].trim() : `Player ${pId}`;
 
-      const ageMatch = block.match(/class="player_age">(\d+)</);
+      const ageMatch = block.match(/class="player_age">(\d+)</i) || block.match(/Age[:\s]*(\d+)/i);
       const age = ageMatch ? parseInt(ageMatch[1]) : 20;
 
-      const wageMatch = block.match(/class="player_wage">&#163;([0-9,]+)</);
+      const wageMatch = block.match(/class="player_wage">(?:&#163;|£)?([0-9,]+)</i) || block.match(/Wage[:\s]*[£$]?([0-9,]+)/i);
       const wage = wageMatch ? parseInt(wageMatch[1].replace(/,/g, '')) : 500;
 
-      const btrMatch = block.match(/class="player_btr">([0-9,]+)</);
+      const btrMatch = block.match(/class="player_btr">([0-9,]+)</i) || block.match(/(?:BTI|BTR)[:\s]*([0-9,]+)/i);
       const bti = btrMatch ? parseInt(btrMatch[1].replace(/,/g, '')) : 5000;
 
-      const extractSkill = (className: string) => {
+      const extractSkill = (className: string, skillName: string) => {
         const rx = new RegExp(`class="${className}">\\s*<a[^>]*>([^<]+)<\\/a>`, 'i');
         const m = block.match(rx);
-        return m ? m[1].trim().toLowerCase() : 'competent';
+        if (m) return m[1].trim().toLowerCase();
+        const rxText = new RegExp(`${skillName}[:\\s]+([A-Za-z]+)`, 'i');
+        const mText = block.match(rxText);
+        return mText ? mText[1].trim().toLowerCase() : 'competent';
       };
 
-      const bathandM = block.match(/class="player_bathand">\s*([LR])<\/span>/i);
-      const battingHand = bathandM ? (bathandM[1].toUpperCase() === 'L' ? 'LHB' : 'RHB') : 'RHB';
+      const bathandM = block.match(/class="player_bathand">\s*([LR])<\/span>/i) || block.match(/(Left|Right)[-\s]hand\s+bat/i);
+      const battingHand = bathandM 
+        ? ((bathandM[1].toUpperCase() === 'L' || bathandM[1].toLowerCase() === 'left') ? 'LHB' : 'RHB') 
+        : 'RHB';
 
       const bowlhandM = block.match(/class="player_bowlhand">\s*([LR])<\/span>/i);
-      const bowltypeM = block.match(/class="player_bowltype">\s*([^<]+)<\/span>/i);
+      const bowltypeM = block.match(/class="player_bowltype">\s*([^<]+)<\/span>/i) || block.match(/(?:Right|Left)-arm\s+(?:Fast-Medium|Fast|Medium|Finger Spin|Wrist Spin)/i);
       let bowlingType = 'None';
       if (bowlhandM && bowltypeM) {
         const arm = bowlhandM[1].trim().toUpperCase() === 'L' ? 'Left-arm' : 'Right-arm';
-        const rawType = bowltypeM[1].replace(/^[Hh]\s*/, '').trim();
+        const rawType = (typeof bowltypeM[1] === 'string' ? bowltypeM[1] : bowltypeM[0]).replace(/^[Hh]\s*/, '').trim();
         bowlingType = `${arm} ${rawType}`;
+      } else if (bowltypeM) {
+        bowlingType = typeof bowltypeM[1] === 'string' ? bowltypeM[1].trim() : bowltypeM[0].trim();
       }
 
-      extractedPlayers.push({
+      addPlayer({
         id: pId,
         club_id: clubId,
         name,
@@ -130,17 +147,17 @@ export const extractPlayersFromHtml = (input: string, clubId: string): Partial<P
         bti,
         batting_hand: battingHand,
         bowling_type: bowlingType,
-        batting: extractSkill('player_batting'),
-        bowling: extractSkill('player_bowling'),
-        keeping: extractSkill('player_keeping'),
-        fielding: extractSkill('player_fielding'),
-        concentration: extractSkill('player_concentration'),
-        consistency: extractSkill('player_consistency'),
-        stamina: extractSkill('player_stamina'),
-        form: extractSkill('player_batform'),
-        fatigue: extractSkill('player_fitness'),
-        leadership: extractSkill('player_leadership'),
-        experience: extractSkill('player_experience'),
+        batting: extractSkill('player_batting', 'Batting'),
+        bowling: extractSkill('player_bowling', 'Bowling'),
+        keeping: extractSkill('player_keeping', 'Keeping'),
+        fielding: extractSkill('player_fielding', 'Fielding'),
+        concentration: extractSkill('player_concentration', 'Concentration'),
+        consistency: extractSkill('player_consistency', 'Consistency'),
+        stamina: extractSkill('player_stamina', 'Stamina'),
+        form: extractSkill('player_batform', 'Form'),
+        fatigue: extractSkill('player_fitness', 'Fitness'),
+        leadership: extractSkill('player_leadership', 'Leadership'),
+        experience: extractSkill('player_experience', 'Experience'),
         subskill: 6.20,
         active_net: 'Unassigned',
         market_value: bti * 85,
@@ -148,8 +165,91 @@ export const extractPlayersFromHtml = (input: string, clubId: string): Partial<P
         is_wonderkid: age <= 18
       });
     }
-  } else {
-    // Plain text fallback
+  }
+
+  // Method 2: Link-based player chunking across all playerdetails.asp links
+  if (extractedPlayers.length === 0 && (input.includes('playerdetails.asp') || input.includes('playerID='))) {
+    const linkRegex = /<a[^>]*href=["'][^"']*playerdetails\.asp\?playerID=(\d+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+    const playerPositions: { id: string; name: string; index: number }[] = [];
+    let lMatch;
+    while ((lMatch = linkRegex.exec(input)) !== null) {
+      const pId = lMatch[1];
+      const pName = lMatch[2].replace(/<[^>]+>/g, '').trim();
+      if (pName && !seenIds.has(pId)) {
+        playerPositions.push({ id: pId, name: pName, index: lMatch.index });
+      }
+    }
+
+    for (let i = 0; i < playerPositions.length; i++) {
+      const curr = playerPositions[i];
+      const nextIndex = i + 1 < playerPositions.length ? playerPositions[i + 1].index : input.length;
+      const block = input.slice(curr.index, Math.min(curr.index + 3500, nextIndex));
+
+      const ageMatch = block.match(/class="player_age">(\d+)</i) || block.match(/Age[:\s]*(\d+)/i) || block.match(/(\d{1,2})\s*(?:yo|years old)/i);
+      const age = ageMatch ? parseInt(ageMatch[1]) : 20;
+
+      const wageMatch = block.match(/class="player_wage">(?:&#163;|£)?([0-9,]+)</i) || block.match(/Wage[:\s]*[£$]?([0-9,]+)/i);
+      const wage = wageMatch ? parseInt(wageMatch[1].replace(/,/g, '')) : 500;
+
+      const btrMatch = block.match(/class="player_btr">([0-9,]+)</i) || block.match(/(?:BTI|BTR)[:\s]*([0-9,]+)/i);
+      const bti = btrMatch ? parseInt(btrMatch[1].replace(/,/g, '')) : 5000;
+
+      const extractSkill = (className: string, skillName: string) => {
+        const rx = new RegExp(`class="${className}">\\s*<a[^>]*>([^<]+)<\\/a>`, 'i');
+        const m = block.match(rx);
+        if (m) return m[1].trim().toLowerCase();
+        const rxText = new RegExp(`${skillName}[:\\s]+([A-Za-z]+)`, 'i');
+        const mText = block.match(rxText);
+        return mText ? mText[1].trim().toLowerCase() : 'competent';
+      };
+
+      const bathandM = block.match(/class="player_bathand">\s*([LR])<\/span>/i) || block.match(/(Left|Right)[-\s]hand\s+bat/i);
+      const battingHand = bathandM 
+        ? ((bathandM[1].toUpperCase() === 'L' || bathandM[1].toLowerCase() === 'left') ? 'LHB' : 'RHB') 
+        : 'RHB';
+
+      const bowlhandM = block.match(/class="player_bowlhand">\s*([LR])<\/span>/i);
+      const bowltypeM = block.match(/class="player_bowltype">\s*([^<]+)<\/span>/i) || block.match(/(?:Right|Left)-arm\s+(?:Fast-Medium|Fast|Medium|Finger Spin|Wrist Spin)/i);
+      let bowlingType = 'None';
+      if (bowlhandM && bowltypeM) {
+        const arm = bowlhandM[1].trim().toUpperCase() === 'L' ? 'Left-arm' : 'Right-arm';
+        const rawType = (typeof bowltypeM[1] === 'string' ? bowltypeM[1] : bowltypeM[0]).replace(/^[Hh]\s*/, '').trim();
+        bowlingType = `${arm} ${rawType}`;
+      } else if (bowltypeM) {
+        bowlingType = typeof bowltypeM[1] === 'string' ? bowltypeM[1].trim() : bowltypeM[0].trim();
+      }
+
+      addPlayer({
+        id: curr.id,
+        club_id: clubId,
+        name: curr.name,
+        age,
+        wage,
+        bti,
+        batting_hand: battingHand,
+        bowling_type: bowlingType,
+        batting: extractSkill('player_batting', 'Batting'),
+        bowling: extractSkill('player_bowling', 'Bowling'),
+        keeping: extractSkill('player_keeping', 'Keeping'),
+        fielding: extractSkill('player_fielding', 'Fielding'),
+        concentration: extractSkill('player_concentration', 'Concentration'),
+        consistency: extractSkill('player_consistency', 'Consistency'),
+        stamina: extractSkill('player_stamina', 'Stamina'),
+        form: extractSkill('player_batform', 'Form'),
+        fatigue: extractSkill('player_fitness', 'Fitness'),
+        leadership: extractSkill('player_leadership', 'Leadership'),
+        experience: extractSkill('player_experience', 'Experience'),
+        subskill: 6.20,
+        active_net: 'Unassigned',
+        market_value: bti * 85,
+        tactical_role: age <= 18 ? 'Wonderkid Trainee' : 'First XI Player',
+        is_wonderkid: age <= 18
+      });
+    }
+  }
+
+  // Method 3: Fallback plain text line parser
+  if (extractedPlayers.length === 0) {
     const lines = input.split('\n');
     let currentPlayer: Partial<Player> | null = null;
 
@@ -158,7 +258,7 @@ export const extractPlayersFromHtml = (input: string, clubId: string): Partial<P
       const nameIdMatch = line.match(/^([A-Za-z\s]+)(?:[-–—\s]+(\d{1,2})\s*yo)?.*?(?:ID[:\s]*|#)?(\d{6,8})/i);
       if (nameIdMatch) {
         if (currentPlayer && currentPlayer.name) {
-          extractedPlayers.push(currentPlayer);
+          addPlayer(currentPlayer);
         }
         const wageInLine = line.match(/Wage[:\s]*[£$]?([0-9,]+)/i);
         const btiInLine = line.match(/(?:BTI|BTR)[:\s]*([0-9,]+)/i);
@@ -229,7 +329,7 @@ export const extractPlayersFromHtml = (input: string, clubId: string): Partial<P
     }
 
     if (currentPlayer && currentPlayer.name) {
-      extractedPlayers.push(currentPlayer);
+      addPlayer(currentPlayer);
     }
   }
 
@@ -407,16 +507,38 @@ export const ImportView: React.FC<ImportViewProps> = ({
     }
   };
 
-  // Ingestion History state (persisted in localStorage)
+  // Ingestion History state (persisted in localStorage, auto-purges corrupted/phantom matches)
   const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>(() => {
     try {
       const saved = localStorage.getItem('bt360_recent_imports');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const clean = parsed.filter((item: ImportHistoryEntry) => 
+            !item.title?.includes('Opposition XI') && 
+            !item.details?.includes('Opposition XI') &&
+            item.matchId !== 'M-724157' && 
+            item.matchId !== 'M-689498' &&
+            item.matchId !== '724157' && 
+            item.matchId !== '689498'
+          );
+          localStorage.setItem('bt360_recent_imports', JSON.stringify(clean));
+          return clean;
+        }
+      }
     } catch (e) {
       console.warn('Failed to parse recent imports from localStorage', e);
     }
-    if (matches && matches.length > 0) {
-      return matches.slice(-5).reverse().map(m => ({
+    const cleanMatches = matches.filter(m => 
+      m.opponent_club !== 'Opposition XI' && 
+      m.opponent_club !== 'Opposition' &&
+      m.id !== 'M-724157' && 
+      m.id !== 'M-689498' &&
+      m.id !== '724157' && 
+      m.id !== '689498'
+    );
+    if (cleanMatches.length > 0) {
+      return cleanMatches.slice(-5).reverse().map(m => ({
         id: `init-${m.id}`,
         timestamp: 'Existing Match',
         type: 'scorecard',
@@ -696,8 +818,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
             continue;
           }
 
-          // A. SQUAD ROSTER DOMAIN
-          if (content.includes('playerdetails.asp') || content.includes('class="player"') || (content.includes('Batting') && content.includes('BTI'))) {
+          // A. SQUAD ROSTER DOMAIN (squad.asp / playerdetails.asp)
+          if (content.includes('playerdetails.asp') || content.includes('class="player"') || content.includes('class="player_') || (content.includes('Batting') && content.includes('BTI'))) {
             const extracted = extractPlayersFromHtml(content, club.id);
             if (extracted.length > 0) {
               const formatted: Player[] = extracted.map((p, idx) => ({
@@ -754,7 +876,24 @@ export const ImportView: React.FC<ImportViewProps> = ({
             }
           }
 
-          // B. MULTI-FIXTURES DOMAIN (fixtures.asp)
+          // B. PAVILION & CLUB OFFICE DOMAIN (default.asp / office.asp / club.asp)
+          const pavilionData = parseBattrickPavilion(content, club.id);
+          if (pavilionData && Object.keys(pavilionData.clubUpdates).length > 0) {
+            updatedClubUpdates = { ...updatedClubUpdates, ...pavilionData.clubUpdates };
+            if (pavilionData.stadiumTiers && pavilionData.stadiumTiers.length > 0) {
+              updatedStadiumTiers = pavilionData.stadiumTiers;
+            }
+            resultsLog.push({
+              fileName: file.name,
+              type: 'Pavilion',
+              title: `${pavilionData.clubUpdates.name || club.name} Intel`,
+              status: 'success',
+              details: `Manager: ${pavilionData.clubUpdates.manager || 'Updated'} • Stadium: ${pavilionData.clubUpdates.stadium_name || 'Updated'} (${(pavilionData.clubUpdates.stadium_capacity || 0).toLocaleString()} cap) • ITS: ${pavilionData.clubUpdates.its_points ?? 0}`
+            });
+            continue;
+          }
+
+          // C. MULTI-FIXTURES DOMAIN (fixtures.asp)
           if (content.includes('fixtures.asp') || (content.includes('Previous Matches') && content.includes('matchID='))) {
             const fixturesList = parseBattrickFixtures(content, club.id);
             if (fixturesList.length > 0) {
@@ -770,19 +909,17 @@ export const ImportView: React.FC<ImportViewProps> = ({
             }
           }
 
-          // C. MATCH SCORECARD DOMAIN (matchinfofc.asp / matchinfo.asp / scorecards)
-          const isScorecard = content.includes('matchinfofc.asp') || 
+          // D. MATCH SCORECARD DOMAIN (matchinfofc.asp / matchinfo.asp / scorecards) - STRICT RECOGNITION ONLY
+          const isScorecard = (content.includes('matchinfofc.asp') || 
                               content.includes('matchinfo.asp') || 
+                              content.includes('matchcommsfc.asp') ||
                               content.includes('Fall of wickets') || 
                               content.includes("Reporter's Summary") ||
-                              content.includes('First Innings of:') ||
-                              content.includes('Second Innings of:') ||
-                              /Total\s*\([^)]*overs/i.test(content) ||
-                              ((content.includes(' v ') || content.includes(' vs ')) && (content.includes('overs') || content.includes('runs') || content.includes('wickets')));
+                              (content.includes('First Innings of:') && content.includes('Second Innings of:')));
 
           if (isScorecard) {
             const scorecard = parseBattrickScorecard(content);
-            if (scorecard) {
+            if (scorecard && (scorecard.battingPerformances.length > 0 || scorecard.bowlingPerformances.length > 0)) {
               const newMatch: MatchRecord = {
                 id: scorecard.matchId,
                 club_id: club.id,
@@ -986,84 +1123,42 @@ export const ImportView: React.FC<ImportViewProps> = ({
     const currentFmt = overrideFormat !== undefined ? overrideFormat : formatOverride;
     const formatArg = currentFmt === 'auto' ? undefined : currentFmt;
 
-    // 1A. MULTI-FIXTURES DOMAIN (fixtures.asp)
-    if (input.includes('fixtures.asp') || (input.includes('Previous Matches') && input.includes('matchID='))) {
-      const fixturesList = parseBattrickFixtures(input, club.id);
-      if (fixturesList.length > 0) {
+    // 1. SQUAD & PLAYERS DOMAIN (squad.asp / playerdetails.asp) - PRIORITY #1
+    const hasSquadMarkers = input.includes('squad.asp') ||
+                            input.includes('playerdetails.asp') ||
+                            input.includes('player_age') ||
+                            input.includes('player_wage') ||
+                            input.includes('class="player"') ||
+                            (input.includes('Batting') && input.includes('Bowling') && (input.includes('BTI') || input.includes('BTR') || input.includes('Wage')));
+
+    if (hasSquadMarkers) {
+      const extractedPlayers = extractPlayersFromHtml(input, club.id);
+      if (extractedPlayers.length > 0) {
         setParseResult({
-          type: 'fixtures',
-          count: fixturesList.length,
-          title: `Battrick Schedule Detected: ${fixturesList.length} Authenticated Matches`,
-          matches: fixturesList
+          type: 'squad',
+          count: extractedPlayers.length,
+          title: `Battrick Squad Detected: ${extractedPlayers.length} Authenticated Players`,
+          players: extractedPlayers
         });
         return;
       }
     }
 
-    // 1B. MATCH SCORECARD DOMAIN (matchinfofc.asp / matchinfo.asp / scorecards)
-    const isScorecard = input.includes('matchinfofc.asp') || 
-                        input.includes('matchinfo.asp') || 
-                        input.includes('Fall of wickets') || 
-                        input.includes("Reporter's Summary") ||
-                        input.includes('First Innings of:') ||
-                        input.includes('Second Innings of:') ||
-                        /Total\s*\([^)]*overs/i.test(input) ||
-                        ((input.includes(' v ') || input.includes(' vs ')) && (input.includes('overs') || input.includes('Date:') || input.includes('runs') || input.includes('wickets')));
-
-    if (isScorecard) {
-      const scorecard = parseBattrickScorecard(input, formatArg);
-      if (scorecard) {
-        const newMatch: MatchRecord = {
-          id: scorecard.matchId,
-          club_id: club.id,
-          match_date: scorecard.matchDate,
-          match_type: scorecard.format,
-          opponent_club: scorecard.opponent,
-          venue: scorecard.venue,
-          pitch_type: scorecard.pitchType,
-          result: scorecard.result,
-          status: 'completed',
-          scoreSummary: scorecard.somnathRuns ? `Somnath ${scorecard.somnathRuns} runs` : undefined,
-          topPerformer: scorecard.battingPerformances[0]?.playerName 
-            ? `${scorecard.battingPerformances[0].playerName} (${scorecard.battingPerformances[0].runs} runs)` 
-            : undefined,
-          scorecardData: scorecard
-        };
-
-        setParseResult({
-          type: 'fixtures',
-          count: 1,
-          title: `Match Scorecard Detected: ${scorecard.format} vs ${scorecard.opponent} (Match Date: ${scorecard.rawMatchDate || scorecard.matchDate})`,
-          matches: [newMatch]
-        });
-        return;
-      }
-    }
-
-    // 2. FINANCES DOMAIN (finances.asp)
-    if (input.includes('Account Summary') || input.includes('Current Balance') || input.includes('Paid Out') || input.includes('Gate Receipts')) {
-      const balM = input.match(/Current Balance[:\s]*([0-9,]+)/i);
-      const balance = balM ? parseInt(balM[1].replace(/,/g, '')) : 1325820;
-
-      const parsedFinances: FinancialRecord[] = [
-        { id: 'fin-1', club_id: club.id, week_number: 1, record_date: '2026-11-19', gate_receipts: 5247, sponsors: 22823, merchandise: 0, prize_money: 33114, total_inflow: 61184, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 27198, cumulative_bank_balance: balance, category: 'Season 69 Closing Week' },
-        { id: 'fin-2', club_id: club.id, week_number: 2, record_date: '2026-11-12', gate_receipts: 158703, sponsors: 22823, merchandise: 0, prize_money: 33114, total_inflow: 214640, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 180654, cumulative_bank_balance: 1298622, category: 'FC Mega-Gate vs Whykickamoocows (£126k+£17k+£15k)' },
-        { id: 'fin-3', club_id: club.id, week_number: 3, record_date: '2026-11-07', gate_receipts: 70775, sponsors: 22301, merchandise: 0, prize_money: 28635, total_inflow: 121711, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 87725, cumulative_bank_balance: 1139919, category: 'Home OD Match vs madgaon CC (£70,775)' },
-        { id: 'fin-4', club_id: club.id, week_number: 4, record_date: '2026-11-01', gate_receipts: 7196, sponsors: 22301, merchandise: 0, prize_money: 28635, total_inflow: 58132, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 24146, cumulative_bank_balance: 1048174, category: 'Friendly Double-Header Week' }
-      ];
-
+    // 2. PAVILION & CLUB OFFICE DOMAIN (default.asp / office.asp / club.asp) - PRIORITY #2
+    const pavilionData = parseBattrickPavilion(input, club.id);
+    if (pavilionData && Object.keys(pavilionData.clubUpdates).length > 0) {
       setParseResult({
-        type: 'finances',
-        count: parsedFinances.length,
-        title: 'Battrick Finances & Ledger Detected',
-        finances: parsedFinances,
-        clubUpdates: { bank_balance: balance }
+        type: 'office',
+        count: 1,
+        title: `Battrick Pavilion Detected: ${pavilionData.clubUpdates.name || club.name} (${pavilionData.clubUpdates.id ? '#' + pavilionData.clubUpdates.id : 'Headquarters'})`,
+        clubUpdates: pavilionData.clubUpdates,
+        stadiumTiers: pavilionData.stadiumTiers
       });
       return;
     }
 
     // 3. GROUND & STADIUM DOMAIN (ground.asp)
-    if (input.includes('Standing Room') || input.includes('Groundsman') || input.includes('Uncovered Seats')) {
+    if (input.includes('Standing Room') || input.includes('Groundsman') || input.includes('Uncovered Seats') || input.includes('ground.asp')) {
       const capM = input.match(/Capacity[:\s]*([0-9,]+)/i);
       const cap = capM ? parseInt(capM[1].replace(/,/g, '')) : (club.stadium_capacity || 10000);
 
@@ -1097,8 +1192,30 @@ export const ImportView: React.FC<ImportViewProps> = ({
       return;
     }
 
-    // 4. NETS & TRAINING DOMAIN (nets.asp)
-    if (input.includes('Training Sessions') || input.includes('Squad training') || input.includes('None of your players were trained last week')) {
+    // 4. FINANCES DOMAIN (finances.asp)
+    if (input.includes('Account Summary') || input.includes('Current Balance') || input.includes('Paid Out') || input.includes('finances.asp')) {
+      const balM = input.match(/Current Balance[:\s]*([0-9,]+)/i);
+      const balance = balM ? parseInt(balM[1].replace(/,/g, '')) : 1325820;
+
+      const parsedFinances: FinancialRecord[] = [
+        { id: 'fin-1', club_id: club.id, week_number: 1, record_date: '2026-11-19', gate_receipts: 5247, sponsors: 22823, merchandise: 0, prize_money: 33114, total_inflow: 61184, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 27198, cumulative_bank_balance: balance, category: 'Season 69 Closing Week' },
+        { id: 'fin-2', club_id: club.id, week_number: 2, record_date: '2026-11-12', gate_receipts: 158703, sponsors: 22823, merchandise: 0, prize_money: 33114, total_inflow: 214640, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 180654, cumulative_bank_balance: 1298622, category: 'FC Mega-Gate vs Whykickamoocows (£126k+£17k+£15k)' },
+        { id: 'fin-3', club_id: club.id, week_number: 3, record_date: '2026-11-07', gate_receipts: 70775, sponsors: 22301, merchandise: 0, prize_money: 28635, total_inflow: 121711, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 87725, cumulative_bank_balance: 1139919, category: 'Home OD Match vs madgaon CC (£70,775)' },
+        { id: 'fin-4', club_id: club.id, week_number: 4, record_date: '2026-11-01', gate_receipts: 7196, sponsors: 22301, merchandise: 0, prize_money: 28635, total_inflow: 58132, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 24146, cumulative_bank_balance: 1048174, category: 'Friendly Double-Header Week' }
+      ];
+
+      setParseResult({
+        type: 'finances',
+        count: parsedFinances.length,
+        title: 'Battrick Finances & Ledger Detected',
+        finances: parsedFinances,
+        clubUpdates: { bank_balance: balance }
+      });
+      return;
+    }
+
+    // 5. NETS & TRAINING DOMAIN (nets.asp)
+    if (input.includes('Training Sessions') || input.includes('Squad training') || input.includes('None of your players were trained last week') || input.includes('nets.asp')) {
       const netAllocations: NetAllocation[] = [
         { club_id: club.id, net_number: 1, training_type: 'Bowling (Finger Spin)', player_id: null, player_name: 'Unassigned', coach_multiplier: 1.00, pops_estimated_weeks: null, notes: 'Net unassigned (Squad training active)' },
         { club_id: club.id, net_number: 2, training_type: 'Batting (Opening Technique)', player_id: null, player_name: 'Unassigned', coach_multiplier: 1.00, pops_estimated_weeks: null, notes: 'Net unassigned (Squad training active)' },
@@ -1116,53 +1233,54 @@ export const ImportView: React.FC<ImportViewProps> = ({
       return;
     }
 
-    // 5. CLUB OFFICE & DIARY DOMAIN (office.asp / diary.asp / club.asp)
-    if (input.includes('Youth Academy Condition') || input.includes('Intensive Training Sessions') || input.includes('Hired 1 fielding coach') || input.includes('General Manager')) {
-      const itsM = input.match(/Intensive Training Sessions[:\s]*([0-9]+)/i);
-      const fanM = input.match(/Club Members[:\s]*([0-9,]+)/i);
-      const coachM = input.match(/Coach Quality[:\s]*([A-Za-z]+)/i);
-      const fanMoodM = input.match(/Fan(?:'s|\s+Club)?\s*Mood[:\s]*([A-Za-z\s]+)/i);
-      const sponsorM = input.match(/Sponsors?[:\s]*([A-Za-z\s]+)/i);
-      const fcM = input.match(/First Class[:\s]*([IVXLCDM0-9.]+(?:\s*\([^)]+\))?)/i);
-      const odM = input.match(/One Day[:\s]*([IVXLCDM0-9.]+(?:\s*\([^)]+\))?)/i);
-      const t20M = input.match(/(?:T20|Twenty20)[:\s]*([IVXLCDM0-9.]+(?:\s*\([^)]+\))?)/i);
-
-      const parsedClubUpdates: Partial<Club> = {};
-      if (itsM) parsedClubUpdates.its_points = parseInt(itsM[1]);
-      if (fanM) parsedClubUpdates.fan_club_members = parseInt(fanM[1].replace(/,/g, ''));
-      if (coachM) parsedClubUpdates.coach_quality = coachM[1].trim();
-      if (fanMoodM) parsedClubUpdates.fan_mood = fanMoodM[1].trim();
-      if (sponsorM) parsedClubUpdates.sponsor_confidence = sponsorM[1].trim();
-      if (fcM) parsedClubUpdates.division_fc = fcM[1].trim();
-      if (odM) parsedClubUpdates.division_od = odM[1].trim();
-      if (t20M) parsedClubUpdates.division_t20 = t20M[1].trim();
-
-      setParseResult({
-        type: 'office',
-        count: 1,
-        title: 'Battrick Club Headquarters & Academy Intel Detected',
-        clubUpdates: parsedClubUpdates
-      });
-      return;
+    // 6. MULTI-FIXTURES DOMAIN (fixtures.asp)
+    if (input.includes('fixtures.asp') || (input.includes('Previous Matches') && input.includes('matchID='))) {
+      const fixturesList = parseBattrickFixtures(input, club.id);
+      if (fixturesList.length > 0) {
+        setParseResult({
+          type: 'fixtures',
+          count: fixturesList.length,
+          title: `Battrick Schedule Detected: ${fixturesList.length} Authenticated Matches`,
+          matches: fixturesList
+        });
+        return;
+      }
     }
 
-    // 6. SQUAD & PLAYERS DOMAIN (squad.asp / playerdetails.asp)
-    const hasPlayerIndicators = input.includes('Batting') || 
-                                input.includes('Bowling') || 
-                                input.includes('bti') || 
-                                input.includes('BTI') ||
-                                input.includes('wage') ||
-                                input.includes('Wage') ||
-                                input.includes('player_');
+    // 7. MATCH SCORECARD DOMAIN (matchinfofc.asp / matchinfo.asp / scorecards) - STRICT RECOGNITION ONLY
+    const hasAuthenticScorecardMarkers = 
+      input.includes('matchinfofc.asp') || 
+      input.includes('matchinfo.asp') || 
+      input.includes('matchcommsfc.asp') ||
+      input.includes('Fall of wickets') || 
+      input.includes("Reporter's Summary") ||
+      (input.includes('First Innings of:') && input.includes('Second Innings of:'));
 
-    if (hasPlayerIndicators) {
-      const extractedPlayers = extractPlayersFromHtml(input, club.id);
-      if (extractedPlayers.length > 0) {
+    if (hasAuthenticScorecardMarkers) {
+      const scorecard = parseBattrickScorecard(input, formatArg, club.id);
+      if (scorecard && (scorecard.battingPerformances.length > 0 || scorecard.bowlingPerformances.length > 0)) {
+        const newMatch: MatchRecord = {
+          id: scorecard.matchId,
+          club_id: club.id,
+          match_date: scorecard.matchDate,
+          match_type: scorecard.format,
+          opponent_club: scorecard.opponent,
+          venue: scorecard.venue,
+          pitch_type: scorecard.pitchType,
+          result: scorecard.result,
+          status: 'completed',
+          scoreSummary: scorecard.somnathRuns ? `Somnath ${scorecard.somnathRuns} runs` : undefined,
+          topPerformer: scorecard.battingPerformances[0]?.playerName 
+            ? `${scorecard.battingPerformances[0].playerName} (${scorecard.battingPerformances[0].runs} runs)` 
+            : undefined,
+          scorecardData: scorecard
+        };
+
         setParseResult({
-          type: 'squad',
-          count: extractedPlayers.length,
-          title: `Successfully Parsed ${extractedPlayers.length} Battrick Squad Players`,
-          players: extractedPlayers
+          type: 'fixtures',
+          count: 1,
+          title: `Match Scorecard Detected: ${scorecard.format} vs ${scorecard.opponent} (Match Date: ${scorecard.rawMatchDate || scorecard.matchDate})`,
+          matches: [newMatch]
         });
         return;
       }
@@ -1172,7 +1290,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
       type: 'unknown',
       count: 0,
       title: 'Unrecognized Data Format',
-      message: 'Paste squad HTML/Text from battrick.org/nl/players.asp, finances.asp, ground.asp, or matchinfofc.asp scorecards.'
+      message: 'Paste squad HTML/Text from battrick.org/nl/squad.asp, default.asp (Pavilion), finances.asp, ground.asp, or matchinfofc.asp scorecards.'
     });
   };
 
@@ -1401,13 +1519,46 @@ export const ImportView: React.FC<ImportViewProps> = ({
         onImportClub(updatedClub);
         localStorage.setItem('bt360_club', JSON.stringify(updatedClub));
 
+        if (parseResult.stadiumTiers && parseResult.stadiumTiers.length > 0 && onImportStadium) {
+          onImportStadium(parseResult.stadiumTiers);
+          localStorage.setItem('bt360_stadiumTiers', JSON.stringify(parseResult.stadiumTiers));
+        }
+
+        if (isSupabaseConfigured) {
+          try {
+            const { error } = await supabase.from('clubs').upsert({
+              id: updatedClub.id,
+              name: updatedClub.name,
+              manager: updatedClub.manager,
+              region: updatedClub.region,
+              division_fc: updatedClub.division_fc,
+              division_od: updatedClub.division_od,
+              division_t20: updatedClub.division_t20,
+              fan_club_members: updatedClub.fan_club_members,
+              fan_mood: updatedClub.fan_mood,
+              sponsor_confidence: updatedClub.sponsor_confidence,
+              morale: updatedClub.morale,
+              bank_balance: updatedClub.bank_balance,
+              weekly_wage_bill: updatedClub.weekly_wage_bill,
+              stadium_name: updatedClub.stadium_name,
+              stadium_capacity: updatedClub.stadium_capacity,
+              form_avg: updatedClub.form_avg,
+              coach_quality: updatedClub.coach_quality,
+              its_points: updatedClub.its_points
+            });
+            if (error) console.warn('Supabase club sync note:', error.message);
+          } catch (sErr) {
+            console.warn('Supabase club sync note:', sErr);
+          }
+        }
+
         const newEntry: ImportHistoryEntry = {
           id: `imp-off-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
           type: 'general',
-          title: `Club Standings & ITS Bank`,
-          details: `${parseResult.clubUpdates.its_points ?? club.its_points ?? 0} ITS Banked & Academy Status Synced`,
-          badgeText: 'Office',
+          title: `${updatedClub.name || 'Club'} Headquarters Synced`,
+          details: `Manager: ${updatedClub.manager} • Ground: ${updatedClub.stadium_name} (${(updatedClub.stadium_capacity || 0).toLocaleString()} cap) • ITS: ${updatedClub.its_points ?? 0}`,
+          badgeText: 'Pavilion',
           status: 'success'
         };
         setImportHistory(prev => {
@@ -1417,7 +1568,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
         });
 
         setStatusMessage({
-          text: `Club standings and ITS bank updated!`,
+          text: `Club Pavilion & Headquarters successfully updated! Name: ${updatedClub.name}, ID: #${updatedClub.id}, Manager: ${updatedClub.manager}, Ground: ${updatedClub.stadium_name} (${(updatedClub.stadium_capacity || 0).toLocaleString()} seats), Balance: £${(updatedClub.bank_balance || 0).toLocaleString()}. Box cleared and ready!`,
           type: 'success'
         });
         setRawText('');
@@ -2446,6 +2597,65 @@ The engine automatically detects Match Scorecards (FC, OD, BT20), Squad Rosters,
                       <div className="text-slate-900 font-bold text-sm mt-0.5">{t.current_seats.toLocaleString()} seats</div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {/* PAVILION / OFFICE PREVIEW */}
+              {parseResult.type === 'office' && parseResult.clubUpdates && (
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 font-mono text-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                    <div>
+                      <span className="text-sm font-black text-slate-900">
+                        {parseResult.clubUpdates.name || club.name}
+                      </span>
+                      {parseResult.clubUpdates.id && (
+                        <span className="text-emerald-700 font-bold ml-2">#{parseResult.clubUpdates.id}</span>
+                      )}
+                    </div>
+                    {parseResult.clubUpdates.manager && (
+                      <span className="text-slate-600 font-bold">Manager: {parseResult.clubUpdates.manager}</span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="p-2 bg-white rounded-lg border border-slate-200">
+                      <div className="text-[10px] text-slate-400">First Class</div>
+                      <div className="font-bold text-slate-800">{parseResult.clubUpdates.division_fc || club.division_fc || '—'}</div>
+                    </div>
+                    <div className="p-2 bg-white rounded-lg border border-slate-200">
+                      <div className="text-[10px] text-slate-400">One Day</div>
+                      <div className="font-bold text-slate-800">{parseResult.clubUpdates.division_od || club.division_od || '—'}</div>
+                    </div>
+                    <div className="p-2 bg-white rounded-lg border border-slate-200">
+                      <div className="text-[10px] text-slate-400">BT20</div>
+                      <div className="font-bold text-slate-800">{parseResult.clubUpdates.division_t20 || club.division_t20 || '—'}</div>
+                    </div>
+                    <div className="p-2 bg-white rounded-lg border border-slate-200">
+                      <div className="text-[10px] text-slate-400">ITS Banked</div>
+                      <div className="font-bold text-amber-700">{parseResult.clubUpdates.its_points ?? club.its_points ?? 0} ITS</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+                    {parseResult.clubUpdates.stadium_name && (
+                      <div className="p-2 bg-white rounded-lg border border-slate-200">
+                        <span className="text-slate-400">Ground: </span>
+                        <span className="font-bold text-slate-800">{parseResult.clubUpdates.stadium_name} ({parseResult.clubUpdates.stadium_capacity?.toLocaleString() || club.stadium_capacity?.toLocaleString()} cap)</span>
+                      </div>
+                    )}
+                    {parseResult.clubUpdates.bank_balance !== undefined && (
+                      <div className="p-2 bg-white rounded-lg border border-slate-200">
+                        <span className="text-slate-400">Balance: </span>
+                        <span className="font-bold text-emerald-700">£{parseResult.clubUpdates.bank_balance.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {parseResult.clubUpdates.fan_club_members !== undefined && (
+                      <div className="p-2 bg-white rounded-lg border border-slate-200">
+                        <span className="text-slate-400">Fan Club: </span>
+                        <span className="font-bold text-slate-800">{parseResult.clubUpdates.fan_club_members.toLocaleString()} ({parseResult.clubUpdates.fan_mood || 'Active'})</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

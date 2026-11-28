@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
 import { MatchRecord, Club } from '../types/database';
-import { Trophy, MapPin, Clock, Upload, Calendar } from 'lucide-react';
+import { Trophy, MapPin, Clock, Upload, Calendar, Trash2 } from 'lucide-react';
 
 interface MatchesViewProps {
   matches: MatchRecord[];
   club?: Club;
   onNavigateToImport?: () => void;
+  onDeleteMatch?: (matchId: string) => void;
+  onClearMatches?: () => void;
 }
 
-export const MatchesView: React.FC<MatchesViewProps> = ({ matches, club, onNavigateToImport }) => {
+export const MatchesView: React.FC<MatchesViewProps> = ({ 
+  matches, 
+  club, 
+  onNavigateToImport,
+  onDeleteMatch,
+  onClearMatches 
+}) => {
   const [formatFilter, setFormatFilter] = useState<string>('ALL');
 
   const filteredMatches = matches.filter(m => {
@@ -61,6 +69,21 @@ export const MatchesView: React.FC<MatchesViewProps> = ({ matches, club, onNavig
             >
               <Upload className="w-3.5 h-3.5" />
               <span>Import Scorecard</span>
+            </button>
+          )}
+
+          {matches.length > 0 && onClearMatches && (
+            <button
+              onClick={() => {
+                if (window.confirm("Are you sure you want to delete ALL matches? This will reset all match stats back to 0.")) {
+                  onClearMatches();
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer shadow-xs"
+              title="Clear all matches from database"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+              <span>Clear Matches</span>
             </button>
           )}
         </div>
@@ -155,6 +178,20 @@ export const MatchesView: React.FC<MatchesViewProps> = ({ matches, club, onNavig
                         <Trophy className="w-3.5 h-3.5 text-amber-600" /> Victory
                       </span>
                     ) : null}
+
+                    {onDeleteMatch && (
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Delete match #${match.id} (${match.match_type} vs ${match.opponent_club})?`)) {
+                            onDeleteMatch(match.id);
+                          }
+                        }}
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 transition-all cursor-pointer ml-1"
+                        title="Delete this match record"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
