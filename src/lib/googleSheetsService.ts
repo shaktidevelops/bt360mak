@@ -15,6 +15,7 @@ import {
   FinancialRecord, 
   StadiumTier, 
   NetAllocation, 
+  TrainingLog,
   StaffMember, 
   CalendarEvent, 
   CricketRecord 
@@ -69,6 +70,7 @@ export interface GoogleSheetsSyncPayload {
   finances?: FinancialRecord[];
   stadium?: StadiumTier[];
   nets?: NetAllocation[];
+  trainingLogs?: TrainingLog[];
   staff?: StaffMember[];
   calendar?: CalendarEvent[];
 }
@@ -78,6 +80,52 @@ export interface SyncResponse {
   message: string;
   timestamp?: string;
   raw?: any;
+}
+
+async function postToAppsScript(payload: Record<string, any>): Promise<SyncResponse> {
+  const url = getAppsScriptUrl();
+  if (!url) {
+    return {
+      success: true,
+      message: 'Saved to local browser database. Configure Google Apps Script Web App URL to sync to Google Sheet.'
+    };
+  }
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    if (text.trim().startsWith('<')) {
+      return {
+        success: false,
+        message: 'Apps Script Web App returned a Google login page. In Apps Script, open Deploy > Manage deployments > Edit and set "Who has access" to "Anyone".'
+      };
+    }
+
+    const result = JSON.parse(text);
+    return {
+      success: result.status === 'success',
+      message: result.message || 'Synced successfully to Google Sheet.',
+      timestamp: result.timestamp,
+      raw: result
+    };
+  } catch (err: any) {
+    const rawMsg = err?.message || String(err);
+    const isCorsOrFetch = rawMsg.includes('Failed to fetch') || rawMsg.includes('NetworkError');
+    return {
+      success: false,
+      message: isCorsOrFetch
+        ? 'Google Sheet Web App blocked browser access (CORS/Auth). Open Apps Script > Deploy > Manage deployments > Edit > set "Who has access" to "Anyone" and click Deploy.'
+        : `Google Sheets sync notice: ${rawMsg}`
+    };
+  }
 }
 
 /**
@@ -95,15 +143,26 @@ export async function pingGoogleSheets(): Promise<{ ok: boolean; message: string
   try {
     const response = await fetch(`${url}?action=ping`, {
       method: 'GET',
+      redirect: 'follow',
       headers: { 'Accept': 'application/json' }
     });
-    if (!response.ok) {
-      return { ok: false, message: `HTTP ${response.status}: ${response.statusText}` };
+    const text = await response.text();
+    if (text.trim().startsWith('<')) {
+      return {
+        ok: false,
+        message: 'Web App requires "Who has access: Anyone" in Apps Script Deploy > Manage deployments.'
+      };
     }
-    const data = await response.json();
-    return { ok: true, message: 'Google Sheet Web App is online and responding!', details: data };
+    const data = JSON.parse(text);
+    return { ok: true, message: `Connected to Google Sheet "${data.spreadsheetName || 'bt360mak'}"!`, details: data };
   } catch (err: any) {
-    return { ok: false, message: `Connection test failed: ${err.message || String(err)}` };
+    const msg = err?.message || String(err);
+    return {
+      ok: false,
+      message: msg.includes('Failed to fetch')
+        ? 'Browser blocked by Google Apps Script auth redirect. Open Apps Script > Deploy > Manage deployments > Edit > set "Who has access" to "Anyone".'
+        : `Connection test failed: ${msg}`
+    };
   }
 }
 
@@ -111,113 +170,28 @@ export async function pingGoogleSheets(): Promise<{ ok: boolean; message: string
  * Synchronizes entire state or subset to Google Sheets via Apps Script Web App
  */
 export async function syncToGoogleSheets(payload: GoogleSheetsSyncPayload): Promise<SyncResponse> {
-  const url = getAppsScriptUrl();
-  if (!url) {
-    // When no Web App URL is configured yet, gracefully fallback to local cache
-    return {
-      success: true,
-      message: 'Saved to local browser database. Connect Google Apps Script Web App to sync to Google Sheet automatically.'
-    };
-  }
-
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8', // Apps script handles text/plain avoiding CORS preflight OPTIONS block
-      },
-      body: JSON.stringify({
-        action: 'syncAll',
-        ...payload
-      })
-    });
-
-    const result = await res.json();
-    return {
-      success: result.status === 'success',
-      message: result.message || 'Synced successfully to Google Sheet.',
-      timestamp: result.timestamp,
-      raw: result
-    };
-  } catch (err: any) {
-    console.warn('Google Sheets sync warning:', err);
-    return {
-      success: false,
-      message: `Google Sheets sync notice: ${err.message || String(err)}`
-    };
-  }
+  return postToAppsScript({ action: 'syncAll', ...payload });
 }
 
 /**
  * Saves squad changes to Google Sheet
  */
 export async function saveSquadToGoogleSheets(squad: Player[]): Promise<SyncResponse> {
-  const url = getAppsScriptUrl();
-  if (!url) return { success: true, message: 'Saved locally.' };
-
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'saveSquad', squad })
-    });
-    const result = await res.json();
-    return {
-      success: result.status === 'success',
-      message: `Saved ${squad.length} players to Google Sheet.`
-    };
-  } catch (err: any) {
-    console.warn('Google Sheets saveSquad error:', err);
-    return { success: false, message: err.message };
-  }
+  return postToAppsScript({ action: 'saveSquad', squad });
 }
 
 /**
  * Saves matches to Google Sheet
  */
 export async function saveMatchesToGoogleSheets(matches: MatchRecord[]): Promise<SyncResponse> {
-  const url = getAppsScriptUrl();
-  if (!url) return { success: true, message: 'Saved locally.' };
-
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'saveMatches', matches })
-    });
-    const result = await res.json();
-    return {
-      success: result.status === 'success',
-      message: `Saved ${matches.length} matches to Google Sheet.`
-    };
-  } catch (err: any) {
-    console.warn('Google Sheets saveMatches error:', err);
-    return { success: false, message: err.message };
-  }
+  return postToAppsScript({ action: 'saveMatches', matches });
 }
 
 /**
  * Saves club to Google Sheet
  */
 export async function saveClubToGoogleSheets(club: Club): Promise<SyncResponse> {
-  const url = getAppsScriptUrl();
-  if (!url) return { success: true, message: 'Saved locally.' };
-
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'saveClub', club })
-    });
-    const result = await res.json();
-    return {
-      success: result.status === 'success',
-      message: 'Saved club profile to Google Sheet.'
-    };
-  } catch (err: any) {
-    console.warn('Google Sheets saveClub error:', err);
-    return { success: false, message: err.message };
-  }
+  return postToAppsScript({ action: 'saveClub', club });
 }
 
 /**
@@ -232,15 +206,23 @@ export async function fetchAllFromGoogleSheets(): Promise<{ success: boolean; da
   try {
     const res = await fetch(`${url}?action=getAllData`, {
       method: 'GET',
+      redirect: 'follow',
       headers: { 'Accept': 'application/json' }
     });
-    if (!res.ok) {
-      return { success: false, error: `HTTP ${res.status}: ${res.statusText}` };
+    const text = await res.text();
+    if (text.trim().startsWith('<')) {
+      return { success: false, error: 'Apps Script Web App requires "Who has access: Anyone" in Deploy > Manage deployments.' };
     }
-    const data = await res.json();
+    const data = JSON.parse(text);
     return { success: true, data };
   } catch (err: any) {
-    return { success: false, error: err.message || String(err) };
+    const msg = err?.message || String(err);
+    return {
+      success: false,
+      error: msg.includes('Failed to fetch')
+        ? 'Web App blocked by Google auth redirect. Set "Who has access: Anyone" in Apps Script Deploy > Manage deployments.'
+        : msg
+    };
   }
 }
 
@@ -248,21 +230,5 @@ export async function fetchAllFromGoogleSheets(): Promise<{ success: boolean; da
  * Wipes rows 2+ across all 10 tabs in Google Sheet
  */
 export async function resetGoogleSheetsDatabase(): Promise<SyncResponse> {
-  const url = getAppsScriptUrl();
-  if (!url) return { success: true, message: 'Local storage reset completed.' };
-
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'resetAll' })
-    });
-    const result = await res.json();
-    return {
-      success: result.status === 'success',
-      message: 'All 10 tabs in Google Sheet reset to clean headers.'
-    };
-  } catch (err: any) {
-    return { success: false, message: err.message };
-  }
+  return postToAppsScript({ action: 'resetAll' });
 }

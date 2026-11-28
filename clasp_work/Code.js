@@ -10,9 +10,6 @@
 
 const SPREADSHEET_ID = "1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E";
 
-/**
- * Returns the target Google Spreadsheet instance
- */
 function getSpreadsheet() {
   try {
     if (SPREADSHEET_ID && SPREADSHEET_ID.trim() !== "") {
@@ -24,9 +21,6 @@ function getSpreadsheet() {
   }
 }
 
-/**
- * Schema definitions for all 10 BT360 tabs
- */
 const SCHEMA = {
   Club: [
     "Club ID", "Club Name", "Manager Name", "Region", "FC Division", 
@@ -41,19 +35,18 @@ const SCHEMA = {
     "Keeping Skill", "Fielding Skill", "Concentration", "Consistency", 
     "Stamina", "Form", "Fatigue", "Leadership", "Experience", 
     "Subskill Info", "Assigned Net", "Player Role", "Wonderkid Trainee", 
-    "Matches Played", "Runs Scored", "Batting Average", "Centuries (100s)", 
-    "Half-Centuries (50s)", "Highest Score", "Wickets Taken", "Bowling Average", 
-    "Best Bowling", "5-Wicket Hauls", "Catches", "Stumpings", "Last Updated"
+    "FC Matches", "FC Runs", "FC Average", "FC 100s", 
+    "FC 50s", "FC High Score", "FC Wickets", "FC Bowling Avg", 
+    "FC Best Bowling", "OD Runs", "OD Wickets", "T20 Runs", "T20 Wickets", "Last Updated"
   ],
   Matches: [
     "Match ID", "Club ID", "Match Date", "Format", "Opponent Club", 
-    "Opponent ID", "Venue", "Pitch Surface", "Result", "Club Runs", 
-    "Opponent Runs", "Top Performer Batsman", "Top Performer Bowler", 
-    "Scorecard Summary", "Full JSON Payload", "Concluded Timestamp"
+    "Venue", "Pitch Surface", "Result", "Status", "Score Summary", 
+    "Top Performer", "Full JSON Payload", "Concluded Timestamp"
   ],
   Records: [
     "Record ID", "Club ID", "Category", "Record Name", "Holder Player Name", 
-    "Record Value", "Opponent Context", "Date Achieved", "Format"
+    "Record Value", "Match Context", "Date Achieved"
   ],
   Finances: [
     "Week Number", "Club ID", "Week Date", "Gate Receipts (£)", "Sponsors (£)", 
@@ -68,29 +61,24 @@ const SCHEMA = {
   ],
   Nets: [
     "Net Slot #", "Club ID", "Assigned Player ID", "Assigned Player Name", 
-    "Primary Training Skill", "Secondary Training Skill", "Coach Multiplier", 
+    "Primary Training Skill", "Coach Multiplier", 
     "Estimated Weeks to Pop", "Coach Notes", "Last Modified"
   ],
   TrainingLogs: [
     "Log ID", "Club ID", "Player ID", "Player Name", "Skill Popped", 
-    "Change Type", "Pop Date", "Previous Level", "New Level", 
-    "Coach Efficiency Impact", "Notes"
+    "Pop Date", "Previous Level", "New Level", 
+    "Weeks Taken", "Coach Quality", "Confirmed"
   ],
   Staff: [
     "Staff ID", "Club ID", "Staff Role", "Staff Name", "Weekly Wage (£)", 
-    "Skill Level / Efficiency", "Employment Status", "Contract Date"
+    "Skill Level / Efficiency", "Impact Description", "Synergy Bonus"
   ],
   Calendar: [
-    "Event ID", "Club ID", "Event Date", "Event Type", "Event Title / Opponent", 
-    "Venue / Surface", "Competition Format", "Status", "Notes"
+    "Event ID", "Club ID", "Event Date", "Day of Week", "Time", "Event Type", 
+    "Event Title", "Details", "Venue", "Importance"
   ]
 };
 
-/**
- * 1-CLICK DATABASE SETUP & FORMATTING FUNCTION
- * Formats all 10 tabs with emerald headers, frozen top rows, auto column widths, and proper styling.
- * Run this function once from Google Apps Script editor.
- */
 function setupBT360Database() {
   const ss = getSpreadsheet();
   const tabNames = Object.keys(SCHEMA);
@@ -102,12 +90,9 @@ function setupBT360Database() {
     }
 
     const headers = SCHEMA[tabName];
-    
-    // Set headers
     const headerRange = sheet.getRange(1, 1, 1, headers.length);
     headerRange.setValues([headers]);
 
-    // Emerald Styling: #064e3b deep sovereign green background, white bold text
     headerRange.setBackground("#064e3b")
                .setFontColor("#FFFFFF")
                .setFontWeight("bold")
@@ -119,7 +104,6 @@ function setupBT360Database() {
     sheet.setRowHeight(1, 38);
     sheet.setFrozenRows(1);
 
-    // Auto-resize columns
     for (let c = 1; c <= headers.length; c++) {
       try {
         sheet.autoResizeColumn(c);
@@ -133,7 +117,6 @@ function setupBT360Database() {
     }
   });
 
-  // Remove default "Sheet1" if it exists and is empty
   const sheet1 = ss.getSheetByName("Sheet1");
   if (sheet1 && ss.getSheets().length > 1) {
     try {
@@ -145,13 +128,6 @@ function setupBT360Database() {
   return { status: "success", message: "All 10 tabs formatted with Sovereign Emerald styling." };
 }
 
-/**
- * HTTP GET Handler (Web App API Endpoint)
- * Supports actions:
- *   - ?action=ping
- *   - ?action=getAllData
- *   - ?action=getTab&tab=Squad
- */
 function doGet(e) {
   try {
     const action = (e && e.parameter && e.parameter.action) ? e.parameter.action : "getAllData";
@@ -167,6 +143,10 @@ function doGet(e) {
       });
     }
 
+    if (action === "setup") {
+      return jsonResponse(setupBT360Database());
+    }
+
     if (action === "getTab") {
       const tabName = e.parameter.tab || "Squad";
       const sheet = ss.getSheetByName(tabName);
@@ -177,7 +157,6 @@ function doGet(e) {
       return jsonResponse({ status: "success", tab: tabName, count: data.length, data: data });
     }
 
-    // Default: getAllData
     const allData = {
       status: "success",
       timestamp: new Date().toISOString(),
@@ -199,16 +178,6 @@ function doGet(e) {
   }
 }
 
-/**
- * HTTP POST Handler (Web App API Endpoint)
- * Supports actions:
- *   - action: "syncAll" (payload: { club, squad, matches, records, finances, stadium, nets, staff, calendar })
- *   - action: "saveSquad" (payload: { squad: [...] })
- *   - action: "saveMatches" (payload: { matches: [...] })
- *   - action: "saveClub" (payload: { club: {...} })
- *   - action: "saveFinances" (payload: { finances: [...] })
- *   - action: "resetAll" (wipes rows 2+ across all tabs)
- */
 function doPost(e) {
   try {
     if (!e || !e.postData || !e.postData.contents) {
@@ -228,6 +197,10 @@ function doPost(e) {
         }
       });
       return jsonResponse({ status: "success", message: "All 10 tabs wiped clean to fresh slate." });
+    }
+
+    if (action === "setup") {
+      return jsonResponse(setupBT360Database());
     }
 
     if (action === "saveClub" && payload.club) {
@@ -253,6 +226,7 @@ function doPost(e) {
       if (Array.isArray(payload.finances)) saveFinancesToSheet(ss, payload.finances);
       if (Array.isArray(payload.stadium)) saveStadiumToSheet(ss, payload.stadium);
       if (Array.isArray(payload.nets)) saveNetsToSheet(ss, payload.nets);
+      if (Array.isArray(payload.trainingLogs)) saveTrainingLogsToSheet(ss, payload.trainingLogs);
       if (Array.isArray(payload.staff)) saveStaffToSheet(ss, payload.staff);
       if (Array.isArray(payload.calendar)) saveCalendarToSheet(ss, payload.calendar);
 
@@ -269,9 +243,6 @@ function doPost(e) {
   }
 }
 
-/**
- * Helper to convert sheet rows into JSON object array
- */
 function getSheetRowsAsObjects(sheet) {
   if (!sheet || sheet.getLastRow() <= 1) return [];
   const numRows = sheet.getLastRow() - 1;
@@ -313,7 +284,6 @@ function saveClubToSheet(ss, club) {
     sheet = ss.getSheetByName("Club");
   }
 
-  // Clear previous rows
   if (sheet.getLastRow() > 1) {
     sheet.deleteRows(2, sheet.getLastRow() - 1);
   }
@@ -330,13 +300,13 @@ function saveClubToSheet(ss, club) {
     club.weekly_wage_bill ?? 0,
     club.stadium_name || "",
     club.stadium_capacity ?? 0,
-    club.fan_club_size ?? 0,
+    club.fan_club_members ?? club.fan_club_size ?? 0,
     club.fan_mood || "",
     club.sponsor_confidence || "",
     club.morale || "",
     club.youth_academy_level || "",
-    club.its_bank ?? 0,
-    club.pitch || "",
+    club.its_points ?? club.its_bank ?? 0,
+    club.pitch_condition || club.pitch || "",
     new Date().toISOString()
   ];
 
@@ -357,6 +327,9 @@ function saveSquadToSheet(ss, squad) {
   if (squad.length === 0) return;
 
   const rows = squad.map(function(p) {
+    const fc = p.statsFC || {};
+    const od = p.statsOD || {};
+    const t20 = p.statsT20 || {};
     return [
       p.id || "",
       p.club_id || "",
@@ -377,22 +350,23 @@ function saveSquadToSheet(ss, squad) {
       p.fatigue || "energised",
       p.leadership || "worthless",
       p.experience || "worthless",
-      p.subskill_info || "",
-      p.training_net || "None",
-      p.role || "Squad",
+      p.subskill ?? p.subskill_info ?? 0,
+      p.active_net || p.training_net || "Unassigned",
+      p.tactical_role || p.role || "Squad",
       p.is_wonderkid ? "YES" : "NO",
-      p.career_matches ?? 0,
-      p.career_runs ?? 0,
-      p.career_average ?? 0,
-      p.career_100s ?? 0,
-      p.career_50s ?? 0,
-      p.career_high_score ?? 0,
-      p.career_wickets ?? 0,
-      p.career_bowling_average ?? 0,
-      p.career_best_bowling ?? "-",
-      p.career_5w ?? 0,
-      p.career_catches ?? 0,
-      p.career_stumpings ?? 0,
+      fc.matches ?? 0,
+      fc.runs ?? 0,
+      fc.average ?? 0,
+      fc.centuries ?? 0,
+      fc.fifties ?? 0,
+      fc.highestScore ?? "-",
+      fc.wickets ?? 0,
+      fc.bowlingAverage ?? 0,
+      fc.bestBowling ?? "-",
+      od.runs ?? 0,
+      od.wickets ?? 0,
+      t20.runs ?? 0,
+      t20.wickets ?? 0,
       new Date().toISOString()
     ];
   });
@@ -417,19 +391,16 @@ function saveMatchesToSheet(ss, matches) {
     return [
       m.id || "",
       m.club_id || "",
-      m.date || "",
-      m.format || "First Class",
+      m.match_date || m.date || "",
+      m.match_type || m.format || "First Class",
       m.opponent_club || "",
-      m.opponent_id || "",
       m.venue || "Home",
-      m.pitch || "Hard & Fast",
+      m.pitch_type || m.pitch || "Hard & Fast",
       m.result || "Concluded",
-      m.our_runs || "",
-      m.opp_runs || "",
-      m.top_batsman || "",
-      m.top_bowler || "",
-      m.summary || "",
-      m.scorecard_json ? JSON.stringify(m.scorecard_json) : "",
+      m.status || "completed",
+      m.scoreSummary || m.summary || "",
+      m.topPerformer || "",
+      m.scorecardData ? JSON.stringify(m.scorecardData) : "",
       new Date().toISOString()
     ];
   });
@@ -443,17 +414,16 @@ function saveRecordsToSheet(ss, records) {
   if (sheet.getLastRow() > 1) sheet.deleteRows(2, sheet.getLastRow() - 1);
   if (records.length === 0) return;
 
-  const rows = records.map(function(r) {
+  const rows = records.map(function(r, idx) {
     return [
-      r.id || "",
+      r.id || ("rec-" + (idx + 1)),
       r.club_id || "",
       r.category || "",
-      r.record_name || "",
-      r.player_name || "",
-      r.record_value || "",
-      r.match_context || "",
-      r.date || "",
-      r.format || ""
+      r.recordName || r.record_name || "",
+      r.holder || r.player_name || "",
+      r.value || r.record_value || "",
+      r.matchContext || r.match_context || "",
+      r.date || ""
     ];
   });
 
@@ -468,9 +438,9 @@ function saveFinancesToSheet(ss, finances) {
 
   const rows = finances.map(function(f) {
     return [
-      f.week || 0,
+      f.week_number ?? f.week ?? 0,
       f.club_id || "",
-      f.date || "",
+      f.record_date || f.date || "",
       f.gate_receipts ?? 0,
       f.sponsors ?? 0,
       f.merchandise ?? 0,
@@ -478,12 +448,12 @@ function saveFinancesToSheet(ss, finances) {
       f.total_inflow ?? 0,
       f.player_wages ?? 0,
       f.staff_wages ?? 0,
-      f.upkeep ?? 0,
-      f.academy ?? 0,
+      f.stadium_upkeep ?? f.upkeep ?? 0,
+      f.youth_academy ?? f.academy ?? 0,
       f.total_outflow ?? 0,
-      f.net_pnl ?? 0,
-      f.balance ?? 0,
-      f.notes || "",
+      f.net_weekly_pnl ?? f.net_pnl ?? 0,
+      f.cumulative_bank_balance ?? f.balance ?? 0,
+      f.category || f.notes || "",
       new Date().toISOString()
     ];
   });
@@ -499,14 +469,14 @@ function saveStadiumToSheet(ss, stadium) {
 
   const rows = stadium.map(function(s) {
     return [
-      s.tier_id || "",
+      s.id || s.tier_id || "",
       s.club_id || "",
-      s.name || "",
+      s.tier_name || s.name || "",
       s.current_seats ?? 0,
       s.optimal_ratio ?? 0,
       s.recommended_seats ?? 0,
       s.ticket_price ?? 0,
-      s.expansion_cost ?? 0,
+      s.expansion_cost_per_seat ?? s.expansion_cost ?? 0,
       new Date().toISOString()
     ];
   });
@@ -525,13 +495,37 @@ function saveNetsToSheet(ss, nets) {
       n.net_number || 0,
       n.club_id || "",
       n.player_id || "",
-      n.player_name || "",
+      n.player_name || "Unassigned",
       n.training_type || "",
-      n.secondary_type || "",
       n.coach_multiplier ?? 1.0,
-      n.pops_forecast ?? 0,
+      n.pops_estimated_weeks ?? n.pops_forecast ?? "",
       n.notes || "",
       new Date().toISOString()
+    ];
+  });
+
+  sheet.getRange(2, 1, rows.length, rows[0].length).setValues(rows);
+}
+
+function saveTrainingLogsToSheet(ss, logs) {
+  let sheet = ss.getSheetByName("TrainingLogs");
+  if (!sheet) return;
+  if (sheet.getLastRow() > 1) sheet.deleteRows(2, sheet.getLastRow() - 1);
+  if (logs.length === 0) return;
+
+  const rows = logs.map(function(l) {
+    return [
+      l.id || "",
+      l.club_id || "",
+      l.player_id || "",
+      l.player_name || "",
+      l.skill_trained || "",
+      l.log_date || "",
+      l.previous_level || "",
+      l.new_level || "",
+      l.weeks_taken ?? 0,
+      l.coach_quality || "",
+      l.pop_confirmed ? "YES" : "NO"
     ];
   });
 
@@ -550,10 +544,10 @@ function saveStaffToSheet(ss, staff) {
       st.club_id || "",
       st.role || "",
       st.name || "",
-      st.wage ?? 0,
-      st.efficiency || "",
-      st.status || "Active",
-      new Date().toISOString()
+      st.weeklyWage ?? st.wage ?? 0,
+      st.skillLevel || st.efficiency || "",
+      st.impactDescription || "",
+      st.synergyBonus || ""
     ];
   });
 
@@ -571,12 +565,13 @@ function saveCalendarToSheet(ss, calendar) {
       c.id || "",
       c.club_id || "",
       c.date || "",
+      c.dayOfWeek || "",
+      c.time || "",
       c.type || "",
       c.title || "",
+      c.details || "",
       c.venue || "",
-      c.format || "",
-      c.status || "Scheduled",
-      c.notes || ""
+      c.importance || "NORMAL"
     ];
   });
 

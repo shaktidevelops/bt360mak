@@ -406,6 +406,11 @@ export function App() {
               squad={squad} 
               matches={matches}
               records={records}
+              finances={finances}
+              stadiumTiers={stadiumTiers}
+              nets={nets}
+              staff={staff}
+              calendar={calendar}
               onResetAllData={handleFactoryReset}
               onImportSquad={(newSquad) => {
                 setSquad(newSquad);

@@ -42,8 +42,14 @@ import {
   syncToGoogleSheets, 
   saveSquadToGoogleSheets, 
   saveMatchesToGoogleSheets, 
-  saveClubToGoogleSheets, 
-  resetGoogleSheetsDatabase 
+  resetGoogleSheetsDatabase,
+  GOOGLE_SHEET_URL,
+  APPS_SCRIPT_EDITOR_URL,
+  getAppsScriptUrl,
+  setAppsScriptUrl,
+  pingGoogleSheets,
+  fetchAllFromGoogleSheets,
+  isGoogleSheetsConfigured
 } from '../lib/googleSheetsService';
 import { 
   parseBattrickScorecard, 
@@ -52,11 +58,18 @@ import {
   parseBattrickFixtures,
   EMPTY_STATS
 } from '../lib/matchStatsEngine';
+import {
+  parseBattrickPlayerDetails,
+  parseBattrickDiary,
+  parseBattrickCalendar,
+  parseBattrickNets,
+  parseBattrickFinances
+} from '../lib/domainParsers';
 
 export interface ImportHistoryEntry {
   id: string;
   timestamp: string;
-  type: 'scorecard' | 'squad' | 'finances' | 'ground' | 'nets' | 'fixtures' | 'general';
+  type: 'scorecard' | 'squad' | 'playerdetails' | 'finances' | 'ground' | 'nets' | 'fixtures' | 'diary' | 'calendar' | 'general';
   title: string;
   originalDate?: string;
   matchId?: string;
@@ -71,6 +84,11 @@ interface ImportViewProps {
   squad: Player[];
   matches?: MatchRecord[];
   records?: CricketRecord[];
+  finances?: FinancialRecord[];
+  stadiumTiers?: StadiumTier[];
+  nets?: NetAllocation[];
+  staff?: StaffMember[];
+  calendar?: CalendarEvent[];
   onResetAllData?: () => void;
   onImportSquad: (newSquad: Player[]) => void;
   onImportClub: (newClub: Club) => void;
@@ -347,6 +365,11 @@ export const ImportView: React.FC<ImportViewProps> = ({
   squad,
   matches = [],
   records = [],
+  finances = [],
+  stadiumTiers = [],
+  nets = [],
+  staff = [],
+  calendar = [],
   onResetAllData,
   onImportSquad,
   onImportClub,
@@ -354,31 +377,38 @@ export const ImportView: React.FC<ImportViewProps> = ({
   onImportMatches,
   onImportRecords,
   onImportStadium,
-  onImportNets
+  onImportNets,
+  onImportCalendar
 }) => {
   // Tabs: Single Paste (Default), Bulk Multi-File, 1-Click Browser Button, Domain Presets, Sheet, and JSON
   const [activeImportTab, setActiveImportTab] = useState<'paste' | 'bulk' | 'bookmarklet' | 'domains' | 'sheet' | 'json'>('paste');
-  const [selectedDomain, setSelectedDomain] = useState<'squad' | 'finances' | 'ground' | 'fixtures' | 'nets' | 'office' | 'diary'>('squad');
+  const [selectedDomain, setSelectedDomain] = useState<'squad' | 'playerdetails' | 'finances' | 'ground' | 'fixtures' | 'nets' | 'office' | 'diary' | 'calendar'>('office');
   const [formatOverride, setFormatOverride] = useState<'auto' | 'First Class' | 'One Day' | 'BT20'>('auto');
   const [matchesFilter, setMatchesFilter] = useState<string>('ALL');
   const [rawText, setRawText] = useState('');
   const [isClipboardPasting, setIsClipboardPasting] = useState(false);
   const [parseResult, setParseResult] = useState<{
-    type: 'squad' | 'office' | 'finances' | 'ground' | 'fixtures' | 'nets' | 'diary' | 'unknown';
+    type: 'squad' | 'playerdetails' | 'office' | 'finances' | 'ground' | 'fixtures' | 'nets' | 'diary' | 'calendar' | 'unknown';
     count: number;
     title: string;
     players?: Partial<Player>[];
+    singlePlayer?: Partial<Player>;
     clubUpdates?: Partial<Club>;
     finances?: FinancialRecord[];
     stadiumTiers?: StadiumTier[];
     matches?: MatchRecord[];
     nets?: NetAllocation[];
     calendarEvents?: CalendarEvent[];
+    trainingLogs?: any[];
     message?: string;
   } | null>(null);
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [sheetSyncBanner, setSheetSyncBanner] = useState<{ ok: boolean; text: string } | null>(null);
+  const [sheetUrlInput, setSheetUrlInput] = useState<string>(() => getAppsScriptUrl());
+  const [sheetConnStatus, setSheetConnStatus] = useState<{ ok: boolean; message: string } | null>(null);
+  const [isTestingSheet, setIsTestingSheet] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
 
   // 1-Click Browser Bookmarklet & Extension State
@@ -1109,7 +1139,21 @@ export const ImportView: React.FC<ImportViewProps> = ({
     const currentFmt = overrideFormat !== undefined ? overrideFormat : formatOverride;
     const formatArg = currentFmt === 'auto' ? undefined : currentFmt;
 
-    // 1. SQUAD & PLAYERS DOMAIN (squad.asp / playerdetails.asp) - PRIORITY #1
+    // 1. PLAYER DETAILS DOMAIN (playerdetails.asp) OR SQUAD ROSTER (squad.asp)
+    const isSinglePlayerPage = input.includes('playerdetails.asp') && !input.includes('squad.asp') && (input.match(/playerdetails\.asp\?playerID=/gi) || []).length <= 2;
+    if (isSinglePlayerPage || (input.includes('Leadership:') && input.includes('Experience:') && !input.includes('squad.asp') && (input.match(/class="player"/g) || []).length <= 1)) {
+      const singleP = parseBattrickPlayerDetails(input, club.id, squad);
+      if (singleP && singleP.name) {
+        setParseResult({
+          type: 'playerdetails',
+          count: 1,
+          title: `Player Details Detected: ${singleP.name} (#${singleP.id})`,
+          singlePlayer: singleP
+        });
+        return;
+      }
+    }
+
     const hasSquadMarkers = input.includes('squad.asp') ||
                             input.includes('playerdetails.asp') ||
                             input.includes('player_age') ||
@@ -1179,44 +1223,57 @@ export const ImportView: React.FC<ImportViewProps> = ({
     }
 
     // 4. FINANCES DOMAIN (finances.asp)
-    if (input.includes('Account Summary') || input.includes('Current Balance') || input.includes('Paid Out') || input.includes('finances.asp')) {
-      const balM = input.match(/Current Balance[:\s]*([0-9,]+)/i);
-      const balance = balM ? parseInt(balM[1].replace(/,/g, '')) : 1325820;
-
-      const parsedFinances: FinancialRecord[] = [
-        { id: 'fin-1', club_id: club.id, week_number: 1, record_date: '2026-11-19', gate_receipts: 5247, sponsors: 22823, merchandise: 0, prize_money: 33114, total_inflow: 61184, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 27198, cumulative_bank_balance: balance, category: 'Season 69 Closing Week' },
-        { id: 'fin-2', club_id: club.id, week_number: 2, record_date: '2026-11-12', gate_receipts: 158703, sponsors: 22823, merchandise: 0, prize_money: 33114, total_inflow: 214640, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 180654, cumulative_bank_balance: 1298622, category: 'FC Mega-Gate vs Whykickamoocows (£126k+£17k+£15k)' },
-        { id: 'fin-3', club_id: club.id, week_number: 3, record_date: '2026-11-07', gate_receipts: 70775, sponsors: 22301, merchandise: 0, prize_money: 28635, total_inflow: 121711, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 87725, cumulative_bank_balance: 1139919, category: 'Home OD Match vs madgaon CC (£70,775)' },
-        { id: 'fin-4', club_id: club.id, week_number: 4, record_date: '2026-11-01', gate_receipts: 7196, sponsors: 22301, merchandise: 0, prize_money: 28635, total_inflow: 58132, player_wages: 7034, staff_wages: 12250, stadium_upkeep: 14702, youth_academy: 0, total_outflow: 33986, net_weekly_pnl: 24146, cumulative_bank_balance: 1048174, category: 'Friendly Double-Header Week' }
-      ];
-
+    if (input.includes('Account Summary') || input.includes('Current Balance') || input.includes('Paid Out') || input.includes('finances.asp') || input.includes('Gate Receipts')) {
+      const { finances: parsedFinances, bankBalance } = parseBattrickFinances(input, club.id);
       setParseResult({
         type: 'finances',
         count: parsedFinances.length,
-        title: 'Battrick Finances & Ledger Detected',
+        title: `Battrick Finances Detected${bankBalance ? ` (Balance: £${bankBalance.toLocaleString()})` : ''}`,
         finances: parsedFinances,
-        clubUpdates: { bank_balance: balance }
+        clubUpdates: bankBalance !== undefined ? { bank_balance: bankBalance } : undefined
       });
       return;
     }
 
     // 5. NETS & TRAINING DOMAIN (nets.asp)
-    if (input.includes('Training Sessions') || input.includes('Squad training') || input.includes('None of your players were trained last week') || input.includes('nets.asp')) {
-      const netAllocations: NetAllocation[] = [
-        { club_id: club.id, net_number: 1, training_type: 'Bowling (Finger Spin)', player_id: null, player_name: 'Unassigned', coach_multiplier: 1.00, pops_estimated_weeks: null, notes: 'Net unassigned (Squad training active)' },
-        { club_id: club.id, net_number: 2, training_type: 'Batting (Opening Technique)', player_id: null, player_name: 'Unassigned', coach_multiplier: 1.00, pops_estimated_weeks: null, notes: 'Net unassigned (Squad training active)' },
-        { club_id: club.id, net_number: 3, training_type: 'Fielding (Slip Catching)', player_id: null, player_name: 'Unassigned', coach_multiplier: 1.00, pops_estimated_weeks: null, notes: 'Net unassigned (Squad training active)' },
-        { club_id: club.id, net_number: 4, training_type: 'Wicket Keeping (Glovework)', player_id: null, player_name: 'Unassigned', coach_multiplier: 1.00, pops_estimated_weeks: null, notes: 'Net unassigned (Squad training active)' },
-        { club_id: club.id, net_number: 5, training_type: 'Fitness & Stamina', player_id: null, player_name: 'Unassigned', coach_multiplier: 1.00, pops_estimated_weeks: null, notes: 'Net unassigned (Squad training active)' }
-      ];
-
+    if (input.includes('Training Sessions') || input.includes('Squad training') || input.includes('None of your players were trained last week') || input.includes('nets.asp') || /Net\s*#?\d+/i.test(input)) {
+      const netAllocations = parseBattrickNets(input, club.id, squad);
       setParseResult({
         type: 'nets',
         count: netAllocations.length,
-        title: 'Battrick Nets Matrix & Squad Session Detected',
+        title: `Battrick Nets Matrix Detected (${netAllocations.length} Net Slots)`,
         nets: netAllocations
       });
       return;
+    }
+
+    // 6. CLUB DIARY DOMAIN (diary.asp)
+    if (input.includes('diary.asp') || input.includes('Club Diary') || (input.includes('popped') && !input.includes('First Innings'))) {
+      const { events, trainingLogs } = parseBattrickDiary(input, club.id);
+      if (events.length > 0 || trainingLogs.length > 0) {
+        setParseResult({
+          type: 'diary',
+          count: events.length || trainingLogs.length,
+          title: `Battrick Club Diary Detected: ${events.length} Events, ${trainingLogs.length} Training Pops`,
+          calendarEvents: events,
+          trainingLogs
+        });
+        return;
+      }
+    }
+
+    // 7. CALENDAR & UPCOMING SCHEDULE DOMAIN (calendar.asp)
+    if (input.includes('calendar.asp') || input.includes('Club Calendar') || (input.includes('Upcoming') && (input.includes('First Class') || input.includes('One Day') || input.includes('BT20')))) {
+      const calEvents = parseBattrickCalendar(input);
+      if (calEvents.length > 0) {
+        setParseResult({
+          type: 'calendar',
+          count: calEvents.length,
+          title: `Battrick Calendar Detected: ${calEvents.length} Scheduled Events`,
+          calendarEvents: calEvents
+        });
+        return;
+      }
     }
 
     // 6. MULTI-FIXTURES DOMAIN (fixtures.asp)
@@ -1474,14 +1531,15 @@ export const ImportView: React.FC<ImportViewProps> = ({
       } else if (parseResult.type === 'nets' && parseResult.nets) {
         if (onImportNets) onImportNets(parseResult.nets);
         localStorage.setItem('bt360_nets', JSON.stringify(parseResult.nets));
+        syncToGoogleSheets({ nets: parseResult.nets }).then(r => setSheetSyncBanner({ ok: r.success, text: r.message }));
 
         const newEntry: ImportHistoryEntry = {
           id: `imp-nets-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
           type: 'nets',
-          title: `Training 10-Net Facility Matrix`,
-          details: `Net slots and stamina distribution updated`,
-          badgeText: 'Training',
+          title: `Training 10-Net Facility Matrix (${parseResult.nets.length} Slots)`,
+          details: `Net slots and player training allocations updated`,
+          badgeText: 'Nets',
           status: 'success'
         };
         setImportHistory(prev => {
@@ -1491,7 +1549,73 @@ export const ImportView: React.FC<ImportViewProps> = ({
         });
 
         setStatusMessage({
-          text: `Training nets matrix successfully updated!`,
+          text: `Training nets matrix (${parseResult.nets.length} slots) successfully updated & queued for Google Sheet!`,
+          type: 'success'
+        });
+        setRawText('');
+        setParseResult(null);
+      } else if (parseResult.type === 'playerdetails' && parseResult.singlePlayer) {
+        const p = parseResult.singlePlayer as Player;
+        const idx = squad.findIndex(ex => ex.id === p.id || ex.name.toLowerCase() === p.name.toLowerCase());
+        const updatedSquad = idx >= 0
+          ? squad.map((ex, i) => (i === idx ? { ...ex, ...p } : ex))
+          : [...squad, p];
+
+        onImportSquad(updatedSquad);
+        localStorage.setItem('bt360_squad', JSON.stringify(updatedSquad));
+        saveSquadToGoogleSheets(updatedSquad).then(r => setSheetSyncBanner({ ok: r.success, text: r.message }));
+
+        const newEntry: ImportHistoryEntry = {
+          id: `imp-pd-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          type: 'playerdetails',
+          title: `Player Details: ${p.name} (#${p.id})`,
+          details: `Age ${p.age} • BTI ${(p.bti || 0).toLocaleString()} • Bat: ${p.batting} • Bowl: ${p.bowling}`,
+          badgeText: 'Player Details',
+          status: 'success'
+        };
+        setImportHistory(prev => {
+          const updated = [newEntry, ...prev].slice(0, 5);
+          localStorage.setItem('bt360_recent_imports', JSON.stringify(updated));
+          return updated;
+        });
+
+        setStatusMessage({
+          text: `Player Details for ${p.name} (#${p.id}) merged into Squad & synced!`,
+          type: 'success'
+        });
+        setRawText('');
+        setParseResult(null);
+      } else if ((parseResult.type === 'diary' || parseResult.type === 'calendar') && parseResult.calendarEvents) {
+        const mergedCalendar = [...parseResult.calendarEvents, ...calendar].slice(0, 100);
+        if (onImportCalendar) onImportCalendar(mergedCalendar);
+        localStorage.setItem('bt360_calendar', JSON.stringify(mergedCalendar));
+
+        syncToGoogleSheets({
+          calendar: mergedCalendar,
+          trainingLogs: parseResult.trainingLogs
+        }).then(r => setSheetSyncBanner({ ok: r.success, text: r.message }));
+
+        const isDiary = parseResult.type === 'diary';
+        const newEntry: ImportHistoryEntry = {
+          id: `imp-${parseResult.type}-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          type: parseResult.type,
+          title: isDiary ? `Club Diary (${parseResult.calendarEvents.length} Entries)` : `Club Calendar (${parseResult.calendarEvents.length} Events)`,
+          details: isDiary
+            ? `${parseResult.calendarEvents.length} diary events & ${parseResult.trainingLogs?.length || 0} training pops recorded`
+            : `${parseResult.calendarEvents.length} scheduled fixtures & club milestones imported`,
+          badgeText: isDiary ? 'Diary' : 'Calendar',
+          status: 'success'
+        };
+        setImportHistory(prev => {
+          const updated = [newEntry, ...prev].slice(0, 5);
+          localStorage.setItem('bt360_recent_imports', JSON.stringify(updated));
+          return updated;
+        });
+
+        setStatusMessage({
+          text: `${isDiary ? 'Club Diary' : 'Calendar'} imported (${parseResult.calendarEvents.length} events) and synced!`,
           type: 'success'
         });
         setRawText('');
@@ -1506,10 +1630,10 @@ export const ImportView: React.FC<ImportViewProps> = ({
           localStorage.setItem('bt360_stadiumTiers', JSON.stringify(parseResult.stadiumTiers));
         }
 
-        saveClubToGoogleSheets(updatedClub).catch(err => console.warn('Google Sheets club sync notice:', err));
-        if (parseResult.stadiumTiers && parseResult.stadiumTiers.length > 0) {
-          syncToGoogleSheets({ stadium: parseResult.stadiumTiers }).catch(err => console.warn('Google Sheets stadium sync notice:', err));
-        }
+        syncToGoogleSheets({
+          club: updatedClub,
+          stadium: parseResult.stadiumTiers && parseResult.stadiumTiers.length > 0 ? parseResult.stadiumTiers : undefined
+        }).then(r => setSheetSyncBanner({ ok: r.success, text: r.message }));
 
         const newEntry: ImportHistoryEntry = {
           id: `imp-off-${Date.now()}`,
@@ -1543,55 +1667,96 @@ export const ImportView: React.FC<ImportViewProps> = ({
     }
   };
 
-  // Preset loaders for the Battrick domains
+  // Format templates for all 9 Battrick domains (clean templates, no dummy club leakage)
   const loadDomainPreset = (domain: string) => {
-    if (domain === 'squad') {
-      const sample = `Bhadraksh Hemalatha - 17 yo, ID: 6099466 | Wage: £545 | BTI: 6,989 | RHB, Right-arm Finger Spin
-Batting: abysmal | Bowling: competent | Keeping: feeble | Fielding: abysmal
-Concentration: feeble | Consistency: competent | Stamina: competent | Form: superb
-
-Nandakishor Ramdhyani - 17 yo, ID: 6099471 | Wage: £559 | BTI: 6,360 | LHB, Left-arm Medium
-Batting: competent | Bowling: mediocre | Keeping: woeful | Fielding: woeful
-Concentration: competent | Consistency: feeble | Stamina: competent | Form: mediocre`;
-      setRawText(sample);
-      parseBattrickData(sample);
+    let sample = '';
+    if (domain === 'office') {
+      sample = `Club Name (12345)\nManager: Your Name\nRegion: Your Region\nFirst Class: IV.12 | One Day: III.5 | BT20: V.18\nGround: Home Oval (Capacity: 10,000)\nBank Balance: £500,000\nFan Club: 500 members (Happy)\nYouth Academy Condition: Proficient\nIntensive Training Sessions: 25`;
+    } else if (domain === 'squad') {
+      sample = `Player One - 20 yo, ID: 1000001 | Wage: £1,200 | BTI: 12,500 | RHB, Right-arm Fast\nBatting: strong | Bowling: worthless | Keeping: worthless | Fielding: competent\nConcentration: respectable | Consistency: competent | Stamina: proficient | Form: superb`;
+    } else if (domain === 'playerdetails') {
+      sample = `Player Details (playerdetails.asp?playerID=1000001)\nPlayer One - 20 yo | Wage: £1,200 | BTI: 12,500 | Right hand batsman, Right-arm Fast\nStamina: proficient | Wicket Keeping: worthless | Batting: strong | Concentration: respectable\nBowling: worthless | Consistency: competent | Fielding: competent\nForm: superb | Fatigue: energised | Leadership: mediocre | Experience: feeble`;
     } else if (domain === 'fixtures') {
-      const sample = `Metropolitan CC v Northern Lions (32232669)
-Date: 10/11/2026 Ground: Sovereign Arena
-Pitch: Hard & Fast Crowd: 12,000
-Metropolitan CC won by 9 wickets.
-Metropolitan CC 406/2 dec
-I. Baboor not out 166 (182b 16x4 2x6)
-V. Malla not out 90 (94b 8x4 1x6)
-P. Rishi 10-2-35-3`;
-      setRawText(sample);
-      parseBattrickData(sample);
+      sample = `Your Club v Opponent XI (32000001)\nDate: 28/11/2026 Ground: Home Oval\nPitch: Hard & Fast Crowd: 8,500\nYour Club won by 6 wickets.\nYour Club 285/4\nPlayer One not out 112 (108b 11x4 2x6)\nPlayer Two 10-1-42-3`;
+    } else if (domain === 'diary') {
+      sample = `Club Diary (diary.asp)\n28/11/2026: Player One popped in Batting from respectable to strong!\n26/11/2026: Won One Day match against Opponent XI by 6 wickets.\n24/11/2026: Weekly sponsors paid £22,500.`;
+    } else if (domain === 'calendar') {
+      sample = `Club Calendar (calendar.asp)\n29/11/2026 05:00 - First Class Match vs Rival CC\n01/12/2026 05:00 - One Day League Match vs City XI\n04/12/2026 05:00 - Friday Training Pops Update`;
+    } else if (domain === 'nets') {
+      sample = `Training Sessions (nets.asp)\nNet 1: Player One - Batting\nNet 2: Player Two - Bowling\nNet 3: Player Three - Fielding\nNet 4: Unassigned - Wicket Keeping\nNet 5: Unassigned - Stamina`;
     } else if (domain === 'finances') {
-      const sample = `Account Summary
-Current Balance: 1,325,820
-Showing transactions from Season 69
-Opening Balance: 75,000 | Payments In: 1,744,048 | Payments Out: 493,228 | Profit/Loss: 1,250,820
-18 Nov 2026: Gate Receipts £5,247
-14 Nov 2026: Backroom Staff Salaries -£12,250 | Player Salaries -£7,034 | Ground Maintenance -£14,702`;
-      setRawText(sample);
-      parseBattrickData(sample);
+      sample = `Account Summary (finances.asp)\nCurrent Balance: 500,000\nGate Receipts: 45,000 | Sponsors: 22,500 | Prize Money: 15,000\nPlayer Salaries: -8,500 | Staff Salaries: -10,000 | Ground Maintenance: -12,000`;
     } else if (domain === 'ground') {
-      const sample = `Metropolitan CC - Sovereign Arena
-Groundsman: Chief Curator
-Capacity: 12000
-Standing Room: 6330
-Uncovered Seats: 3924
-Covered Seats: 1320
-Members Seats: 426`;
+      sample = `Home Oval (ground.asp)\nGroundsman: Head Curator\nCapacity: 10000\nStanding Room: 6800\nUncovered Seats: 2300\nCovered Seats: 700\nMembers Seats: 200`;
+    }
+    if (sample) {
       setRawText(sample);
       parseBattrickData(sample);
-    } else if (domain === 'office') {
-      const sample = `Youth Academy Condition: Masterful
-Intensive Training Sessions: 35
-Club Members: 500
-Coach Quality: Competent`;
-      setRawText(sample);
-      parseBattrickData(sample);
+    }
+  };
+
+  const handleTestSheetConnection = async () => {
+    setIsTestingSheet(true);
+    setSheetConnStatus(null);
+    setAppsScriptUrl(sheetUrlInput);
+    const res = await pingGoogleSheets();
+    setSheetConnStatus(res);
+    setIsTestingSheet(false);
+  };
+
+  const handlePushAllToSheet = async () => {
+    setIsSyncing(true);
+    setAppsScriptUrl(sheetUrlInput);
+    const res = await syncToGoogleSheets({
+      club,
+      squad,
+      matches,
+      records,
+      finances,
+      stadium: stadiumTiers,
+      nets,
+      staff,
+      calendar
+    });
+    setSheetSyncBanner({ ok: res.success, text: res.message });
+    setSheetConnStatus({ ok: res.success, message: res.message });
+    setIsSyncing(false);
+  };
+
+  const handlePullFromSheet = async () => {
+    setIsTestingSheet(true);
+    setAppsScriptUrl(sheetUrlInput);
+    const res = await fetchAllFromGoogleSheets();
+    if (res.success && res.data) {
+      if (res.data.club && res.data.club.club_name) {
+        onImportClub({ ...club, ...res.data.club, name: res.data.club.club_name, id: String(res.data.club.club_id || club.id) });
+      }
+      setSheetConnStatus({ ok: true, message: `Pulled live data from Google Sheet (${res.data.squad?.length || 0} squad rows, ${res.data.matches?.length || 0} matches).` });
+    } else {
+      setSheetConnStatus({ ok: false, message: res.error || 'Failed to pull from Google Sheet.' });
+    }
+    setIsTestingSheet(false);
+  };
+
+  const handleJsonRestoreFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (data.club) onImportClub(data.club);
+      if (Array.isArray(data.squad)) onImportSquad(data.squad);
+      if (Array.isArray(data.matches) && onImportMatches) onImportMatches(data.matches);
+      if (Array.isArray(data.records) && onImportRecords) onImportRecords(data.records);
+      setStatusMessage({ text: `Restored JSON snapshot from ${file.name}!`, type: 'success' });
+      syncToGoogleSheets({
+        club: data.club,
+        squad: data.squad,
+        matches: data.matches,
+        records: data.records
+      }).then(r => setSheetSyncBanner({ ok: r.success, text: r.message }));
+    } catch (err: any) {
+      setStatusMessage({ text: `Invalid JSON backup file: ${err.message}`, type: 'error' });
     }
   };
 
@@ -1626,17 +1791,30 @@ Coach Quality: Competent`;
               <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-700">
                 <Sparkles className="w-4 h-4 text-emerald-600" />
                 <span>Universal Multi-Domain Battrick Ingestion Hub</span>
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-black border ${isGoogleSheetsConfigured() ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'}`}>
+                  {isGoogleSheetsConfigured() ? 'Google Sheet Sync Ready' : 'Local Mode'}
+                </span>
               </div>
               <h2 className="text-2xl font-black text-slate-900 mt-1">
-                Import from Battrick Club (#{club.id || '13108'})
+                Import from Battrick Club {club.id && club.id !== 'Unassigned' ? `(#${club.id})` : ''}
               </h2>
               <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
-                Import and sync your authentic matches, scorecards, squad roster, and ground records. Choose <span className="font-bold text-emerald-800">Bulk Multi-File Upload</span> to ingest 50+ HTML files at once, or use <span className="font-bold text-slate-800">Single Paste</span>. Links match primarily by <span className="font-bold text-emerald-700">permanent IDs</span> so renamed clubs or stadiums never cause confusion!
+                Import and sync your <span className="font-bold text-emerald-800">Pavilion, Squad, Player Details, Match Scorecards, Diary, Calendar, Nets, Finances &amp; Ground</span> directly into BT360MAK and your live Google Sheet.
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
+            {/* Quick Push All to Google Sheet */}
+            <button
+              onClick={handlePushAllToSheet}
+              disabled={isSyncing}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
+              title="Push all current club, squad, match, net, and calendar data to Google Sheet"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span>Sync to Google Sheet</span>
+            </button>
             {/* 100% Fresh Start Button */}
             <button
               onClick={() => setShowResetModal(true)}
@@ -1669,6 +1847,21 @@ Coach Quality: Competent`;
           }`}>
             <span>{statusMessage.text}</span>
             <button onClick={() => setStatusMessage(null)} className="text-slate-400 hover:text-slate-800 ml-2">&times;</button>
+          </div>
+        )}
+
+        {/* Live Google Sheet Sync Status Banner */}
+        {sheetSyncBanner && (
+          <div className={`mt-3 p-3 rounded-xl border text-xs font-semibold flex items-center justify-between shadow-xs ${
+            sheetSyncBanner.ok
+              ? 'bg-emerald-50/90 border-emerald-300 text-emerald-900'
+              : 'bg-amber-50/90 border-amber-300 text-amber-900'
+          }`}>
+            <div className="flex items-center gap-2">
+              <Table className={`w-4 h-4 shrink-0 ${sheetSyncBanner.ok ? 'text-emerald-600' : 'text-amber-600'}`} />
+              <span>{sheetSyncBanner.text}</span>
+            </div>
+            <button onClick={() => setSheetSyncBanner(null)} className="text-slate-400 hover:text-slate-800 ml-2">&times;</button>
           </div>
         )}
       </div>
@@ -2342,14 +2535,18 @@ Coach Quality: Competent`;
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-[10px] uppercase font-bold text-slate-500 mr-1 flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>Quick Preset Samples:</span>
+                <span>All 9 Battrick Domains:</span>
               </span>
               {[
-                { id: 'squad', label: 'Squad (squad.asp)', icon: Users },
-                { id: 'fixtures', label: 'Scorecard (matchinfofc.asp)', icon: Trophy },
-                { id: 'finances', label: 'Finances (finances.asp)', icon: DollarSign },
-                { id: 'ground', label: 'Ground (ground.asp)', icon: Building },
-                { id: 'office', label: 'Office (office.asp)', icon: Building }
+                { id: 'office', label: 'Pavilion', icon: Building },
+                { id: 'squad', label: 'Squad', icon: Users },
+                { id: 'playerdetails', label: 'Player Details', icon: Users },
+                { id: 'fixtures', label: 'Scorecard', icon: Trophy },
+                { id: 'diary', label: 'Diary', icon: History },
+                { id: 'calendar', label: 'Calendar', icon: Calendar },
+                { id: 'nets', label: 'Nets', icon: Play },
+                { id: 'finances', label: 'Finances', icon: DollarSign },
+                { id: 'ground', label: 'Ground', icon: Building }
               ].map(item => {
                 const Icon = item.icon;
                 return (
@@ -2452,7 +2649,7 @@ The engine automatically detects Match Scorecards (FC, OD, BT20), Squad Rosters,
 
             <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
               <span>{rawText ? `${rawText.length.toLocaleString()} characters loaded` : 'Ready for input'}</span>
-              <span>Supported pages: <code className="text-emerald-700 font-mono">matchinfofc.asp</code>, <code className="text-emerald-700 font-mono">matchinfo.asp</code>, <code className="text-emerald-700 font-mono">squad.asp</code>, <code className="text-emerald-700 font-mono">finances.asp</code>, <code className="text-emerald-700 font-mono">ground.asp</code></span>
+              <span>Supported: <code className="text-emerald-700 font-mono">default.asp</code> (Pavilion), <code className="text-emerald-700 font-mono">squad.asp</code>, <code className="text-emerald-700 font-mono">playerdetails.asp</code>, <code className="text-emerald-700 font-mono">matchinfofc.asp</code>, <code className="text-emerald-700 font-mono">diary.asp</code>, <code className="text-emerald-700 font-mono">calendar.asp</code>, <code className="text-emerald-700 font-mono">nets.asp</code>, <code className="text-emerald-700 font-mono">finances.asp</code>, <code className="text-emerald-700 font-mono">ground.asp</code></span>
             </div>
           </div>
 
@@ -2617,73 +2814,212 @@ The engine automatically detects Match Scorecards (FC, OD, BT20), Squad Rosters,
                   </div>
                 </div>
               )}
+
+              {/* Player Details Preview */}
+              {parseResult.type === 'playerdetails' && parseResult.singlePlayer && (
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+                  <div className="p-2 bg-white rounded-lg border border-slate-200">
+                    <div className="text-[10px] text-slate-400">Player</div>
+                    <div className="font-black text-slate-900">{parseResult.singlePlayer.name} (#{parseResult.singlePlayer.id})</div>
+                  </div>
+                  <div className="p-2 bg-white rounded-lg border border-slate-200">
+                    <div className="text-[10px] text-slate-400">Age / BTI</div>
+                    <div className="font-bold text-emerald-700">{parseResult.singlePlayer.age} yo • {(parseResult.singlePlayer.bti || 0).toLocaleString()}</div>
+                  </div>
+                  <div className="p-2 bg-white rounded-lg border border-slate-200">
+                    <div className="text-[10px] text-slate-400">Bat / Bowl</div>
+                    <div className="font-bold text-slate-800 capitalize">{parseResult.singlePlayer.batting} / {parseResult.singlePlayer.bowling}</div>
+                  </div>
+                  <div className="p-2 bg-white rounded-lg border border-slate-200">
+                    <div className="text-[10px] text-slate-400">Lead / Exp</div>
+                    <div className="font-bold text-slate-800 capitalize">{parseResult.singlePlayer.leadership} / {parseResult.singlePlayer.experience}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Nets Preview */}
+              {parseResult.type === 'nets' && parseResult.nets && (
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+                  {parseResult.nets.map(n => (
+                    <div key={n.net_number} className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
+                      <span className="font-black text-emerald-800">Net #{n.net_number}</span>
+                      <span className="font-bold text-slate-800">{n.player_name || 'Unassigned'}</span>
+                      <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px]">{n.training_type}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Diary / Calendar Preview */}
+              {(parseResult.type === 'diary' || parseResult.type === 'calendar') && parseResult.calendarEvents && (
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs max-h-52 overflow-y-auto">
+                  {parseResult.calendarEvents.slice(0, 8).map((ev, i) => (
+                    <div key={ev.id || i} className="p-2 bg-white rounded-lg border border-slate-200 flex items-center justify-between gap-2">
+                      <span className="font-mono font-bold text-emerald-700 shrink-0">{ev.date}</span>
+                      <span className="text-slate-800 font-semibold truncate flex-1">{ev.title}</span>
+                      <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-mono shrink-0">{ev.type}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
 
-      {/* TAB 3: Domain Quick Presets */}
+      {/* TAB 4: All 9 Battrick Domain Presets & Templates */}
       {activeImportTab === 'domains' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            { id: 'squad', title: 'Squad Roster', file: 'squad.asp', desc: 'All 14 players, 11 skills, wages, BTI, and tactical roles.' },
-            { id: 'fixtures', title: 'Match Scorecards', file: 'matchinfofc.asp', desc: 'Real First Class, OD, and BT20 scorecards to recalculate career stats.' },
-            { id: 'finances', title: 'Finances & Ledger', file: 'finances.asp', desc: 'Current balance (£1,325,820), gate receipts, staff & player wages.' },
-            { id: 'ground', title: 'Ground & Stadium', file: 'ground.asp', desc: 'Stadium capacity, seating tiers distribution, and pitch condition.' },
-            { id: 'office', title: 'Club Headquarters', file: 'office.asp', desc: 'League standings, ITS points, fan club morale, and youth academy.' }
+            { id: 'office', title: 'Pavilion & Club Office', file: 'default.asp / office.asp', desc: 'Club name, ID, manager, divisions (FC/OD/BT20), ITS reserve, fan mood, and stadium.' },
+            { id: 'squad', title: 'Squad Roster', file: 'squad.asp', desc: 'Full squad roster, numeric player IDs, 11 skills, wages, BTI, and tactical roles.' },
+            { id: 'playerdetails', title: 'Player Details', file: 'playerdetails.asp', desc: 'Individual player page with Leadership, Experience, Fatigue, Subskills, and Career Stats.' },
+            { id: 'fixtures', title: 'Match Scorecards', file: 'matchinfofc.asp / matchinfo.asp', desc: 'Real First Class, One Day, BT20, and Friendly scorecards to compute career stats.' },
+            { id: 'diary', title: 'Club Diary', file: 'diary.asp', desc: 'Dated club diary entries, Friday training skill pops, match logs, and youth academy events.' },
+            { id: 'calendar', title: 'Calendar & Fixtures', file: 'calendar.asp / fixtures.asp', desc: 'Upcoming league, cup & friendly matches, training updates, and financial dates.' },
+            { id: 'nets', title: 'Training Nets Matrix', file: 'nets.asp', desc: '10-net player assignments, primary/secondary training skills, and coach multipliers.' },
+            { id: 'finances', title: 'Finances & Ledger', file: 'finances.asp', desc: 'Current bank balance, gate receipts, sponsors, prize money, staff & player wages.' },
+            { id: 'ground', title: 'Ground & Stadium', file: 'ground.asp', desc: 'Stadium capacity, 4 seating tiers distribution, groundsman, and pitch condition.' }
           ].map(d => (
-            <div key={d.id} className="sovereign-card p-5 rounded-2xl border-slate-200 space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-black text-slate-900">{d.title}</h4>
-                <code className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-emerald-700 border border-slate-200 font-mono">{d.file}</code>
+            <div key={d.id} className="sovereign-card p-5 rounded-2xl border-slate-200 hover:border-emerald-300 transition-all space-y-3 flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="text-sm font-black text-slate-900">{d.title}</h4>
+                  <code className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-emerald-700 border border-slate-200 font-mono shrink-0">{d.file}</code>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">{d.desc}</p>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">{d.desc}</p>
-              <button
-                onClick={() => {
-                  setActiveImportTab('paste');
-                  loadDomainPreset(d.id);
-                }}
-                className="w-full py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs transition-all cursor-pointer shadow-sm"
-              >
-                Load {d.title} Sample &rarr;
-              </button>
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  onClick={() => {
+                    setSelectedDomain(d.id as any);
+                    setActiveImportTab('paste');
+                    setRawText('');
+                    setParseResult(null);
+                  }}
+                  className="flex-1 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs transition-all cursor-pointer shadow-sm"
+                >
+                  Paste &amp; Import &rarr;
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedDomain(d.id as any);
+                    setActiveImportTab('paste');
+                    loadDomainPreset(d.id);
+                  }}
+                  className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold text-xs transition-all cursor-pointer"
+                  title="Load format template"
+                >
+                  Template
+                </button>
+              </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* TAB 4: Google Sheet Sync */}
+      {/* TAB 5: Lively Google Sheet Cloud Connector */}
       {activeImportTab === 'sheet' && (
-        <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-4">
-          <div className="flex items-center gap-3">
-            <Table className="w-6 h-6 text-emerald-600" />
-            <div>
-              <h3 className="text-base font-black text-slate-900">Google Sheet & Apps Script Cloud Connector</h3>
-              <p className="text-xs text-slate-600">
-                Synchronize directly with your Master Google Sheet (ID: <code className="text-emerald-700 font-mono">1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E</code>)
-              </p>
+        <div className="sovereign-card p-6 rounded-2xl border-emerald-300 shadow-md space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <Table className="w-6 h-6 text-emerald-700" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900">Lively Google Sheet &amp; Apps Script Connector</h3>
+                <p className="text-xs text-slate-600">
+                  Master Sheet ID: <code className="text-emerald-800 font-mono font-bold">1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E</code>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <a
+                href={GOOGLE_SHEET_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-sm transition-all"
+              >
+                Open Google Sheet &nearr;
+              </a>
+              <a
+                href={APPS_SCRIPT_EDITOR_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs shadow-sm transition-all"
+              >
+                Open Apps Script &nearr;
+              </a>
             </div>
           </div>
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
-            <div className="text-emerald-700 font-bold">Connected Google Apps Script Web App:</div>
-            <code className="block p-2 rounded bg-white text-slate-700 font-mono text-[11px] break-all border border-slate-200">
-              https://script.google.com/macros/s/AKfycby_56P0m_Mij_N-zz0K44NntJNyts_8bUtl1VoPZQhlSnUFsCOq-lh33A3B9b9npmA/exec
-            </code>
+
+          <div className="space-y-2">
+            <label className="text-xs font-black text-slate-800 uppercase tracking-wider">
+              Google Apps Script Web App Endpoint
+            </label>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="url"
+                value={sheetUrlInput}
+                onChange={(e) => setSheetUrlInput(e.target.value)}
+                placeholder="https://script.google.com/macros/s/.../exec"
+                className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50 font-mono text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              <button
+                onClick={handleTestSheetConnection}
+                disabled={isTestingSheet}
+                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all cursor-pointer disabled:opacity-50 shrink-0"
+              >
+                {isTestingSheet ? 'Testing...' : 'Save & Test Connection'}
+              </button>
+            </div>
+          </div>
+
+          {sheetConnStatus && (
+            <div className={`p-3.5 rounded-xl border text-xs font-semibold flex items-start gap-2 ${
+              sheetConnStatus.ok
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                : 'bg-amber-50 border-amber-300 text-amber-900'
+            }`}>
+              {sheetConnStatus.ok ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" /> : <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />}
+              <span>{sheetConnStatus.message}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <button
+              onClick={handlePushAllToSheet}
+              disabled={isSyncing}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span>Push All Live State to Google Sheet ({squad.length} Players, {matches.length} Matches, {calendar.length} Events)</span>
+            </button>
+
+            <button
+              onClick={handlePullFromSheet}
+              disabled={isTestingSheet}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-black text-xs shadow-xs transition-all cursor-pointer disabled:opacity-50"
+            >
+              <Download className="w-4 h-4 text-emerald-700" />
+              <span>Pull Latest Data from Google Sheet</span>
+            </button>
           </div>
         </div>
       )}
 
-      {/* TAB 5: JSON Backup & Restore */}
+      {/* TAB 6: JSON Backup & Restore */}
       {activeImportTab === 'json' && (
         <div className="sovereign-card p-6 rounded-2xl border-slate-200 shadow-md space-y-4">
           <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
             <Upload className="w-5 h-5 text-emerald-600" />
-            <span>Full JSON Backup & Snapshot Restore</span>
+            <span>Full JSON Backup &amp; Snapshot Restore</span>
           </h3>
           <p className="text-xs text-slate-600 leading-relaxed">
-            Download a complete offline snapshot of all club records, or restore from a previous backup file.
+            Download a complete offline snapshot of all club records, or restore from a previous JSON backup file and sync directly to Google Sheet.
           </p>
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               onClick={handleDownloadBackup}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
@@ -2691,6 +3027,12 @@ The engine automatically detects Match Scorecards (FC, OD, BT20), Squad Rosters,
               <Download className="w-4 h-4" />
               <span>Download Full Backup JSON</span>
             </button>
+
+            <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold text-xs shadow-xs transition-all cursor-pointer">
+              <Upload className="w-4 h-4 text-emerald-700" />
+              <span>Restore from JSON File</span>
+              <input type="file" accept=".json" onChange={handleJsonRestoreFile} className="hidden" />
+            </label>
           </div>
         </div>
       )}
