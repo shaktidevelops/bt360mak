@@ -35,7 +35,8 @@ import {
   Layers,
   CheckCircle,
   AlertCircle,
-  Zap
+  Zap,
+  Clipboard
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { 
@@ -243,12 +244,13 @@ export const ImportView: React.FC<ImportViewProps> = ({
   onImportStadium,
   onImportNets
 }) => {
-  // Tabs: Support Bulk, 1-Click Bookmarklet, Single Paste, Domains, Sheet, and JSON
-  const [activeImportTab, setActiveImportTab] = useState<'bulk' | 'bookmarklet' | 'paste' | 'domains' | 'sheet' | 'json'>('bulk');
+  // Tabs: Single Paste (Default), Bulk Multi-File, 1-Click Browser Button, Domain Presets, Sheet, and JSON
+  const [activeImportTab, setActiveImportTab] = useState<'paste' | 'bulk' | 'bookmarklet' | 'domains' | 'sheet' | 'json'>('paste');
   const [selectedDomain, setSelectedDomain] = useState<'squad' | 'finances' | 'ground' | 'fixtures' | 'nets' | 'office' | 'diary'>('squad');
   const [formatOverride, setFormatOverride] = useState<'auto' | 'First Class' | 'One Day' | 'BT20'>('auto');
   const [matchesFilter, setMatchesFilter] = useState<string>('ALL');
   const [rawText, setRawText] = useState('');
+  const [isClipboardPasting, setIsClipboardPasting] = useState(false);
   const [parseResult, setParseResult] = useState<{
     type: 'squad' | 'office' | 'finances' | 'ground' | 'fixtures' | 'nets' | 'diary' | 'unknown';
     count: number;
@@ -349,6 +351,55 @@ export const ImportView: React.FC<ImportViewProps> = ({
     window.addEventListener('bt360:bookmarklet-import', handleBookmarkletImport);
     return () => window.removeEventListener('bt360:bookmarklet-import', handleBookmarkletImport);
   }, []);
+
+  // 1-Click Clipboard Reader
+  const handlePasteFromClipboard = async () => {
+    try {
+      setIsClipboardPasting(true);
+      const text = await navigator.clipboard.readText();
+      if (!text || !text.trim()) {
+        setStatusMessage({
+          text: 'Clipboard is empty or does not contain text. Copy from Battrick first (Ctrl+A, Ctrl+C), then click here!',
+          type: 'error'
+        });
+        return;
+      }
+      setRawText(text);
+      parseBattrickData(text);
+      setStatusMessage({
+        text: 'Clipboard content loaded and auto-parsed! Review the detected domain below and click "Apply & Synchronize".',
+        type: 'success'
+      });
+    } catch (err: any) {
+      setStatusMessage({
+        text: `Clipboard read permission denied: ${err.message}. Please click inside the box and press Ctrl+V.`,
+        type: 'error'
+      });
+    } finally {
+      setIsClipboardPasting(false);
+    }
+  };
+
+  // Drop Single HTML/TXT file directly onto textarea
+  const handleSingleTextareaDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        if (content) {
+          setRawText(content);
+          parseBattrickData(content);
+          setStatusMessage({
+            text: `File "${file.name}" loaded and parsed successfully!`,
+            type: 'success'
+          });
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
 
   // Ingestion History state (persisted in localStorage)
   const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>(() => {
@@ -1526,6 +1577,21 @@ Coach Quality: Competent`;
       {/* Import Method Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
         <button
+          onClick={() => setActiveImportTab('paste')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            activeImportTab === 'paste'
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+          }`}
+        >
+          <FileText className="w-4 h-4" />
+          <span>Single Copy-Paste (Direct Input & Clipboard)</span>
+          <span className="bg-emerald-100 text-emerald-950 text-[10px] font-black px-1.5 py-0.2 rounded-md uppercase tracking-wider">
+            PRIMARY
+          </span>
+        </button>
+
+        <button
           onClick={() => setActiveImportTab('bulk')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
             activeImportTab === 'bulk'
@@ -1535,9 +1601,6 @@ Coach Quality: Competent`;
         >
           <FolderUp className="w-4 h-4" />
           <span>Bulk Multi-File Upload (.html / .htm / .txt)</span>
-          <span className="bg-amber-400 text-slate-900 text-[10px] font-black px-1.5 py-0.2 rounded-md uppercase tracking-wider">
-            RECOMMENDED
-          </span>
         </button>
 
         <button
@@ -1548,20 +1611,8 @@ Coach Quality: Competent`;
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
-          <Sparkles className="w-4 h-4 text-amber-400" />
+          <Zap className="w-4 h-4 text-amber-400" />
           <span>1-Click Browser Button</span>
-        </button>
-
-        <button
-          onClick={() => setActiveImportTab('paste')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-            activeImportTab === 'paste'
-              ? 'bg-emerald-600 text-white shadow-md'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          <FileText className="w-4 h-4" />
-          <span>Single Paste (Scorecards & Squad)</span>
         </button>
 
         <button
@@ -1985,7 +2036,7 @@ Coach Quality: Competent`;
         </div>
       )}
 
-      {/* TAB 2: 1-Click Browser Bookmarklet & Extension */}
+      {/* TAB 3: 1-Click Browser Bookmarklet & Extension */}
       {activeImportTab === 'bookmarklet' && (
         <div className="space-y-6">
           <div className="sovereign-card p-6 rounded-2xl border-emerald-500/40 shadow-xl space-y-4">
@@ -1999,7 +2050,7 @@ Coach Quality: Competent`;
                     1-Click Browser Button for Battrick
                   </h3>
                   <p className="text-xs text-slate-600 mt-0.5">
-                    No copying, no pasting, no saving files. Click one button in your browser on any Battrick page to import instantly!
+                    No manual copying or file downloading! Click one button in your browser on any Battrick page to capture data instantly.
                   </p>
                 </div>
               </div>
@@ -2038,7 +2089,7 @@ Coach Quality: Competent`;
 
               <div>
                 <a
-                  href={`javascript:(function(){try{var h=document.documentElement.outerHTML;var u=window.location.href;var t='${bookmarkletTarget === 'local' ? (typeof window !== 'undefined' ? window.location.origin + '/' : 'http://localhost:5173/') : 'https://shaktidevelops.github.io/bt360mak/'}';var w=window.open(t+'?source=bookmarklet','bt360_importer');if(w){window.addEventListener('message',function hdl(e){if(e.data==='BT360_READY'){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');window.removeEventListener('message',hdl);}});setTimeout(function(){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');},1500);}if(navigator.clipboard){navigator.clipboard.writeText(h).catch(function(){});}}catch(err){alert('BT360 Bookmarklet: '+err.message);}})();`}
+                  href={`javascript:(function(){try{var h=document.documentElement.outerHTML;var u=window.location.href;var t='${bookmarkletTarget === 'local' ? (typeof window !== 'undefined' ? window.location.origin + '/' : 'http://localhost:5173/') : 'https://shaktidevelops.github.io/bt360mak/'}';try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(h).catch(function(){});}}catch(e){}try{var ta=document.createElement('textarea');ta.value=h;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}catch(e){}var b=document.getElementById('bt360-toast');if(b)b.remove();b=document.createElement('div');b.id='bt360-toast';b.style.cssText='position:fixed;top:16px;right:16px;z-index:99999999;background:#064e3b;color:#ecfdf5;padding:16px 20px;border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.45);border:2px solid #34d399;font-family:sans-serif;font-size:13px;max-width:360px;line-height:1.4;';b.innerHTML='<div style=\"display:flex;align-items:center;gap:8px;font-weight:900;font-size:14px;color:#a7f3d0;margin-bottom:4px;\"><span style=\"background:#10b981;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;\">✓</span>BT360: Captured!</div><div>Page copied to clipboard. Opening BT360...<br/><span style=\"font-size:11px;color:#93c5fd;\">(If popup was blocked, switch to BT360 tab and click <b>Paste from Clipboard</b>)</span></div>';document.body.appendChild(b);setTimeout(function(){if(b&&b.parentNode)b.parentNode.removeChild(b);},6000);var w=window.open(t+'?source=bookmarklet','bt360_importer');if(w){window.addEventListener('message',function hdl(e){if(e.data==='BT360_READY'){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');window.removeEventListener('message',hdl);}});[300,800,1600,2500].forEach(function(d){setTimeout(function(){try{w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');}catch(e){}},d);});}}catch(err){alert('BT360: '+err.message);}})();`}
                   onClick={(e) => {
                     e.preventDefault();
                     alert("Note: Drag this button up into your browser's Bookmarks Bar (press Ctrl+Shift+B if bookmarks bar is hidden). Then click it when viewing any Battrick page!");
@@ -2046,12 +2097,12 @@ Coach Quality: Competent`;
                   className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-800 hover:to-teal-900 text-white font-black text-base shadow-lg cursor-grab transition-all hover:scale-105 select-none border border-emerald-500"
                   title="Drag this button to your Bookmarks Toolbar"
                 >
-                  <Download className="w-5 h-5 text-amber-300" />
+                  <Zap className="w-5 h-5 text-amber-300" />
                   <span>Send to BT360</span>
                 </a>
               </div>
 
-              <p className="text-xs text-slate-600 max-w-lg mx-auto">
+              <p className="text-xs text-slate-600 max-w-lg mx-auto leading-relaxed">
                 Press <kbd className="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-mono font-bold shadow-2xs">Ctrl + Shift + B</kbd> (or <kbd className="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-mono font-bold shadow-2xs">Cmd + Shift + B</kbd> on Mac) to show your browser Bookmarks bar, then drag the button above into it.
               </p>
 
@@ -2059,7 +2110,7 @@ Coach Quality: Competent`;
                 <button
                   onClick={() => {
                     const tUrl = bookmarkletTarget === 'local' ? (typeof window !== 'undefined' ? window.location.origin + '/' : 'http://localhost:5173/') : 'https://shaktidevelops.github.io/bt360mak/';
-                    const code = `javascript:(function(){try{var h=document.documentElement.outerHTML;var u=window.location.href;var t='${tUrl}';var w=window.open(t+'?source=bookmarklet','bt360_importer');if(w){window.addEventListener('message',function hdl(e){if(e.data==='BT360_READY'){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');window.removeEventListener('message',hdl);}});setTimeout(function(){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');},1500);}if(navigator.clipboard){navigator.clipboard.writeText(h).catch(function(){});}}catch(err){alert('BT360 Bookmarklet: '+err.message);}})();`;
+                    const code = `javascript:(function(){try{var h=document.documentElement.outerHTML;var u=window.location.href;var t='${tUrl}';try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(h).catch(function(){});}}catch(e){}try{var ta=document.createElement('textarea');ta.value=h;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}catch(e){}var b=document.getElementById('bt360-toast');if(b)b.remove();b=document.createElement('div');b.id='bt360-toast';b.style.cssText='position:fixed;top:16px;right:16px;z-index:99999999;background:#064e3b;color:#ecfdf5;padding:16px 20px;border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.45);border:2px solid #34d399;font-family:sans-serif;font-size:13px;max-width:360px;line-height:1.4;';b.innerHTML='<div style=\"display:flex;align-items:center;gap:8px;font-weight:900;font-size:14px;color:#a7f3d0;margin-bottom:4px;\"><span style=\"background:#10b981;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;\">✓</span>BT360: Captured!</div><div>Page copied to clipboard. Opening BT360...<br/><span style=\"font-size:11px;color:#93c5fd;\">(If popup was blocked, switch to BT360 tab and click <b>Paste from Clipboard</b>)</span></div>';document.body.appendChild(b);setTimeout(function(){if(b&&b.parentNode)b.parentNode.removeChild(b);},6000);var w=window.open(t+'?source=bookmarklet','bt360_importer');if(w){window.addEventListener('message',function hdl(e){if(e.data==='BT360_READY'){w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');window.removeEventListener('message',hdl);}});[300,800,1600,2500].forEach(function(d){setTimeout(function(){try{w.postMessage({type:'BT360_ONE_CLICK_IMPORT',html:h,url:u},'*');}catch(e){}},d);});}}catch(err){alert('BT360: '+err.message);}})();`;
                     navigator.clipboard.writeText(code);
                     setCopiedBookmarklet(true);
                     setTimeout(() => setCopiedBookmarklet(false), 2500);
@@ -2114,13 +2165,13 @@ Coach Quality: Competent`;
                     <span>Power Option: Tampermonkey / Greasemonkey Userscript</span>
                   </h4>
                   <p className="text-[11px] text-slate-500">
-                    Injects a floating "Send to BT360" button directly onto the Battrick website pages.
+                    Injects a permanent floating "Send to BT360" button directly onto the Battrick website pages.
                   </p>
                 </div>
                 <button
                   onClick={() => {
                     const tUrl = bookmarkletTarget === 'local' ? (typeof window !== 'undefined' ? window.location.origin + '/' : 'http://localhost:5173/') : 'https://shaktidevelops.github.io/bt360mak/';
-                    const script = `// ==UserScript==\n// @name         BT360MAK Battrick 1-Click Importer\n// @namespace    https://shaktidevelops.github.io/bt360mak/\n// @version      1.0\n// @description  Adds 1-click button to send match scorecards & squad data directly to BT360MAK\n// @match        *://*.battrick.org/*\n// @grant        none\n// ==/UserScript==\n(function(){\n  'use strict';\n  const btn = document.createElement('button');\n  btn.innerHTML = 'Send to BT360';\n  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:999999;background:#059669;color:#fff;padding:12px 18px;border-radius:12px;font-weight:900;font-size:13px;border:2px solid #34d399;box-shadow:0 8px 24px rgba(0,0,0,0.3);cursor:pointer;font-family:sans-serif;';\n  btn.onclick = function() {\n    const html = document.documentElement.outerHTML;\n    const target = '${tUrl}';\n    const win = window.open(target + '?source=userscript', 'bt360_importer');\n    if (win) {\n      setTimeout(() => {\n        win.postMessage({ type: 'BT360_ONE_CLICK_IMPORT', html: html, url: location.href }, '*');\n      }, 1500);\n    }\n  };\n  document.body.appendChild(btn);\n})();`;
+                    const script = `// ==UserScript==\n// @name         BT360MAK Battrick 1-Click Importer\n// @namespace    https://shaktidevelops.github.io/bt360mak/\n// @version      2.0\n// @description  Adds 1-click button to send match scorecards & squad data directly to BT360MAK\n// @match        *://*.battrick.org/*\n// @grant        none\n// ==/UserScript==\n(function(){\n  'use strict';\n  if (document.getElementById('bt360-send-btn')) return;\n  const btn = document.createElement('button');\n  btn.id = 'bt360-send-btn';\n  btn.innerHTML = '⚡ Send to BT360';\n  btn.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999999;background:linear-gradient(135deg,#059669,#047857);color:#fff;padding:12px 20px;border-radius:14px;font-weight:900;font-size:13px;border:2px solid #34d399;box-shadow:0 10px 25px rgba(0,0,0,0.35);cursor:pointer;font-family:sans-serif;letter-spacing:0.5px;';\n  btn.onclick = function() {\n    const html = document.documentElement.outerHTML;\n    const url = location.href;\n    try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(html); } catch(e) {}\n    btn.innerHTML = '✓ Captured!';\n    setTimeout(() => { btn.innerHTML = '⚡ Send to BT360'; }, 3000);\n    const target = '${tUrl}';\n    const win = window.open(target + '?source=userscript', 'bt360_importer');\n    if (win) {\n      [400, 1000, 2000].forEach(delay => {\n        setTimeout(() => {\n          win.postMessage({ type: 'BT360_ONE_CLICK_IMPORT', html: html, url: url }, '*');\n        }, delay);\n      });\n    }\n  };\n  document.body.appendChild(btn);\n})();`;
                     navigator.clipboard.writeText(script);
                     setCopiedUserscript(true);
                     setTimeout(() => setCopiedUserscript(false), 2500);
@@ -2135,141 +2186,80 @@ Coach Quality: Competent`;
         </div>
       )}
 
-      {/* TAB 2: Smart Text / HTML Paste (Single Match or Squad) */}
+      {/* TAB 1: Smart Text / HTML Paste (Single Match or Squad) - PRIMARY */}
       {activeImportTab === 'paste' && (
         <div className="space-y-4">
           {/* DOMAIN QUICK SELECTOR BAR */}
-          <div className="flex flex-wrap items-center gap-2 p-3 bg-white rounded-xl border border-slate-200 text-xs shadow-xs">
-            <span className="text-[10px] uppercase font-bold text-slate-500 mr-2 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Quick Select:</span>
-            </span>
-            {[
-              { id: 'squad', label: 'Squad (squad.asp)', icon: Users },
-              { id: 'fixtures', label: 'Scorecard (matchinfofc.asp)', icon: Trophy },
-              { id: 'finances', label: 'Finances (finances.asp)', icon: DollarSign },
-              { id: 'ground', label: 'Ground (ground.asp)', icon: Building },
-              { id: 'office', label: 'Office (office.asp)', icon: Building }
-            ].map(item => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setSelectedDomain(item.id as any);
-                    loadDomainPreset(item.id);
-                  }}
-                  className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer shadow-xs flex items-center gap-1.5 ${
-                    selectedDomain === item.id 
-                      ? 'btn-cricket-emerald text-white border-emerald-600 font-black shadow-sm' 
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* RECENT INGESTION ACTIVITY (LAST 5 IMPORTS) */}
-          <div className="sovereign-card p-5 rounded-2xl border-emerald-500/30 shadow-md space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-200">
-              <div className="flex items-center gap-2">
-                <History className="w-4 h-4 text-emerald-600" />
-                <h3 className="text-sm font-black text-slate-900">
-                  Recent Ingestion Activity (Last 5 Imports)
-                </h3>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">
-                  {importHistory.length} Logged
-                </span>
-              </div>
-
-              {importHistory.length > 0 && (
-                <button
-                  onClick={() => {
-                    setImportHistory([]);
-                    localStorage.removeItem('bt360_recent_imports');
-                  }}
-                  className="text-[11px] text-slate-500 hover:text-rose-600 flex items-center gap-1 font-bold transition-colors cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Clear Ingestion History</span>
-                </button>
-              )}
+          <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-white rounded-xl border border-slate-200 text-xs shadow-xs">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[10px] uppercase font-bold text-slate-500 mr-1 flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Quick Preset Samples:</span>
+              </span>
+              {[
+                { id: 'squad', label: 'Squad (squad.asp)', icon: Users },
+                { id: 'fixtures', label: 'Scorecard (matchinfofc.asp)', icon: Trophy },
+                { id: 'finances', label: 'Finances (finances.asp)', icon: DollarSign },
+                { id: 'ground', label: 'Ground (ground.asp)', icon: Building },
+                { id: 'office', label: 'Office (office.asp)', icon: Building }
+              ].map(item => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setSelectedDomain(item.id as any);
+                      loadDomainPreset(item.id);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer shadow-xs flex items-center gap-1.5 ${
+                      selectedDomain === item.id 
+                        ? 'btn-cricket-emerald text-white border-emerald-600 font-black shadow-sm' 
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            {importHistory.length === 0 ? (
-              <div className="py-6 text-center text-slate-500 text-xs">
-                <p className="font-bold text-slate-700">No imports recorded yet in this session.</p>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Paste any Battrick match scorecard or squad HTML in the box below and click "Apply & Synchronize" to view your live history here.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-2.5">
-                {importHistory.map((item, idx) => (
-                  <div 
-                    key={item.id || idx}
-                    className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-emerald-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs"
-                  >
-                    <div className="flex items-start sm:items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center shrink-0 shadow-xs">
-                        {item.type === 'scorecard' ? <Trophy className="w-4 h-4" /> : item.type === 'squad' ? <Users className="w-4 h-4" /> : item.type === 'finances' ? <DollarSign className="w-4 h-4" /> : item.type === 'ground' ? <Building className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
-                      </div>
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-black text-slate-900 text-xs">{item.title}</span>
-                          <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-black">
-                            {item.badgeText}
-                          </span>
-                          {item.matchId && (
-                            <span className="font-mono text-[10px] text-slate-500 font-bold">#{item.matchId}</span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-1">{item.details}</p>
-                        {item.statsCalculated && (
-                          <p className="text-[10px] text-emerald-700 font-bold mt-0.5 flex items-center gap-1">
-                            <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
-                            <span>{item.statsCalculated}</span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex sm:flex-col items-center sm:items-end justify-between shrink-0 text-right gap-1 pt-2 sm:pt-0 border-t sm:border-0 border-slate-200">
-                      {item.originalDate && (
-                        <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-900 px-2.5 py-0.5 rounded-lg text-[10px] font-black shadow-xs">
-                          <Calendar className="w-3 h-3 text-amber-600" />
-                          <span>Original Date: {item.originalDate}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1 text-[10px] text-slate-400 font-mono">
-                        <Clock className="w-3 h-3" />
-                        <span>{item.timestamp}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* Paste from Clipboard Top Shortcut */}
+            <button
+              onClick={handlePasteFromClipboard}
+              disabled={isClipboardPasting}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
+              title="Read clipboard text and auto-parse in 1 click"
+            >
+              <Clipboard className="w-4 h-4 text-amber-300" />
+              <span>{isClipboardPasting ? 'Reading...' : 'Paste from Clipboard'}</span>
+            </button>
           </div>
 
           <div className="sovereign-card p-5 rounded-2xl border-slate-200 shadow-md space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
                   <Copy className="w-4 h-4 text-emerald-600" />
-                  <span>Paste Raw Battrick Web Page Text or HTML</span>
+                  <span>Direct Copy-Paste & HTML Dropzone</span>
                 </h3>
                 <p className="text-xs text-slate-600 mt-0.5">
-                  Open any Battrick page (<code className="text-emerald-700 font-mono">matchinfofc.asp</code>, <code className="text-emerald-700 font-mono">matchinfo.asp</code>, <code className="text-emerald-700 font-mono">squad.asp</code>, <code className="text-emerald-700 font-mono">finances.asp</code>), press <kbd className="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-300 text-[10px]">Ctrl+A</kbd> then <kbd className="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-300 text-[10px]">Ctrl+C</kbd>, and paste here:
+                  Copy from Battrick (<kbd className="px-1 py-0.5 bg-slate-100 rounded border border-slate-300 text-[10px]">Ctrl+A</kbd>, <kbd className="px-1 py-0.5 bg-slate-100 rounded border border-slate-300 text-[10px]">Ctrl+C</kbd>) and click <strong className="text-emerald-700 font-bold">Paste from Clipboard</strong>, or drag & drop a single HTML file into the box:
                 </p>
               </div>
 
               <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                <button
+                  onClick={handlePasteFromClipboard}
+                  disabled={isClipboardPasting}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                >
+                  <Clipboard className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Paste from Clipboard</span>
+                </button>
+
                 <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl border border-slate-300 text-xs shadow-xs">
-                  <span className="text-[11px] font-bold text-slate-600">Match Format:</span>
+                  <span className="text-[11px] font-bold text-slate-600">Format:</span>
                   <select
                     value={formatOverride}
                     onChange={(e) => {
@@ -2281,10 +2271,10 @@ Coach Quality: Competent`;
                     }}
                     className="text-xs font-black text-slate-900 bg-transparent focus:outline-none cursor-pointer"
                   >
-                    <option value="auto">Auto-Detect Format (Smart)</option>
-                    <option value="First Class">Force First Class (FC)</option>
-                    <option value="One Day">Force One Day (OD)</option>
-                    <option value="BT20">Force BT20 (T20)</option>
+                    <option value="auto">Auto-Detect</option>
+                    <option value="First Class">First Class (FC)</option>
+                    <option value="One Day">One Day (OD)</option>
+                    <option value="BT20">BT20 (T20)</option>
                   </select>
                 </div>
 
@@ -2298,16 +2288,24 @@ Coach Quality: Competent`;
             </div>
 
             <textarea
-              rows={8}
+              rows={9}
               value={rawText}
               onChange={(e) => {
                 setRawText(e.target.value);
                 parseBattrickData(e.target.value);
               }}
-              placeholder="Paste raw text or HTML from ANY Battrick page here...
-The engine automatically detects whether you pasted a Match Scorecard, Squad, Finances, Ground, or Office data!"
+              onDrop={handleSingleTextareaDrop}
+              onDragOver={(e) => e.preventDefault()}
+              placeholder="Paste raw text or HTML from ANY Battrick page here (Ctrl+V) or click 'Paste from Clipboard' above...
+You can also Drag & Drop any single .html or .txt file directly onto this box!
+The engine automatically detects Match Scorecards (FC, OD, BT20), Squad Rosters, Finances, Ground, or Club Office data."
               className="w-full p-4 rounded-xl bg-slate-50 border border-slate-300 font-mono text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 leading-relaxed shadow-inner"
             />
+
+            <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
+              <span>{rawText ? `${rawText.length.toLocaleString()} characters loaded` : 'Ready for input'}</span>
+              <span>Supported pages: <code className="text-emerald-700 font-mono">matchinfofc.asp</code>, <code className="text-emerald-700 font-mono">matchinfo.asp</code>, <code className="text-emerald-700 font-mono">squad.asp</code>, <code className="text-emerald-700 font-mono">finances.asp</code>, <code className="text-emerald-700 font-mono">ground.asp</code></span>
+            </div>
           </div>
 
           {/* Real-time Parser Results Preview */}
@@ -2489,6 +2487,89 @@ The engine automatically detects whether you pasted a Match Scorecard, Squad, Fi
           </div>
         </div>
       )}
+
+      {/* PERSISTENT FOOTER: RECENT INGESTION ACTIVITY (LAST 5 IMPORTS) */}
+      <div className="sovereign-card p-5 rounded-2xl border-emerald-500/30 shadow-md space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-200">
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4 text-emerald-600" />
+            <h3 className="text-sm font-black text-slate-900">
+              Recent Ingestion Activity (Last 5 Imports)
+            </h3>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">
+              {importHistory.length} Logged
+            </span>
+          </div>
+
+          {importHistory.length > 0 && (
+            <button
+              onClick={() => {
+                setImportHistory([]);
+                localStorage.removeItem('bt360_recent_imports');
+              }}
+              className="text-[11px] text-slate-500 hover:text-rose-600 flex items-center gap-1 font-bold transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear Ingestion History</span>
+            </button>
+          )}
+        </div>
+
+        {importHistory.length === 0 ? (
+          <div className="py-6 text-center text-slate-500 text-xs">
+            <p className="font-bold text-slate-700">No imports recorded yet in this session.</p>
+            <p className="text-[11px] text-slate-500 mt-1">
+              Paste any Battrick match scorecard or squad HTML above, or use Bulk Upload or 1-Click Import to view your live history here.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-2.5">
+            {importHistory.map((item, idx) => (
+              <div 
+                key={item.id || idx}
+                className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-emerald-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs"
+              >
+                <div className="flex items-start sm:items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center shrink-0 shadow-xs">
+                    {item.type === 'scorecard' ? <Trophy className="w-4 h-4" /> : item.type === 'squad' ? <Users className="w-4 h-4" /> : item.type === 'finances' ? <DollarSign className="w-4 h-4" /> : item.type === 'ground' ? <Building className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-black text-slate-900 text-xs">{item.title}</span>
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-black">
+                        {item.badgeText}
+                      </span>
+                      {item.matchId && (
+                        <span className="font-mono text-[10px] text-slate-500 font-bold">#{item.matchId}</span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-1">{item.details}</p>
+                    {item.statsCalculated && (
+                      <p className="text-[10px] text-emerald-700 font-bold mt-0.5 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
+                        <span>{item.statsCalculated}</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex sm:flex-col items-center sm:items-end justify-between shrink-0 text-right gap-1 pt-2 sm:pt-0 border-t sm:border-0 border-slate-200">
+                  {item.originalDate && (
+                    <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-900 px-2.5 py-0.5 rounded-lg text-[10px] font-black shadow-xs">
+                      <Calendar className="w-3 h-3 text-amber-600" />
+                      <span>Original Date: {item.originalDate}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1 text-[10px] text-slate-400 font-mono">
+                    <Clock className="w-3 h-3" />
+                    <span>{item.timestamp}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
