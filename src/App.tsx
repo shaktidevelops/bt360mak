@@ -25,7 +25,7 @@ import {
   fallbackRecords
 } from './lib/mockData';
 import { recalculateStatsFromMatches } from './lib/matchStatsEngine';
-import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { resetGoogleSheetsDatabase } from './lib/googleSheetsService';
 import { 
   Club, 
   Player, 
@@ -254,15 +254,7 @@ export function App() {
       setCalendar([]);
       setNets([]);
 
-      if (isSupabaseConfigured) {
-        try {
-          await supabase.from('matches').delete().neq('id', 'keep_clean');
-          await supabase.from('cricket_records').delete().neq('id', 'keep_clean');
-          await supabase.from('players').delete().neq('id', 'keep_clean');
-        } catch (sErr) {
-          console.warn('Supabase reset error', sErr);
-        }
-      }
+      resetGoogleSheetsDatabase().catch(sErr => console.warn('Google Sheets reset notice:', sErr));
     } catch (err) {
       console.warn('Reset error:', err);
     }
@@ -394,7 +386,18 @@ export function App() {
           )}
 
           {currentTab === 'database' && (
-            <SettingsView onResetAllData={handleFactoryReset} />
+            <SettingsView 
+              club={club}
+              squad={squad}
+              matches={matches}
+              records={records}
+              finances={finances}
+              stadiumTiers={stadiumTiers}
+              nets={nets}
+              staff={staff}
+              calendar={calendar}
+              onResetAllData={handleFactoryReset} 
+            />
           )}
 
           {currentTab === 'import' && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Club } from '../types/database';
-import { Clock, ShieldCheck, Database, Upload } from 'lucide-react';
-import { isSupabaseConfigured } from '../lib/supabase';
+import { Clock, Upload, FileSpreadsheet, ExternalLink } from 'lucide-react';
+import { isGoogleSheetsConfigured, GOOGLE_SHEET_URL } from '../lib/googleSheetsService';
 import { ClubLogo } from './ClubLogo';
 
 interface HeaderProps {
@@ -104,18 +104,21 @@ export const Header: React.FC<HeaderProps> = ({ club, onOpenImport }) => {
           </button>
         )}
 
-        {/* Database Status */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold shadow-xs">
-          <Database className={`w-3.5 h-3.5 ${isSupabaseConfigured ? 'text-emerald-600' : 'text-amber-600'}`} />
-          <span className={`text-[11px] font-bold ${isSupabaseConfigured ? 'text-emerald-700' : 'text-amber-700'}`}>
-            {isSupabaseConfigured ? 'Live DB' : 'Local'}
+        {/* Google Sheet Live Database Status */}
+        <a
+          href={GOOGLE_SHEET_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50/80 hover:bg-emerald-100 text-xs font-semibold shadow-xs transition-colors group cursor-pointer"
+          title="Open Google Sheet Database (ID: 1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E)"
+        >
+          <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-700" />
+          <span className="text-[11px] font-bold text-emerald-800">
+            {isGoogleSheetsConfigured() ? 'Sheet DB Live' : 'Google Sheet'}
           </span>
-          {isSupabaseConfigured ? (
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-          ) : (
-            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-          )}
-        </div>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <ExternalLink className="w-3 h-3 text-emerald-600 opacity-60 group-hover:opacity-100" />
+        </a>
       </div>
     </header>
   );

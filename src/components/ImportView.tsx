@@ -38,7 +38,13 @@ import {
   Zap,
   Clipboard
 } from 'lucide-react';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { 
+  syncToGoogleSheets, 
+  saveSquadToGoogleSheets, 
+  saveMatchesToGoogleSheets, 
+  saveClubToGoogleSheets, 
+  resetGoogleSheetsDatabase 
+} from '../lib/googleSheetsService';
 import { 
   parseBattrickScorecard, 
   parseBattrickPavilion,
@@ -580,15 +586,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
         localStorage.setItem('bt360_squad', JSON.stringify(resetSquad));
         localStorage.removeItem('bt360_recent_imports');
 
-        if (isSupabaseConfigured) {
-          try {
-            await supabase.from('matches').delete().eq('club_id', club.id);
-            await supabase.from('records').delete().eq('club_id', club.id);
-            await supabase.from('players').upsert(resetSquad);
-          } catch (sErr) {
-            console.warn('Supabase reset warning:', sErr);
-          }
-        }
+        resetGoogleSheetsDatabase().catch(err => console.warn('Google Sheets reset notice:', err));
       }
 
       setImportHistory([]);
@@ -637,14 +635,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
       localStorage.removeItem('bt360_recent_imports');
       setImportHistory([]);
 
-      if (isSupabaseConfigured) {
-        try {
-          await supabase.from('matches').delete().eq('club_id', club.id);
-          await supabase.from('players').upsert(resetSquad);
-        } catch (sErr) {
-          console.warn('Supabase reset note:', sErr);
-        }
-      }
+      saveMatchesToGoogleSheets([]).catch(err => console.warn('Google Sheets matches reset notice:', err));
+      saveSquadToGoogleSheets(resetSquad).catch(err => console.warn('Google Sheets squad reset notice:', err));
 
       setStatusMessage({
         text: 'All imported matches have been completely deleted! Player career stats (FC, OD, T20) and clubhouse records have been reset to zero.',
@@ -1057,15 +1049,9 @@ export const ImportView: React.FC<ImportViewProps> = ({
       localStorage.setItem('bt360_squad', JSON.stringify(updatedSquad));
       localStorage.setItem('bt360_records', JSON.stringify(updatedRecords));
 
-      // 4. Update Supabase if configured
-      if (isSupabaseConfigured) {
-        try {
-          await supabase.from('matches').upsert(allMatches);
-          await supabase.from('players').upsert(updatedSquad);
-        } catch (sErr) {
-          console.warn('Supabase bulk sync note:', sErr);
-        }
-      }
+      // 4. Update Google Sheets if configured
+      saveMatchesToGoogleSheets(allMatches).catch(err => console.warn('Google Sheets bulk matches notice:', err));
+      saveSquadToGoogleSheets(updatedSquad).catch(err => console.warn('Google Sheets bulk squad notice:', err));
 
       // 5. Build recent import history
       const newHistoryEntries: ImportHistoryEntry[] = resultsLog
@@ -1321,10 +1307,8 @@ export const ImportView: React.FC<ImportViewProps> = ({
         localStorage.setItem('bt360_squad', JSON.stringify(updatedSquad));
         localStorage.setItem('bt360_records', JSON.stringify(updatedRecords));
 
-        if (isSupabaseConfigured) {
-          await supabase.from('matches').upsert(newMatches);
-          await supabase.from('players').upsert(updatedSquad);
-        }
+        saveMatchesToGoogleSheets(newMatches).catch(err => console.warn('Google Sheets matches sync notice:', err));
+        saveSquadToGoogleSheets(updatedSquad).catch(err => console.warn('Google Sheets squad sync notice:', err));
 
         const newEntries: ImportHistoryEntry[] = parseResult.matches.map(m => ({
           id: `imp-${m.id}-${Date.now()}`,
@@ -1401,10 +1385,7 @@ export const ImportView: React.FC<ImportViewProps> = ({
         onImportSquad(formatted);
         localStorage.setItem('bt360_squad', JSON.stringify(formatted));
 
-        if (isSupabaseConfigured) {
-          const { error } = await supabase.from('players').upsert(formatted);
-          if (error) console.warn('Supabase upsert note:', error.message);
-        }
+        saveSquadToGoogleSheets(formatted).catch(err => console.warn('Google Sheets squad sync notice:', err));
 
         const newEntry: ImportHistoryEntry = {
           id: `imp-squad-${Date.now()}`,
@@ -1433,10 +1414,10 @@ export const ImportView: React.FC<ImportViewProps> = ({
         if (parseResult.clubUpdates) onImportClub({ ...club, ...parseResult.clubUpdates });
         localStorage.setItem('bt360_finances', JSON.stringify(parseResult.finances));
 
-        if (isSupabaseConfigured) {
-          await supabase.from('financial_ledger').upsert(parseResult.finances);
-          if (parseResult.clubUpdates) await supabase.from('clubs').upsert({ ...club, ...parseResult.clubUpdates });
-        }
+        syncToGoogleSheets({ 
+          finances: parseResult.finances, 
+          club: parseResult.clubUpdates ? { ...club, ...parseResult.clubUpdates } : undefined 
+        }).catch(err => console.warn('Google Sheets finances sync notice:', err));
 
         const newEntry: ImportHistoryEntry = {
           id: `imp-fin-${Date.now()}`,
@@ -1464,9 +1445,10 @@ export const ImportView: React.FC<ImportViewProps> = ({
         if (parseResult.clubUpdates) onImportClub({ ...club, ...parseResult.clubUpdates });
         localStorage.setItem('bt360_stadiumTiers', JSON.stringify(parseResult.stadiumTiers));
 
-        if (isSupabaseConfigured) {
-          await supabase.from('stadium_tiers').upsert(parseResult.stadiumTiers);
-        }
+        syncToGoogleSheets({ 
+          stadium: parseResult.stadiumTiers, 
+          club: parseResult.clubUpdates ? { ...club, ...parseResult.clubUpdates } : undefined 
+        }).catch(err => console.warn('Google Sheets stadium sync notice:', err));
 
         const newEntry: ImportHistoryEntry = {
           id: `imp-ground-${Date.now()}`,
@@ -1524,32 +1506,9 @@ export const ImportView: React.FC<ImportViewProps> = ({
           localStorage.setItem('bt360_stadiumTiers', JSON.stringify(parseResult.stadiumTiers));
         }
 
-        if (isSupabaseConfigured) {
-          try {
-            const { error } = await supabase.from('clubs').upsert({
-              id: updatedClub.id,
-              name: updatedClub.name,
-              manager: updatedClub.manager,
-              region: updatedClub.region,
-              division_fc: updatedClub.division_fc,
-              division_od: updatedClub.division_od,
-              division_t20: updatedClub.division_t20,
-              fan_club_members: updatedClub.fan_club_members,
-              fan_mood: updatedClub.fan_mood,
-              sponsor_confidence: updatedClub.sponsor_confidence,
-              morale: updatedClub.morale,
-              bank_balance: updatedClub.bank_balance,
-              weekly_wage_bill: updatedClub.weekly_wage_bill,
-              stadium_name: updatedClub.stadium_name,
-              stadium_capacity: updatedClub.stadium_capacity,
-              form_avg: updatedClub.form_avg,
-              coach_quality: updatedClub.coach_quality,
-              its_points: updatedClub.its_points
-            });
-            if (error) console.warn('Supabase club sync note:', error.message);
-          } catch (sErr) {
-            console.warn('Supabase club sync note:', sErr);
-          }
+        saveClubToGoogleSheets(updatedClub).catch(err => console.warn('Google Sheets club sync notice:', err));
+        if (parseResult.stadiumTiers && parseResult.stadiumTiers.length > 0) {
+          syncToGoogleSheets({ stadium: parseResult.stadiumTiers }).catch(err => console.warn('Google Sheets stadium sync notice:', err));
         }
 
         const newEntry: ImportHistoryEntry = {

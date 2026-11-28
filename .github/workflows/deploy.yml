@@ -36,8 +36,9 @@ jobs:
       - name: Build Application
         run: npm run build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://xyvezmzsbmoqxepwblfq.supabase.co' }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5dmV6bXpzYm1vcXhlcHdibGZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ5ODIzMjcsImV4cCI6MjExMDU1ODMyN30.0Ar8Rh--jI7GP0q1ki2fOnE4soJmYGmAtgWha1RrMLw' }}
+          VITE_GOOGLE_SHEET_ID: ${{ secrets.VITE_GOOGLE_SHEET_ID || '1KXQbrZ2D7aYJUAniQ5F3L8FeFfM8zmsMsIDHfl2An_E' }}
+          VITE_GOOGLE_APPS_SCRIPT_ID: ${{ secrets.VITE_GOOGLE_APPS_SCRIPT_ID || '1tS9xWWXRBTlrsysAeF82qyrrFDPfHrchSpYNGmAhSZZD_D-f4nGmP7kz' }}
+          VITE_GOOGLE_APPS_SCRIPT_URL: ${{ secrets.VITE_GOOGLE_APPS_SCRIPT_URL || '' }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

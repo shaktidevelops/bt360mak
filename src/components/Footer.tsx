@@ -53,7 +53,7 @@ export const Footer: React.FC<FooterProps> = ({ club }) => {
               BT360MAK <span className="text-emerald-700 font-mono">v3.0 Sovereign</span>
             </div>
             <div className="text-[10px] text-slate-500 whitespace-nowrap">
-              React 19 &bull; Vite 6 &bull; Supabase Live &bull; 12 Battrick Domains
+              React 19 &bull; Vite 6 &bull; Google Sheet Live &bull; 12 Battrick Domains
             </div>
           </div>
           <a
